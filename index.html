@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cat Farm (Coins + Battle Pets + Boss)</title>
+
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<!-- MAIN MENU -->
+<div id="menu">
+  <div class="menuCard">
+    <img src="images/title.png" alt="title" class="menuTitle">
+    <img src="images/logo.png" alt="Logo" onerror="this.style.display='none'"/>
+    <button onclick="startGame()"><span>Play</span></button>
+    <div class="buttonGroup2">
+      <button onclick="openInfo()" class="button2"><span>What's New</span></button>
+      <button onclick="openInfo()" class="button2"><span>Leaderboard</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div id="toast"><span>⚠️</span><span id="toastText">A wild pet has appeared!</span></div>
+
+  <div class="header">
+    <div class="profileArea">
+      <img src="images/profile.png" alt="profile" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'"/>
+      <div class="nameStack">
+        <div id="playerNameDisplay">Player</div>
+        <div id="playerTitleDisplay">Rookie Farmer</div>
+      </div>
+    </div>
+
+    <div class="coinCon">
+      <button class="townBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm">
+        <span id="townBtnIcon">🏘️</span>
+      </button>
+
+      <div class="coinbox" id="coinBox">
+        <img src="images/coin.png" alt="coin" onerror="this.style.display='none'"/>
+        <span id="coins">0</span>
+      </div>
+
+      <div class="coinbox" id="petBox" title="Captured pets">
+        <span style="font-size:18px;">🐾</span>
+        <span id="petCount">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="xpBarContainer">
+    <div id="xpBar"></div>
+    <div id="xpLevelText">Lvl 1</div>
+  </div>
+
+  <!-- FARM SCREEN -->
+  <div id="farmScreen" class="screen">
+    <div class="farmcon">
+      <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
+
+<div id="farmWrap">
+        
+      <div class="toolStrip" id="toolStrip">
+        <button class="toolBtn active" id="toolPlantBtn" onclick="setTool('plant')" title="Plant crops">🌱 Plant</button>
+        <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')" title="Harvest grown crops">✂️ Harvest</button>
+        <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')" title="Move a planted crop">🧤 Move</button>
+        <button class="toolBtn" id="toolRemoveBtn" onclick="setTool('remove')" title="Remove a planted crop">🧹 Remove</button>
+      </div>
+<div id="eventLayer"></div>
+        <div id="farm"></div>
+      </div>
+      <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'"/>
+    </div>
+  </div>
+
+  <!-- TOWN SCREEN -->
+  <div id="townScreen" class="screen">
+    <div class="townTitle">Town</div>
+    <div class="townGrid">
+      <div class="building" id="buildingShop" onclick="openSupermarket()">
+        <div class="icon">🛒</div>
+        <div class="name">Supermarket</div>
+        <div class="tag">Boosts + Limited Seeds</div>
+      </div>
+
+      <div class="building" id="buildingQuest" onclick="openQuestBoard()">
+        <div class="icon">📜</div>
+        <div class="name">Quest Board</div>
+        <div class="tag">Daily quests + streak</div>
+      </div>
+
+      <div class="building" id="buildingZoo" onclick="openZoo()">
+        <div class="icon">🐾</div>
+        <div class="name">Zoo</div>
+        <div class="tag">Your captured pets</div>
+      </div>
+
+      <div class="building" id="buildingArena" onclick="openArena()">
+        <div class="icon">⚔️</div>
+        <div class="name">Arena</div>
+        <div class="tag">Battle (PvP)</div>
+      </div>
+
+
+      <div class="building" id="buildingLibrary" onclick="openLibrary()">
+        <div class="icon">📚</div>
+        <div class="name">Library</div>
+        <div class="tag">Library exam (daily)</div>
+      </div>
+    </div>
+    <div class="townHint">Wild pets enter from the side. Clean poop for rewards!</div>
+  </div>
+
+  <!-- ZOO SCREEN -->
+  <div id="zooScreen" class="screen">
+    <div class="zooTitle">Zoo</div>
+    <div class="zooSub">Your captured pets can roam freely here.</div>
+
+    <div id="zooYard" title="Tap a pet to view details">
+      <div id="zooRoamLayer"></div>
+      <div id="zooEmpty" class="zooEmpty">No pets yet. Capture wild pets on your farm!</div>
+    </div>
+
+    <div id="zooStats" class="zooStats">Pets: <b>0</b></div>
+    <div class="zooNav">
+      <button onclick="openArena()">Arena</button>
+      <button onclick="showTown()">Back to Town</button>
+      <button onclick="showFarm()">Back to Farm</button>
+    </div>
+    <div class="zooHint">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
+  </div>
+
+
+  <!-- Bottom nav -->
+  <div class="bottomNav">
+    <div id="bottomBar">
+      <button class="bottomBtn" id="btnCrops" onclick="openCrops()"><img src="images/crops.png" alt="crops" onerror="this.style.display='none'"> Crops</button>
+      <button class="bottomBtn" id="btnShop" onclick="openSupermarket()"><img src="images/shop.png" alt="shop" onerror="this.style.display='none'"> Shop</button>
+      <button class="bottomBtn" id="btnBag" onclick="openInventory()"><img src="images/inventory.png" alt="inventory" onerror="this.style.display='none'"> Bag</button>
+      <button class="bottomBtn" id="btnZoo" onclick="openZoo()"><img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> Zoo</button>
+    </div>
+    <img class="backdrop" src="images/wood.png" alt="wood" onerror="this.style.display='none'"/>
+  </div>
+</div>
+
+<!-- TUTORIAL OVERLAY (Spotlight + Arrow) -->
+<div id="tutorialOverlay" title="Click anywhere to continue • Double-click to skip">
+  <div class="tutorialBlocker"></div>
+  <div id="tutorialHighlight"></div>
+  <svg id="tutorialArrowSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  <div id="tutorialBubble">
+    <div id="tutorialMascot">🐱</div>
+    <div id="tutorialRight">
+      <div id="tutorialTitle">Mao the Cat</div>
+      <div id="tutorialText"></div>
+      <div id="tutorialHint">Click anywhere to continue • Double-click anywhere to skip</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modalBox">
+    <div class="modalHeader">
+      <div id="modalTitle"></div>
+      <button class="modalClose" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
