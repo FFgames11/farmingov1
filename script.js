@@ -81,7 +81,7 @@ const LEVELS = {
 
 const CROPS = [
   // MODIFIED: Carrot now uses images for seedling and grown states
-  { emoji:"🥕", name:"Carrot", isImage: true, seedling:"images/seedling.png", level:"beginner", seedCost: 2,  grown:"images/carrot.png", growMs: 25000, harvestCoins: 4, harvestXP: 8, unlockLevel: 1 },
+  { emoji:"🥕", name:"Carrot", isImage:true, seedling:"images/seedling.png", grown:"images/carrot.png", level:"beginner", seedCost: 2, growMs: 25000, harvestCoins: 4, harvestXP: 8, unlockLevel: 1 },
   { emoji:"🌽", name:"Corn",  isImage: true, seedling:"images/seedling.png",    level:"beginner",     seedCost: 3, grown:"images/corn.png", growMs: 45000, harvestCoins: 5,  harvestXP: 9,  unlockLevel: 1 },
   { emoji:"🍅", name:"Tomato",  isImage: true, seedling:"images/seedling.png",   level:"intermediate", seedCost: 5, grown:"images/tomato.png", growMs: 70000, harvestCoins: 9,  harvestXP: 14, unlockLevel: 2 },
   { emoji:"🧅", name:"Onion",   isImage: true, seedling:"images/seedling.png",   level:"intermediate", seedCost: 6, grown:"images/onion.png", growMs: 90000, harvestCoins: 10, harvestXP: 15, unlockLevel: 3 },
@@ -622,6 +622,8 @@ const LIB_EXAM_KEY = "catfarm_library_exam_v1";
 let coins = 30;
 let xp = 0;
 let level = 1;
+let playerCountry = "Unknown"; // NEW
+let inventory = {}; // NEW: Stores harvested crops
 
 let playerName = "Player";
 let playerTitle = "Rookie Farmer";
@@ -648,7 +650,9 @@ function saveState(){
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
       playerName, playerTitle,
+      playerCountry, // ADDED
       selectedSeed, seeds,
+      inventory,     // ADDED
       unlockedTiles, tileStates,
       zooPets, roamingPetUids: [],
       boosts,
@@ -660,10 +664,16 @@ function saveState(){
 
 function loadState(){
   try{
+    // ... inside loadState ...
+    playerTitle = st.playerTitle || playerTitle;
     const raw = localStorage.getItem(STATE_KEY);
     if(!raw) return;
     const st = JSON.parse(raw);
     if(!st || typeof st !== "object") return;
+
+    // ADD THESE LINES:
+    playerCountry = st.playerCountry || "Unknown";
+    inventory = st.inventory || {};
 
     coins = Number(st.coins ?? coins);
     xp = Number(st.xp ?? xp);
@@ -1419,28 +1429,62 @@ function toggleTown(){
 }
 
 function openProfile(){
+  // Determine title based on Library Exams (if you have that system)
+  let title = "Rookie Farmer";
+  try {
+    const st = JSON.parse(localStorage.getItem(LIB_EXAM_KEY) || "{}");
+    const tk = todayKey();
+    if(st?.[tk]?.advanced) title = "Advanced Learner";
+    else if(st?.[tk]?.intermediate) title = "Intermediate Learner";
+    else title = "Beginner Learner";
+  } catch(e){}
+  // Build Showcase (Top 4 items in inventory)
+  let showcaseHtml = "";
+  let itemsFound = 0;
+  for(const c of CROPS){
+    if(itemsFound >= 4) break;
+    if(inventory[c.emoji] > 0){
+      const img = c.isImage ? `<img src="${c.grown}" style="width:40px;">` : c.emoji;
+      showcaseHtml += `<div class="showbox" style="width:60px;height:60px;border:2px dashed #D3B58D;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.5);">${img}</div>`;
+      itemsFound++;
+    }
+  }
+  // Fill empty slots
+  while(itemsFound < 4){
+    showcaseHtml += `<div style="width:60px;height:60px;border:2px dashed #D3B58D;border-radius:12px;background:rgba(255,255,255,0.3);"></div>`;
+    itemsFound++;
+  }
   openModal("Profile", `
-    <div class="itemCard">
-      <div class="itemLeft">
-        <div class="itemIcon">👤</div>
-        <div class="itemMeta">
-          <div class="itemName">${escapeHtml(playerName)}</div>
-          <div class="itemSub">Title: <b>${escapeHtml(playerTitle)}</b></div>
-          <div class="badgeRow">
-            <div class="badge">Level ${level}</div>
-            <div class="badge">Coins ${coins}</div>
-            <div class="badge">Pets ${zooPets.length}</div>
-            <div class="badge">Streak ${dailyStreak}</div>
-          </div>
-        </div>
+    <div style="text-align:center; padding:10px;">
+      <div style="position:relative; width:80px; margin:0 auto;">
+        <img src="images/profile.png" style="width:80px; height:80px; border-radius:50%; border:4px solid #74DE34; object-fit:cover;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NjYyIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1zaXplPSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiPvCfkTY8L3RleHQ+PC9zdmc+'">
       </div>
-      <div class="rowBtns">
-        <button onclick="editProfile()">Edit</button>
-        <button onclick="resetTutorial()">Tutorial</button>
+      <div style="font-size:20px; font-weight:900; margin-top:10px; color:#3b2716;">
+        ${escapeHtml(playerName)} <span style="cursor:pointer;" onclick="editProfile()">✏️</span>
       </div>
+      <div style="font-size:14px; color:#5D420D; margin-top:4px;">
+        📍 ${escapeHtml(playerCountry)} <span style="cursor:pointer;" onclick="editCountry()">✏️</span>
+      </div>
+      <div class="badge" style="margin-top:8px; background:#FDA914; color:white;">${title}</div>
+    </div>
+    <div class="sectionTitle" style="text-align:center; margin-top:15px;">Crop Showcase</div>
+    <div style="display:flex; justify-content:center; gap:10px; margin:10px 0;">${showcaseHtml}</div>
+    <div class="resLine">
+      <span>🔥 Login Streak: <b>${dailyStreak} Days</b></span>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button style="flex:1;" onclick="closeModal()">Close</button>
     </div>
   `);
 }
+function editCountry(){
+  const c = prompt("Enter your country:", playerCountry);
+  if(c && c.trim()){
+    playerCountry = c.trim();
+    saveState(); updateUI(); openProfile();
+  }
+}
+
 function editProfile(){
   openModal("Edit Profile", `
     <div class="resLine">Update your name/title</div>
@@ -1557,7 +1601,7 @@ function renderFarm(){
 
     if(!unlockedTiles[i]){
       t.classList.add("locked");
-      cropEls[i].textContent = "🔒";
+      cropEls[i].innerHTML = '<img src="images/tilecoin.png" alt="tilecoin"> <span>200</span>';
       continue;
     }
 
@@ -1575,9 +1619,10 @@ function renderFarm(){
 
     if(st.state === "planted"){
       t.classList.add("planted");
-      // MODIFIED: Support image rendering for specific crops like carrots
+      
+      // NEW IMAGE LOGIC
       if(c && c.isImage){
-        cropEls[i].innerHTML = `<img src="${c.seedling}" style="width:100%; height:100%; object-fit:contain;">`;
+        cropEls[i].innerHTML = `<img src="${c.seedling}">`;
       } else {
         cropEls[i].textContent = st.crop;
       }
@@ -1592,9 +1637,10 @@ function renderFarm(){
 
     if(st.state === "grown"){
       t.classList.add("grown");
+      
       // MODIFIED: Support image rendering for specific crops like carrots
       if(c && c.isImage){
-        cropEls[i].innerHTML = `<img src="${c.grown}" style="width:100%; height:100%; object-fit:contain;">`;
+        cropEls[i].innerHTML = `<img src="${c.grown}">`;
       } else {
         cropEls[i].textContent = st.crop;
       }
@@ -1871,9 +1917,13 @@ function harvestQuiz(tileIndex){
 
     if(ok){
       fb.className = "quizFeedback good";
-      fb.innerHTML = `Correct! +<b>${cropInfo.harvestCoins}</b> coins, +<b>${cropInfo.harvestXP}</b> XP <span class="smallNote">(It will regrow)</span>`;
+      // Update logic: Add to Inventory instead of Coin
+      const invKey = cropInfo.emoji;
+      inventory[invKey] = (inventory[invKey] || 0) + 1;
+      
+      fb.innerHTML = `Correct! <b>${cropInfo.name}</b> added to Bag! +<b>${cropInfo.harvestXP}</b> XP`;
 
-      coins += cropInfo.harvestCoins;
+      // coins += cropInfo.harvestCoins; // Removed direct coin gain
       gainXP(cropInfo.harvestXP);
 
       questProgress("harvest", 1);
@@ -1887,7 +1937,7 @@ function harvestQuiz(tileIndex){
       updateUI();
       renderFarm();
 
-      setTimeout(()=>closeModal(), 650);
+      setTimeout(()=>closeModal(), 1000); // slightly longer delay to read
     }else{
       fb.className = "quizFeedback bad";
       fb.innerHTML = `Wrong. The plant needs time to regrow 😿`;
@@ -4231,3 +4281,65 @@ function updateUI(){
   updateUI();
   updateToolUI();
 })();
+
+/* =========================================================
+   HARVEST SHOP / MARKET
+========================================================= */
+function openHarvestShop() {
+  let html = `<div class="resLine">Market • Sell your Harvest</div>`;
+  let hasItems = false;
+  CROPS.forEach(c => {
+    const count = inventory[c.emoji] || 0;
+    if (count > 0) {
+      hasItems = true;
+      const display = c.isImage ? `<img src="${c.grown}" style="width:30px">` : c.emoji;
+      html += `
+        <div class="itemCard">
+          <div class="itemLeft">
+            <div class="itemIcon">${display}</div>
+            <div class="itemMeta">
+              <div class="itemName">${c.name} (x${count})</div>
+              <div class="itemSub">Value: ${c.harvestCoins} coins</div>
+            </div>
+          </div>
+          <div class="rowBtns">
+            <button onclick="sellCrop('${c.emoji}', 1)">Sell 1</button>
+            <button onclick="sellCrop('${c.emoji}', ${count})">Sell All</button>
+          </div>
+        </div>`;
+    }
+  });
+  if (!hasItems) html += `<div class="smallNote">Your bag is empty. Harvest crops first!</div>`;
+  html += `
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button style="flex:1; background:#74DE34; color:white; font-weight:900;" onclick="sellAllCrops()">Sell Everything</button>
+      <button style="flex:1;" onclick="closeModal()">Close</button>
+    </div>`;
+  openModal("Farmer's Market", html);
+}
+function sellCrop(emoji, amount) {
+  const c = cropByEmoji(emoji);
+  if ((inventory[emoji]||0) >= amount) {
+    inventory[emoji] -= amount;
+    coins += (c.harvestCoins * amount);
+    saveState(); updateUI(); openHarvestShop();
+    showToast(`Sold for ${c.harvestCoins * amount} coins!`);
+  }
+}
+function sellAllCrops() {
+  let total = 0;
+  CROPS.forEach(c => {
+    const count = inventory[c.emoji] || 0;
+    if (count > 0) {
+      total += count * c.harvestCoins;
+      inventory[c.emoji] = 0;
+    }
+  });
+  if (total > 0) {
+    coins += total;
+    saveState(); updateUI(); openHarvestShop();
+    showToast(`Sold all for ${total} coins!`);
+  } else {
+    showToast("Nothing to sell!");
+  }
+}

@@ -477,17 +477,62 @@ body{
 .tile:active{ transform: translateY(1px) scale(0.99); filter: brightness(0.98); }
 
 .tileCrop{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size: 2rem;
+  position: relative;
+  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 83px;
+  bottom: 0;
+  margin: auto;
+  height: 83px;
+}
+.tileCrop img {
+  left: 0px;
+  right: 0;
+  margin: 0 auto;
+  bottom: 0;
+  width: 100%;
+  position: absolute;
 }
 
-.tileCrop img {
-  width: 100%;
+.locked > .tileCrop:before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    content: '';
+    margin: auto;
+    background: url("images/border.png") no-repeat center center;
+    border-radius: 19px;
+    width: 85%;
+    height: 85%;
+    background-size: contain;
 }
+
+.locked > .tileCrop img {
+    position: relative;
+    width: 25px;
+    height: 25px;
+    margin: 0 5px 0 0;
+}
+
+.locked > .tileCrop {
+    display: flex;
+    height: 100%;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.locked > .tileCrop span {
+  font: normal 20px / 100% 'ArialRounded';
+  color: #FEE22A;
+  text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
+}
+
+
 
 .tileBadge{
   position:absolute;
@@ -503,6 +548,7 @@ body{
   box-shadow: 0 6px 12px rgba(0,0,0,0.10);
   display:none;
   white-space:nowrap;
+  z-index: 10;
 }
 
 /* growth indicator */
@@ -635,7 +681,7 @@ body{
 /* fences */
 .fence1, .fence2{ width:100%; position:relative; }
 .fence1{ bottom:-2px; }
-.fence2{ top:-20px; }
+.fence2{ top:-20px; z-index: 10;}
 
 /* bottom bar */
 .bottomNav{ position:relative; }
