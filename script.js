@@ -237,17 +237,18 @@ function renderQuestionUI(qObj, containerId, onAnswered){
 ========================================================= */
 const PET_TYPES = [
   // Farmingo battle roster (also used as wild pets in the farm)
-  { id:"rabbit",    name:"Rabbit",    emoji:"🐰", rarity:"Common",   weight:42, eatMs:7000, capture:0.45, poopMin:1, poopMax:1 },
-  { id:"dog",       name:"Dog",       emoji:"🐶", rarity:"Common",   weight:42, eatMs:7000, capture:0.45, poopMin:1, poopMax:1 },
+  { id:"pig",       name:"Pig",       emoji:"🐷", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1 },
+  { id:"rabbit",    name:"Rabbit",    emoji:"🐰", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1 },
+  { id:"dog",       name:"Dog",       emoji:"🐶", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1 },
 
-  { id:"deer",      name:"Deer",      emoji:"🦌", rarity:"Uncommon", weight:22, eatMs:6500, capture:0.32, poopMin:1, poopMax:2 },
-  { id:"cat",       name:"Cat",       emoji:"🐱", rarity:"Uncommon", weight:22, eatMs:6500, capture:0.32, poopMin:1, poopMax:2 },
+  { id:"deer",      name:"Deer",      emoji:"🦌", rarity:"Uncommon", weight:22, eatMs:15000, capture:0.32, poopMin:1, poopMax:2 },
+  { id:"cat",       name:"Cat",       emoji:"🐱", rarity:"Uncommon", weight:22, eatMs:15000, capture:0.32, poopMin:1, poopMax:2 },
 
-  { id:"fox",       name:"Fox",       emoji:"🦊", rarity:"Rare",     weight:12, eatMs:6000, capture:0.22, poopMin:1, poopMax:2 },
-  { id:"panda",     name:"Panda",     emoji:"🐼", rarity:"Rare",     weight:12, eatMs:6000, capture:0.22, poopMin:1, poopMax:2 },
+  { id:"fox",       name:"Fox",       emoji:"🦊", rarity:"Rare",     weight:12, eatMs:15000, capture:0.22, poopMin:1, poopMax:2 },
+  { id:"panda",     name:"Panda",     emoji:"🐼", rarity:"Rare",     weight:12, eatMs:15000, capture:0.22, poopMin:1, poopMax:2 },
 
-  { id:"lion",      name:"Lion",      emoji:"🦁", rarity:"Epic",     weight: 6, eatMs:5600, capture:0.14, poopMin:2, poopMax:3 },
-  { id:"alligator", name:"Alligator", emoji:"🐊", rarity:"Epic",     weight: 6, eatMs:5600, capture:0.14, poopMin:2, poopMax:3 },
+  { id:"lion",      name:"Lion",      emoji:"🦁", rarity:"Epic",     weight: 6, eatMs:15000, capture:0.14, poopMin:2, poopMax:3 },
+  { id:"alligator", name:"Alligator", emoji:"🐊", rarity:"Epic",     weight: 6, eatMs:15000, capture:0.14, poopMin:2, poopMax:3 },
 ];
 
 /* =========================================================
@@ -322,6 +323,31 @@ const ANIMAL_LEVEL_TABLE = [
 
 
 const BATTLE_ANIMALS = {
+  "pig": { 
+      "name": "Pig", 
+      "emoji": "🐷", 
+      "rarity": "Starter", 
+      "base": { 
+        "atk": 5, 
+        "def": 5,
+        "spd": 5 
+      }, 
+      "skills": 
+      { 
+        "attack": 
+        { 
+          "name": "Tackle", 
+          "power": 5 }, 
+          "buff": 
+          { 
+            "name": "Mud Bath", 
+            "desc":"Heal 5" }, 
+            "ultimate": { 
+              "name": 
+              "Oink Blast", 
+              "power": 8 } 
+      } 
+    },
   "rabbit": {
     "name": "Rabbit",
     "emoji": "🐰",
@@ -622,8 +648,9 @@ const LIB_EXAM_KEY = "catfarm_library_exam_v1";
 let coins = 30;
 let xp = 0;
 let level = 1;
-let playerCountry = "Unknown"; // NEW
-let inventory = {}; // NEW: Stores harvested crops
+let playerCountry = "Philippines"; // Default country
+let inventory = {}; // Stores harvested crops
+let showcase = [null, null, null, null]; // Profile showcase slots
 
 let playerName = "Player";
 let playerTitle = "Rookie Farmer";
@@ -650,6 +677,7 @@ function saveState(){
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
       playerName, playerTitle,
+      playerCountry, inventory, showcase, // ADD THESE 3
       playerCountry, // ADDED
       selectedSeed, seeds,
       inventory,     // ADDED
@@ -670,6 +698,10 @@ function loadState(){
     if(!raw) return;
     const st = JSON.parse(raw);
     if(!st || typeof st !== "object") return;
+
+    playerCountry = st.playerCountry || "Philippines";
+    inventory = st.inventory || {};
+    showcase = st.showcase || [null, null, null, null];
 
     // ADD THESE LINES:
     playerCountry = st.playerCountry || "Unknown";
@@ -1920,7 +1952,7 @@ function harvestQuiz(tileIndex){
       // Update logic: Add to Inventory instead of Coin
       const invKey = cropInfo.emoji;
       inventory[invKey] = (inventory[invKey] || 0) + 1;
-      
+
       fb.innerHTML = `Correct! <b>${cropInfo.name}</b> added to Bag! +<b>${cropInfo.harvestXP}</b> XP`;
 
       // coins += cropInfo.harvestCoins; // Removed direct coin gain
@@ -2164,6 +2196,9 @@ function cleanPoop(poopEl){
 }
 
 function tickWildPet(){
+  // FIX: Stop eating if player is in Town/Zoo or a menu is open
+  if(activeScreen !== "farm" || modal.style.display === "flex") return; 
+
   if(tutorialIsActive()) return;
   if(!activeWildPet) return;
   const st = tileStates[activeWildPet.targetTileIndex];
@@ -3404,7 +3439,7 @@ function trySpawnBoss(){
   showToast("A wild boss appeared!", 1400);
 
   openModal("A wild boss appeared!", `
-    <div class="resLine">You: <b>Pig 🐷</b> vs Wild Boss: <b>Scarecrow</b></div>
+    <div class="resLine">You: <b>Dog 🐶</b> vs Wild Boss: <b>Scarecrow</b></div>
     <div class="smallNote" style="text-align:left;">
       Turn-based fight.<br>
       • Normal Attack = Beginner question<br>
@@ -3418,12 +3453,12 @@ function trySpawnBoss(){
   `);
 }
 
-function ensureStarterPig(){
-  const hasPig = zooPets.some(p => p.typeId === "pig_starter");
-  if(hasPig) return;
-  const pig = { uid: uid(), typeId:"pig_starter", emoji:"🐷", name:"Pig", rarity:"Starter" };
-  zooPets.push(pig);
-}
+// function ensureStarterDog(){
+//   const hasDog = zooPets.some(p => p.typeId === "dog_starter");
+//   if(hasDog) return;
+//   const dog = { uid: uid(), typeId:"dog_starter", emoji:"🐶", name:"Dog", rarity:"Starter" };
+//   zooPets.push(dog);
+// }
 
 function runFromBoss(){
   // penalty: boss eats one random crop (if any)
@@ -3442,7 +3477,7 @@ function runFromBoss(){
 }
 
 function startBossBattle(){
-  ensureStarterPig();
+  // ensureStarterDog();
 
   // Create a list of available pets for the player to choose from.
   const petOptions = zooPets.map(pet => {
@@ -3928,6 +3963,16 @@ function openInventory(){
     return `<div class="badge">${escapeHtml(k)} x${seeds[k]||0} (${escapeHtml(name)})</div>`;
   }).join("");
 
+  const harvestedCrops = CROPS
+      .sort((a, b) => a.emoji.localeCompare(b.emoji))
+      .map(c => {
+        const amount = inventory[c.emoji] ?? 0; // default to 0
+        return `<div class="badge">
+          ${escapeHtml(c.emoji)} x${amount} (${escapeHtml(c.name)})
+        </div>`;
+  }).join("");
+  
+
   const netOwned = boosts.net || 0;
   const fertOwned = boosts.fertilizer || 0;
   const scareLeft = Math.max(0, (boosts.scarecrowUntil||0) - Date.now());
@@ -3938,6 +3983,11 @@ function openInventory(){
     <div class="sectionTitle">Seeds</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
       ${seedBadges || `<div class="smallNote">No seeds. Buy some in Crops.</div>`}
+    </div>
+
+    <div class="sectionTitle">Harvested Crops</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+      ${harvestedCrops || `<div class="smallNote">No crops were harvested yet. Plant a seed and harvest the crop.</div>`}
     </div>
 
     <div class="sectionTitle">Boosts</div>
@@ -4265,7 +4315,7 @@ function updateUI(){
     }
   }
 
-  ensureStarterPig();
+  // ensureStarterDog();
 
   if(!nextPetSpawnAt || nextPetSpawnAt < Date.now()){
     scheduleNextPetSpawn();
@@ -4282,64 +4332,141 @@ function updateUI(){
   updateToolUI();
 })();
 
-/* =========================================================
-   HARVEST SHOP / MARKET
-========================================================= */
+
+// 1. MARKET SYSTEM
 function openHarvestShop() {
-  let html = `<div class="resLine">Market • Sell your Harvest</div>`;
-  let hasItems = false;
+  let html = `<div class="resLine">Market • Sell Crops</div>`;
+  let has = false;
   CROPS.forEach(c => {
-    const count = inventory[c.emoji] || 0;
-    if (count > 0) {
-      hasItems = true;
-      const display = c.isImage ? `<img src="${c.grown}" style="width:30px">` : c.emoji;
-      html += `
-        <div class="itemCard">
-          <div class="itemLeft">
-            <div class="itemIcon">${display}</div>
-            <div class="itemMeta">
-              <div class="itemName">${c.name} (x${count})</div>
-              <div class="itemSub">Value: ${c.harvestCoins} coins</div>
-            </div>
-          </div>
-          <div class="rowBtns">
-            <button onclick="sellCrop('${c.emoji}', 1)">Sell 1</button>
-            <button onclick="sellCrop('${c.emoji}', ${count})">Sell All</button>
-          </div>
-        </div>`;
+    const qty = inventory[c.emoji] || 0;
+    if(qty > 0){
+      has = true;
+      html += `<div class="itemCard">
+        <div class="itemLeft"><div class="itemIcon">${c.isImage?`<img src="${c.grown}" style="width:30px">`:c.emoji}</div>
+        <div><b>${c.name}</b> (x${qty})</div></div>
+        <div class="rowBtns">
+          <button onclick="sellCrop('${c.emoji}', 1)">Sell 1</button>
+          <button onclick="sellCrop('${c.emoji}', ${qty})">All</button>
+        </div>
+      </div>`;
     }
   });
-  if (!hasItems) html += `<div class="smallNote">Your bag is empty. Harvest crops first!</div>`;
-  html += `
-    <div style="margin-top:15px; display:flex; gap:10px;">
-      <button style="flex:1; background:#74DE34; color:white; font-weight:900;" onclick="sellAllCrops()">Sell Everything</button>
-      <button style="flex:1;" onclick="closeModal()">Close</button>
-    </div>`;
-  openModal("Farmer's Market", html);
+  if(!has) html += `<div class="smallNote">Inventory empty. Harvest crops first!</div>`;
+  else html += `<div style="margin-top:10px"><button onclick="sellAllCrops()" style="width:100%; background:#74DE34; color:white; padding:10px; border-radius:10px;">Sell Everything</button></div>`;
+  html += `<div style="margin-top:10px"><button onclick="closeModal()" style="width:100%; padding:10px; border-radius:10px;">Close</button></div>`;
+  openModal("Market", html);
 }
-function sellCrop(emoji, amount) {
-  const c = cropByEmoji(emoji);
-  if ((inventory[emoji]||0) >= amount) {
-    inventory[emoji] -= amount;
-    coins += (c.harvestCoins * amount);
+function sellCrop(e, amt){
+  if((inventory[e]||0) >= amt){
+    inventory[e] -= amt;
+    coins += cropByEmoji(e).harvestCoins * amt;
     saveState(); updateUI(); openHarvestShop();
-    showToast(`Sold for ${c.harvestCoins * amount} coins!`);
+    showToast(`Sold for ${cropByEmoji(e).harvestCoins * amt} coins`);
   }
 }
-function sellAllCrops() {
-  let total = 0;
-  CROPS.forEach(c => {
-    const count = inventory[c.emoji] || 0;
-    if (count > 0) {
-      total += count * c.harvestCoins;
-      inventory[c.emoji] = 0;
+function sellAllCrops(){
+  let gained = 0;
+  Object.keys(inventory).forEach(k=>{
+    if(inventory[k]>0){
+      gained += inventory[k] * cropByEmoji(k).harvestCoins;
+      inventory[k] = 0;
     }
   });
-  if (total > 0) {
-    coins += total;
-    saveState(); updateUI(); openHarvestShop();
-    showToast(`Sold all for ${total} coins!`);
-  } else {
-    showToast("Nothing to sell!");
+  coins += gained;
+  saveState(); updateUI(); openHarvestShop();
+  showToast(`Sold all for ${gained}!`);
+}
+// 2. UPGRADED PROFILE
+function getExamTitle(){
+  // Tries to read library exam data (if available)
+  try {
+    const ex = JSON.parse(localStorage.getItem(LIB_EXAM_KEY)||"{}");
+    const tk = todayKey();
+    if(ex[tk]?.advanced) return "Advanced Learner";
+    if(ex[tk]?.intermediate) return "Intermediate Learner";
+  } catch(e) {}
+  return "Beginner Learner";
+}
+// Replace your existing openProfile function with this one
+function openProfile(){
+  const title = getExamTitle();
+  let scHtml = "";
+  for(let i=0; i<4; i++){
+    const item = showcase[i];
+    const display = item ? (cropByEmoji(item).isImage ? `<img src="${cropByEmoji(item).grown}" style="width:40px;">` : item) : "";
+    // Click to change showcase
+    scHtml += `<div class="showbox" onclick="pickShowcase(${i})" style="cursor:pointer;">${display}</div>`;
   }
+  openModal("Profile", `
+    <div style="text-align:center;">
+      <div style="width:80px;height:80px;border-radius:50%;border:4px solid #74DE34;margin:0 auto;overflow:hidden;">
+        <img src="images/profile.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NjYyIvPjwvc3ZnPg=='">
+      </div>
+      <h3 style="margin:5px 0;">
+        ${escapeHtml(playerName)} 
+        <span class="editable-field" onclick="editName()" style="cursor:pointer; font-size:14px;">✏️</span>
+      </h3>
+      <div style="color:#8B4513;font-size:14px;">
+        📍 ${escapeHtml(playerCountry)} 
+        <span class="editable-field" onclick="editCountry()" style="cursor:pointer; font-size:14px;">✏️</span>
+      </div>
+      <div class="badge" style="background:#FDA914;margin-top:5px;padding:4px 10px;border-radius:10px;color:white;font-weight:bold;">${title}</div>
+    </div>
+    <div class="sectionTitle" style="text-align:center; margin-top:15px; font-weight:bold;">Crop Showcase (Tap Box)</div>
+    <div class="showcase-container" style="display:flex; justify-content:center; gap:10px; margin:10px 0;">${scHtml}</div>
+    <div class="streak-zone" style="background:white; padding:10px; border-radius:10px; margin-top:10px; text-align:center; font-weight:bold;">
+      🔥 Login Streak: ${dailyStreak} Days
+    </div>
+    <div style="margin-top:15px;display:flex;"><button style="width:100%; padding:10px; border-radius:10px;" onclick="closeModal()">Close</button></div>
+  `);
+}
+function pickShowcase(idx){
+  let html = `<div class="resLine">Pick item for Slot ${idx+1}</div><div class="modalGrid" style="display:grid; gap:10px;">`;
+  let has = false;
+  Object.keys(inventory).forEach(k=>{
+    if(inventory[k]>0){
+      has=true;
+      const c = cropByEmoji(k);
+      html += `<div class="itemCard" onclick="setShowcase(${idx},'${k}')" style="cursor:pointer; background:white; padding:10px; border-radius:10px; border:1px solid #ccc;">
+        <div class="itemLeft">${c.isImage?`<img src="${c.grown}" style="width:30px">`:c.emoji} <b>${c.name}</b></div>
+      </div>`;
+    }
+  });
+  if(!has) html += `<div class="smallNote">No crops in bag.</div>`;
+  html += `<button onclick="setShowcase(${idx}, null)" style="width:100%; margin-top:10px;">Clear Slot</button>`;
+  html += `</div>`;
+  openModal("Select Showcase", html);
+}
+function setShowcase(idx, val){
+  showcase[idx] = val;
+  saveState(); openProfile();
+}
+// 3. CUSTOM EDIT MODALS (No Browser Alerts)
+function editName(){
+  openModal("Edit Name", `
+    <div class="resLine">Enter your new name:</div>
+    <div class="fillWrap" style="display:flex; gap:5px; margin-top:10px;">
+      <input id="newNameInput" value="${escapeHtml(playerName)}" style="flex:1; padding:8px; border-radius:8px; border:1px solid #ccc;">
+      <button onclick="saveName()">Save</button>
+    </div>
+  `);
+}
+function saveName(){
+  const val = $("newNameInput").value.trim();
+  if(val) playerName = val;
+  saveState(); updateUI(); openProfile();
+}
+function editCountry(){
+  openModal("Edit Country", `
+    <div class="resLine">Enter your country:</div>
+    <div class="fillWrap" style="display:flex; gap:5px; margin-top:10px;">
+      <input id="newCountryInput" value="${escapeHtml(playerCountry)}" style="flex:1; padding:8px; border-radius:8px; border:1px solid #ccc;">
+      <button onclick="saveCountry()">Save</button>
+    </div>
+  `);
+}
+function saveCountry(){
+  const val = $("newCountryInput").value.trim();
+  if(val) playerCountry = val;
+  saveState(); updateUI(); openProfile();
 }

@@ -142,8 +142,12 @@
   <div class="bottomNav">
     <div id="bottomBar">
       <button class="bottomBtn" id="btnCrops" onclick="openCrops()"><img src="images/crops.png" alt="crops" onerror="this.style.display='none'"> Crops</button>
-      <button class="bottomBtn" id="btnShop" onclick="openHarvestShop()"><img src="images/shop.png" alt="shop" onerror="this.style.display='none'"> Shop</button>
-      <button class="bottomBtn" id="btnBag" onclick="openHarvestShop()"><img src="images/inventory.png" alt="inventory" onerror="this.style.display='none'"> Bag</button>
+      <button class="bottomBtn" onclick="openHarvestShop()">
+        <img src="images/shop.png" alt="market"> Market
+      </button>
+      <button class="bottomBtn" onclick="openInventory()">
+        <img src="images/inventory.png" alt="bag"> Bag
+      </button>
       <button class="bottomBtn" id="btnZoo" onclick="openZoo()"><img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> Zoo</button>
     </div>
     <img class="backdrop" src="images/wood.png" alt="wood" onerror="this.style.display='none'"/>
