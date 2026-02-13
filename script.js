@@ -3833,7 +3833,7 @@ function openCrops(){
           <button ${locked || coins<c.seedCost ? "disabled":""} onclick="buySeed('${c.emoji}')">
             ${locked ? "Locked" : "Buy"}
           </button>
-          <button onclick="selectSeed('${c.emoji}')">Select</button>
+          <button ${locked || coins<c.seedCost ? "disabled":""} onclick="selectSeed('${c.emoji}')">Select</button>
         </div>
       </div>
     `;
@@ -4263,7 +4263,8 @@ function updateXPUI(){
   const needed = xpNeededForLevel(level);
   const percent = clamp(Math.floor((xp / needed) * 100), 0, 100);
   $("xpBar").style.width = percent + "%";
-  $("xpLevelText").textContent = `Lvl ${level} • ${xp}/${needed}`;
+  $("xpLevelText").textContent = `${xp}/${needed}`;
+  $("LevelTxt").textContent = `${level}`;
 }
 function updateUI(){
   $("coins").textContent = String(coins);

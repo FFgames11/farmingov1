@@ -31,10 +31,17 @@
 
   <div class="header">
     <div class="profileArea">
-      <img src="images/profile.png" alt="profile" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'"/>
+      <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
+        <img src="images/profile.png" alt="profile"/>
+      </div>
       <div class="nameStack">
         <div id="playerNameDisplay">Player</div>
         <div id="playerTitleDisplay">Rookie Farmer</div>
+          <div id="xpBarContainer">
+          <div id="xpBar"></div>
+          <div id="xpLevelText">Lvl 1</div>
+        </div>
+        <div id="LevelTxt"></div>
       </div>
     </div>
 
@@ -55,10 +62,7 @@
     </div>
   </div>
 
-  <div id="xpBarContainer">
-    <div id="xpBar"></div>
-    <div id="xpLevelText">Lvl 1</div>
-  </div>
+
 
   <!-- FARM SCREEN -->
   <div id="farmScreen" class="screen">
@@ -146,7 +150,7 @@
         <img src="images/shop.png" alt="market"> Market
       </button>
       <button class="bottomBtn" onclick="openInventory()">
-        <img src="images/inventory.png" alt="bag"> Bag
+        <img src="images/inventory.png" alt="bag"> Inventory
       </button>
       <button class="bottomBtn" id="btnZoo" onclick="openZoo()"><img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> Zoo</button>
     </div>
