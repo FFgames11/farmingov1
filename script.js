@@ -657,7 +657,7 @@ let playerTitle = "Rookie Farmer";
 
 let selectedSeed = "🥕";
 
-let currentTool = "plant"; // plant | remove | move
+let currentTool = "harvest"; // plant | remove | move
 let moveSourceIndex = null;
 
 let seeds = {}; // emoji -> count
@@ -868,15 +868,39 @@ const zooScreen = $("zooScreen");
 const townBtnIcon = $("townBtnIcon");
 const toolStrip = $("toolStrip");
 const bottomBar = $("bottomBar");
+const toolsArrow = $("toolsArrow");
 
-function updateToolStripPosition(){
-  if(!toolStrip || !bottomBar) return;
-  // place tool strip right above the bottom nav buttons
-  const r = bottomBar.getBoundingClientRect();
-  const offset = Math.max(12, window.innerHeight - r.top + 10);
-  toolStrip.style.bottom = offset + "px";
+//toggle tool
+const toolsToggleBtn = $("toolsToggleBtn");
+const toolsPanel = $("toolsPanel");
+const currentToolIcon = $("currentToolIcon");
+
+function toggleToolsPanel(){
+  if(!toolsPanel) return;
+
+  const isOpen = toolsPanel.classList.toggle("toolsOpen");
+
+  if (toolsArrow) {
+    toolsArrow.classList.toggle("toolsOpenArrow", isOpen);
+  }
 }
-window.addEventListener("resize", updateToolStripPosition);
+
+if (toolsToggleBtn) {
+  toolsToggleBtn.onclick = toggleToolsPanel;
+}
+//end of toggle tool
+
+// function updateToolStripPosition(){
+//   if(!toolStrip || !bottomBar) return;
+//   // place tool strip right above the bottom nav buttons
+//   const r = bottomBar.getBoundingClientRect();
+//   const offset = Math.max(12, window.innerHeight - r.top + 10);
+//   toolStrip.style.bottom = offset + "px";
+// }
+// window.addEventListener("resize", updateToolStripPosition);
+
+
+
 
 // Zoo screen elements
 const zooYard = $("zooYard");
@@ -1364,6 +1388,9 @@ function startTutorial(){
 
 
 
+
+
+
 function openInfo(){
   showMessage("What's New", `
     <div class="resLine">Tutorial spotlight • Bigger quizbank • Boss fight</div>
@@ -1721,6 +1748,21 @@ function applyGrowBoost(ms){
 function setTool(tool){
   if(tutorialIsActive()) return;
   currentTool = tool;
+
+  // Update the toggle button icon
+  if (currentToolIcon) {
+    currentToolIcon.src = `images/${tool}tool.png`;
+  }
+
+  // Optional: close panel after selecting
+  if (toolsPanel) {
+    toolsPanel.classList.remove("toolsOpen");
+  }
+
+  if (toolsArrow) {
+    toolsArrow.classList.remove("toolsOpenArrow");
+  }
+
   moveSourceIndex = null;
   updateToolUI();
   applyMoveHighlights();
@@ -1728,7 +1770,7 @@ function setTool(tool){
   if(tool === "plant") showToast("Tool: Plant", 900);
   if(tool === "remove") showToast("Tool: Remove plant", 1100);
   if(tool === "move") showToast("Tool: Move plant", 1100);
-  if(tool === "harvest") showToast("Tool: Harvest", 900);
+  if(tool === "harvest") showToast("Tool: Harvest", 900);  
 }
 
 function updateToolUI(){

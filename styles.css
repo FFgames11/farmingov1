@@ -52,6 +52,36 @@ body{
     max-width: 552px;
 }
 
+/* ===== TOOL BAR ===== */
+
+.toolStrip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#toolsPanel {
+  display: flex;
+  gap: 6px;
+
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+
+  transition: 
+    max-width 0.35s ease,
+    opacity 0.25s ease;
+    overflow 0.25s ease;
+  }
+
+  .toolsOpen {
+    max-width: 400px!important; /* large enough to fit buttons */
+    opacity: 1!important;
+    overflow: visible !important;
+  }
+
+
+
 /* ===== MENU ===== */
 #menu{
   display:flex;
@@ -377,6 +407,7 @@ body{
     radial-gradient(circle at 12% 16%, rgba(255,255,255,0.9) 0 18px, rgba(255,255,255,0) 19px),
     radial-gradient(circle at 78% 14%, rgba(255,255,255,0.9) 0 18px, rgba(255,255,255,0) 19px),
     linear-gradient(#bfe9ff 0%, #d9f6ff 45%, #ffeecf 46%, #ffeecf 58%, #b9f4c9 59%, #8ee7a7 100%);
+    z-index: 10;
 }
 #townScreen > *{ position:relative; z-index:1; }
 
@@ -468,33 +499,46 @@ body{
 }
 
 /* tools */
+#toolsArrow {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+  user-select: none;
+  color: #F6C38D;
+  stroke: 3px solid #F5D4A9;
+  filter: drop-shadow(0px 2px 1px #CC9A69);
+}
+
+/* When open, rotate arrow */
+.toolsOpenArrow {
+  transform: scaleX(-1);
+}
+
 .toolStrip{
-  position: fixed;
-  left: 50%;
-  bottom: 120px; /* JS will auto-adjust based on bottom nav */
-  transform: translateX(-50%);
-  display:flex;
-  flex-direction:row;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items:center;
-  justify-content:center;
-  width: auto;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: rgba(253,245,230,0.92);
-  border: 1px solid rgba(0,0,0,0.10);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-  z-index: 9997;
-  max-width: calc(100vw - 24px);
+    position: absolute;
+    right: 41px;
+    bottom: 60px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 50px;
+    z-index: 9997;
+    height: auto;
+    width: 100%;
+    max-width: max-content;
+    justify-content: center;
+    background: none;
 }
 
 .toolBtn{
   appearance:none;
-  border: 1px solid rgba(0,0,0,0.14);
-  background: rgba(253,245,230,0.96);
+  border: 3px solid #F5D4A9;
+  background: #E7A763;
   color: var(--ink);
-  border-radius: 999px;
+  border-radius: 23px;
   padding: 6px 10px;
   font-size: 12px;
   line-height: 1;
@@ -502,12 +546,32 @@ body{
   cursor:pointer;
   white-space: nowrap;
   box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  width: 85px;
+  height: 85px;
+  filter: drop-shadow(0px 5px 1px #CC9A69);
+}
+
+#toolsPanel .toolBtn{
+  background: #F6C38D;
+}
+
+.toolBtn span{
+  display: block;
+  font: normal 16px / 100% 'ArialRounded';
+  color: #fff;
+  text-shadow: 2px 0 0 #8A6A6A, -2px 0 0 #8A6A6A, 0 2px 0 #8A6A6A, 0 -2px 0 #8A6A6A;
+  text-align: center;
+}
+
+.toolBtn img {
+  width: 54px;
 }
 
 .toolBtn:active{ transform: translateY(1px); }
 .toolBtn.active{
-  outline: 2px solid rgba(255, 174, 64, 0.85);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+  text-shadow: 2px 0 0 #8A6A6A, -2px 0 0 #8A6A6A, 0 2px 0 #8A6A6A, 0 -2px 0 #8A6A6A;
+  border: 3px solid #F5D4A9;
+  background: #E7A763!important;
 }
 .tile.moveSource{
   outline: 3px solid rgba(86, 197, 255, 0.95);
@@ -756,8 +820,10 @@ body{
 
 /* bottom bar */
 .bottomNav{ 
-  position:relative;
-  top: -50px; 
+    position: relative;
+    top: 0;
+    background: url('images/wood.png') no-repeat center -60%;
+    background-size: 126%;
 }
 #bottomBar{
   position: relative;
@@ -786,7 +852,7 @@ body{
     gap: 11px;
 }
 .bottomBtn img{ 
-    width: 77px;
+    width: 78px;
     margin: 0 auto;
     filter: drop-shadow(0px 5px 1px rgba(0, 0, 0, 0.5));
 }
@@ -1125,6 +1191,7 @@ hr.sep{
     radial-gradient(circle at 10% 16%, rgba(255,255,255,0.9) 0 18px, rgba(255,255,255,0) 19px),
     radial-gradient(circle at 84% 14%, rgba(255,255,255,0.9) 0 18px, rgba(255,255,255,0) 19px),
     linear-gradient(#bfe9ff 0%, #d9f6ff 36%, #b9f4c9 37%, #8ee7a7 100%);
+    z-index: 10;
 }
 #zooScreen > *{ position:relative; z-index:1; }
 

@@ -67,16 +67,21 @@
   <!-- FARM SCREEN -->
   <div id="farmScreen" class="screen">
     <div class="farmcon">
-      <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
-
-<div id="farmWrap">
-        
       <div class="toolStrip" id="toolStrip">
-        <button class="toolBtn active" id="toolPlantBtn" onclick="setTool('plant')" title="Plant crops">🌱 Plant</button>
-        <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')" title="Harvest grown crops">✂️ Harvest</button>
-        <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')" title="Move a planted crop">🧤 Move</button>
-        <button class="toolBtn" id="toolRemoveBtn" onclick="setTool('remove')" title="Remove a planted crop">🧹 Remove</button>
+        <!-- Arrow indicator -->
+        <div id="toolsArrow"><img src="images/toolArrow.png" alt="toolArrow"></div>
+        <!-- Expanding list of tools -->
+        <div id="toolsPanel">
+          <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')"><img src="images/harvesttool.png" alt="Harvest"><span>Harvest</span></button>
+          <button class="toolBtn active" id="toolPlantBtn"  onclick="setTool('plant')"><img src="images/planttool.png" alt="Plant"><span>Plant</span></button>
+          <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')"><img src="images/movetool.png" alt="Move"><span>Move</span></button>
+          <button class="toolBtn"  id="toolRemoveBtn" onclick="setTool('remove')"><img src="images/removetool.png" alt="Remove"><span>Remove</span></button>
+        </div>
+        <!-- Main Button -->
+        <button class="toolBtn" id="toolsToggleBtn" type="button"> <img id="currentToolIcon" src="images/harvesttool.png" alt="Current Tool"><span>Tool</span></button>
       </div>
+      <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
+      <div id="farmWrap">
         <div id="eventLayer"></div>
         <div id="farm"></div>
       </div>
@@ -154,7 +159,7 @@
       </button>
       <button class="bottomBtn" id="btnZoo" onclick="openZoo()"><img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> Zoo</button>
     </div>
-    <img class="backdrop" src="images/wood.png" alt="wood" onerror="this.style.display='none'"/>
+  
   </div>
 </div>
 
