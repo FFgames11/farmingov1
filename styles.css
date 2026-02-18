@@ -9,7 +9,17 @@
 
 @font-face{
   font-family: 'ArialRounded';
-  src: url('fonts/arialroundedmtbold.woff') format('woff2');
+  src: url('fonts/arialroundedmtbold.woff') format('woff2'),
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face{
+  font-family: 'Bungee';
+  src: url('fonts/Bungee-Regular.ttf') format('ttf'),
+  url('fonts/Bungee-Regular.woff') format('woff'),
+  url('fonts/Bungee-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -1314,7 +1324,7 @@ hr.sep{
     z-index: 10;
     width: 100%;
     height: 911px !important;
-    padding: 260px 0 70px;
+    padding: 260px 0 0;
 }
 #zooScreen > *{ position:relative; z-index:1; }
 
@@ -1339,7 +1349,7 @@ hr.sep{
     width: 100%;
     max-width: 554px;
     height: 460px;
-    margin: 60px auto 20px;
+    margin: 60px auto 50px;
     border-radius: 0;
     border: 1px solid rgba(0,0,0,0.12);
     box-shadow: inset 0 2px 0 rgba(255,255,255,0.55), 0 12px 18px rgba(0,0,0,0.14);
@@ -1374,10 +1384,18 @@ hr.sep{
   pointer-events:none;
 }
 
+.zooEmpty span{
+    background: #FDF0D9;
+    border: 3px solid #D3B58D;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font: normal 18px/100% 'ArialRounded';
+}
+
 .zooPet{
   position:absolute;
   font-size: 30px;
-  filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.18));
+  filter: drop-shadow(0px 4px 0 #93691A);
   cursor:pointer;
   transition: left 1200ms ease, top 1200ms ease, transform 1200ms ease;
 }
@@ -1389,28 +1407,94 @@ hr.sep{
 
 .zooStats{
   margin-top: 10px;
-  background: rgba(255,255,255,0.55);
+  background: #FDF0D9;
   padding: 8px 12px;
+  border: 3px solid #D3B58D;
+  filter: drop-shadow(0px 4px 0px #93691A);
+  padding: 10px 20px;
   border-radius: 999px;
   font-size: 13px;
   color:#2a3b2a;
 }
 .zooHint{
-  margin-top: 8px;
-  font-size: 12px;
-  color: rgba(42,59,42,0.9);
-  opacity: 0.9;
+    margin-top: 20px;
+    font: normal 14px / 100% 'ArialRounded';
+    color: #fff;
+    opacity: 0.9;
+    filter: drop-shadow(0px 2px 0px #93691A);
+    position: relative;
+}
+.zooHint:before {
+    -webkit-text-stroke: 3px #8A6A6A;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
+    font-size: 1em;
 }
 
 
 .zooNav{
-  display:flex;
-  gap:10px;
-  margin-top: 10px;
+  display: flex;
+  margin-top: 30px;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background: url('images/wood.png') no-repeat center center;
+  background-size: 120%;
+  padding: 0;
+  height: 125px;
 }
+
+
 .zooNav button{
   padding: 10px 12px;
-  border-radius: 999px;
+  position: relative;
+  background: #2DD902;
+  border: 2px solid #C4E8AA;
+  filter: drop-shadow(0px 5px 0 #029902);
+  border-radius: 16px;
+  width: 139px;
+  height: 56px;
+  cursor: pointer;
+}
+
+.zooNav button:before{
+    background: #ADEC51;
+    border-radius: 8px 8px 2px 2px;
+    content: '';
+    width: 90%;
+    height: 24px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 4px;
+    position: absolute;
+}
+
+.zooNav button span {
+  font: normal 22px/100% 'Bungee';
+  color: #fff;
+  position: relative;
+  z-index: 0; 
+}
+
+.zooNav button span:before {
+    -webkit-text-stroke: 3px #091C17;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
 }
 
 

@@ -137,18 +137,18 @@
     <div id="zooYard" title="Tap a pet to view details">
       <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
         <div id="zooRoamLayer"></div>
-        <div id="zooEmpty" class="zooEmpty">No pets yet. Capture wild pets on your farm!</div>
+        <div id="zooEmpty" class="zooEmpty"><span>No pets yet. Capture wild pets on your farm!</span></div>
       <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'"/>
     </div>
     
 
     <div id="zooStats" class="zooStats">Pets: <b>0</b></div>
-    <div class="zooHint">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
-    
+    <div class="zooHint" data-title="Tip: Open Town 🏘️ to visit the Library and Quest Board.">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
+
     <div class="zooNav">
-      <button onclick="openArena()">Arena</button>
-      <button onclick="showTown()">Back to Town</button>
-      <button onclick="showFarm()">Back to Farm</button>
+      <button onclick="openArena()"><span data-title="Arena">Arena</span></button>
+      <button onclick="showTown()"><span data-title="Town">Town</span></button>
+      <button onclick="showFarm()"><span data-title="Farm">Farm</span></button>
     </div>
     
   </div>
