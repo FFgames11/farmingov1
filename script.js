@@ -20,6 +20,7 @@ function openModal(title, html){
   if(tutorialState?.active) return; // prevent random popups during tutorial
   modal.style.display = "flex";
   modalTitle.textContent = title;
+  modalTitle.setAttribute('data-title', title);
   modalContent.innerHTML = html;
 }
 function closeModal(){
@@ -203,7 +204,7 @@ function renderQuestionUI(qObj, containerId, onAnswered){
   if(qObj.type === "fill"){
     const prompt = qObj.prompt || "";
     root.innerHTML = `
-      <div style="margin-top:10px;font-weight:900;color:#3b2716;">${escapeHtml(prompt)}</div>
+      <div class="questionItem">${escapeHtml(prompt)}</div>
       ${qObj.hint ? `<div class="smallNote" style="text-align:left;margin-top:6px;">Hint: ${escapeHtml(qObj.hint)}</div>` : ""}
       <div class="fillWrap">
         <input id="${containerId}_input" placeholder="Type your answer">
@@ -237,18 +238,18 @@ function renderQuestionUI(qObj, containerId, onAnswered){
 ========================================================= */
 const PET_TYPES = [
   // Farmingo battle roster (also used as wild pets in the farm)
-  { id:"pig",       name:"Pig",       emoji:"🐷", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1 },
-  { id:"rabbit",    name:"Rabbit",    emoji:"🐰", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1 },
-  { id:"dog",       name:"Dog",       emoji:"🐶", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1 },
-
-  { id:"deer",      name:"Deer",      emoji:"🦌", rarity:"Uncommon", weight:22, eatMs:15000, capture:0.32, poopMin:1, poopMax:2 },
-  { id:"cat",       name:"Cat",       emoji:"🐱", rarity:"Uncommon", weight:22, eatMs:15000, capture:0.32, poopMin:1, poopMax:2 },
-
-  { id:"fox",       name:"Fox",       emoji:"🦊", rarity:"Rare",     weight:12, eatMs:15000, capture:0.22, poopMin:1, poopMax:2 },
-  { id:"panda",     name:"Panda",     emoji:"🐼", rarity:"Rare",     weight:12, eatMs:15000, capture:0.22, poopMin:1, poopMax:2 },
-
-  { id:"lion",      name:"Lion",      emoji:"🦁", rarity:"Epic",     weight: 6, eatMs:15000, capture:0.14, poopMin:2, poopMax:3 },
-  { id:"alligator", name:"Alligator", emoji:"🐊", rarity:"Epic",     weight: 6, eatMs:15000, capture:0.14, poopMin:2, poopMax:3 },
+  { id:"pig",       name:"Pig",       emoji:"🐷", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1,  isImage:true, imagepath:'<img src="images/pig.png" alt="pig">' },
+  { id:"rabbit",    name:"Rabbit",    emoji:"🐰", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1, isImage:true, imagepath:'<img src="images/rabbit.png" alt="rabbit">' },
+  { id:"dog",       name:"Dog",       emoji:"🐶", rarity:"Common",   weight:42, eatMs:15000, capture:0.45, poopMin:1, poopMax:1,  isImage:true, imagepath:'<img src="images/dog.png" alt="dog">'},
+, 
+  { id:"deer",      name:"Deer",      emoji:"🦌", rarity:"Uncommon", weight:22, eatMs:15000, capture:0.32, poopMin:1, poopMax:2,  isImage:true, imagepath:'<img src="images/deer.png" alt="deer">'},
+  { id:"cat",       name:"Cat",       emoji:"🐱", rarity:"Uncommon", weight:22, eatMs:15000, capture:0.32, poopMin:1, poopMax:2,  isImage:true, imagepath:'<img src="images/cat.png" alt="cat">'},
+, 
+  { id:"fox",       name:"Fox",       emoji:"🦊", rarity:"Rare",     weight:12, eatMs:15000, capture:0.22, poopMin:1, poopMax:2,  isImage:true, imagepath:'<img src="images/fox.png" alt="fox">'},
+  { id:"panda",     name:"Panda",     emoji:"🐼", rarity:"Rare",     weight:12, eatMs:15000, capture:0.22, poopMin:1, poopMax:2,  isImage:true, imagepath:'<img src="images/panda.png" alt="panda">'},
+, 
+  { id:"lion",      name:"Lion",      emoji:"🦁", rarity:"Epic",     weight: 6, eatMs:15000, capture:0.14, poopMin:2, poopMax:3,  isImage:true, imagepath:'<img src="images/lion.png" alt="lion">'},
+  { id:"alligator", name:"Alligator", emoji:"🐊", rarity:"Epic",     weight: 6, eatMs:15000, capture:0.14, poopMin:2, poopMax:3,  isImage:true, imagepath:'<img src="images/alligator.png" alt="alligator">'},
 ];
 
 /* =========================================================
@@ -326,6 +327,7 @@ const BATTLE_ANIMALS = {
   "pig": { 
       "name": "Pig", 
       "emoji": "🐷", 
+      "imagepath": "images/pig.png",
       "rarity": "Starter", 
       "base": { 
         "atk": 5, 
@@ -351,6 +353,7 @@ const BATTLE_ANIMALS = {
   "rabbit": {
     "name": "Rabbit",
     "emoji": "🐰",
+    "imagepath": "images/rabbit.png",
     "rarity": "Common",
     "base": {
       "atk": 5,
@@ -377,6 +380,7 @@ const BATTLE_ANIMALS = {
   "dog": {
     "name": "Dog",
     "emoji": "🐶",
+    "imagepath": "images/dog.png",
     "rarity": "Common",
     "base": {
       "atk": 6,
@@ -403,6 +407,7 @@ const BATTLE_ANIMALS = {
   "deer": {
     "name": "Deer",
     "emoji": "🦌",
+    "imagepath": "images/deer.png",
     "rarity": "Uncommon",
     "base": {
       "atk": 4,
@@ -429,6 +434,7 @@ const BATTLE_ANIMALS = {
   "cat": {
     "name": "Cat",
     "emoji": "🐱",
+    "imagepath": "images/cat.png",
     "rarity": "Uncommon",
     "base": {
       "atk": 7,
@@ -455,6 +461,7 @@ const BATTLE_ANIMALS = {
   "lion": {
     "name": "Lion",
     "emoji": "🦁",
+    "imagepath": "images/lion.png",
     "rarity": "Epic",
     "base": {
       "atk": 9,
@@ -481,6 +488,7 @@ const BATTLE_ANIMALS = {
   "panda": {
     "name": "Panda",
     "emoji": "🐼",
+    "imagepath": "images/panda.png",
     "rarity": "Rare",
     "base": {
       "atk": 5,
@@ -507,6 +515,7 @@ const BATTLE_ANIMALS = {
   "fox": {
     "name": "Fox",
     "emoji": "🦊",
+    "imagepath": "images/fox.png",
     "rarity": "Rare",
     "base": {
       "atk": 6,
@@ -533,6 +542,7 @@ const BATTLE_ANIMALS = {
   "alligator": {
     "name": "Alligator",
     "emoji": "🐊",
+    "imagepath": "images/alligator.png",
     "rarity": "Epic",
     "base": {
       "atk": 8,
@@ -746,6 +756,7 @@ function loadState(){
         pet.typeId = pet.typeId || pet.animalId;
         pet.name = meta.name;
         pet.emoji = meta.emoji;
+        pet.imagepath = meta.imagepath;
         pet.rarity = meta.rarity;
       }
       return pet;
@@ -1137,7 +1148,7 @@ function startGame(){
   menu.style.display = "none";
   gameDiv.style.display = "flex";
   showFarm();
-  requestAnimationFrame(updateToolStripPosition);
+  // requestAnimationFrame(updateToolStripPosition);
 
   if(shouldShowTutorial()){
     startTutorial();
@@ -1410,7 +1421,7 @@ function showFarm(){
   townScreen.style.display = "none";
   if(zooScreen) zooScreen.style.display = "none";
   townBtnIcon.textContent = "🏘️";
-  updateToolStripPosition();
+  // updateToolStripPosition();
 }
 function showTown(which){
   activeScreen = "town";
@@ -1563,6 +1574,7 @@ function saveProfileEdits(){
   playerName = (n?.value||"").trim() || "Player";
   playerTitle = (t?.value||"").trim() || "Rookie Farmer";
   $("playerNameDisplay").textContent = playerName;
+  $("playerNameDisplay").setAttribute('data-title',playerName);
   $("playerTitleDisplay").textContent = playerTitle;
   saveState();
   openProfile();
@@ -2049,8 +2061,8 @@ function gainXP(amount){
    WILD PET SPAWN INTERVAL (SLOWER)
 ========================================================= */
 function scheduleNextPetSpawn(){
-  let min = 70_000;
-  let max = 120_000;
+  let min = 5000;
+  let max = 5000;
   if(petSpawnsBlocked()){
     min += 40_000;
     max += 80_000;
@@ -2126,13 +2138,14 @@ function spawnWildPetEntity(type, targetTileIndex){
 
   const entityEl = document.createElement("div");
   entityEl.className = "wildEntity";
-  entityEl.textContent = type.emoji;
+  entityEl.innerHTML = type.imagepath;
   entityEl.title = `${type.name} (${type.rarity})`;
   entityEl.style.left = `${startX}px`;
   entityEl.style.top = `${startY}px`;
   entityEl.onclick = (e)=>{
     e.stopPropagation();
     onWildPetClicked();
+  
   };
 
   const barEl = document.createElement("div");
@@ -2416,7 +2429,7 @@ function spawnZooPetElement(pet){
   if(!zooRoamLayer) return;
   const el = document.createElement("div");
   el.className = "zooPet";
-  el.textContent = pet.emoji;
+  el.innerHTML = pet.imagepath;
   el.style.left = "18px";
   el.style.top = "18px";
   el.dataset.uid = pet.uid;
@@ -2491,6 +2504,7 @@ function capturePet(type){
     animalId: type.id,
     level: 1,
     emoji: type.emoji,
+    imagepath: type.imagepath,
     name: type.name,
     rarity: type.rarity
   };
@@ -2560,7 +2574,7 @@ function openArenaPetSelect(side){
     return `
       <div class="itemCard">
         <div class="itemLeft">
-          <div class="itemIcon">${meta.emoji}</div>
+          <div class="itemIcon">${meta.imagepath}</div>
           <div class="itemMeta">
             <div class="itemName">${escapeHtml(meta.name)} <span style="opacity:.65;">Lv${lvl}</span></div>
             <div class="itemSub">ATK ${st.atk} • DEF ${st.def} • SPD ${st.spd} • HP ${hp}</div>
@@ -3523,7 +3537,7 @@ function startBossBattle(){
 
   // Create a list of available pets for the player to choose from.
   const petOptions = zooPets.map(pet => {
-    return `<button class="petChoiceBtn" onclick="selectPetForBossFight('${pet.uid}')">${pet.emoji} ${pet.name}</button>`;
+    return `<button class="petChoiceBtn" onclick="selectPetForBossFight('${pet.uid}')">${pet.imagepath} ${pet.name}</button>`;
   }).join("");
 
   // Show the modal to select a pet
@@ -4306,12 +4320,17 @@ function updateXPUI(){
   const percent = clamp(Math.floor((xp / needed) * 100), 0, 100);
   $("xpBar").style.width = percent + "%";
   $("xpLevelText").textContent = `${xp}/${needed}`;
+  $("xpLevelText").setAttribute('data-title',`${xp}/${needed}`);
   $("LevelTxt").textContent = `${level}`;
+  $("LevelTxt").setAttribute('data-title',`${level}`);
 }
 function updateUI(){
   $("coins").textContent = String(coins);
+  $("coins").setAttribute('data-title',String(coins));
   $("petCount").textContent = String(zooPets.length);
+  $("petCount").setAttribute('data-title',String(zooPets.length));
   $("playerNameDisplay").textContent = playerName;
+  $("playerNameDisplay").setAttribute('data-title',playerName);
   $("playerTitleDisplay").textContent = playerTitle;
   updateXPUI();
 }
@@ -4368,6 +4387,7 @@ function updateUI(){
   }
 
   $("playerNameDisplay").textContent = playerName;
+  $("playerNameDisplay").setAttribute('data-title',playerName);
   $("playerTitleDisplay").textContent = playerTitle;
 
   initTiles();
@@ -4445,15 +4465,15 @@ function openProfile(){
       <div style="width:80px;height:80px;border-radius:50%;border:4px solid #74DE34;margin:0 auto;overflow:hidden;">
         <img src="images/profile.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NjYyIvPjwvc3ZnPg=='">
       </div>
-      <h3 style="margin:5px 0;">
+      <h3 style="margin:5px 0;" class="modalPlayerName">
         ${escapeHtml(playerName)} 
         <span class="editable-field" onclick="editName()" style="cursor:pointer; font-size:14px;">✏️</span>
       </h3>
-      <div style="color:#8B4513;font-size:14px;">
+      <div class="playerlocation">
         📍 ${escapeHtml(playerCountry)} 
         <span class="editable-field" onclick="editCountry()" style="cursor:pointer; font-size:14px;">✏️</span>
       </div>
-      <div class="badge" style="background:#FDA914;margin-top:5px;padding:4px 10px;border-radius:10px;color:white;font-weight:bold;">${title}</div>
+      <div class="badge">${title}</div>
     </div>
     <div class="sectionTitle" style="text-align:center; margin-top:15px; font-weight:bold;">Crop Showcase (Tap Box)</div>
     <div class="showcase-container" style="display:flex; justify-content:center; gap:10px; margin:10px 0;">${scHtml}</div>

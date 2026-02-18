@@ -31,8 +31,11 @@
 
   <div class="header">
     <div class="profileArea">
-      <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
+      <div class="dpandlevelcon">
+        <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
         <img src="images/profile.png" alt="profile"/>
+      </div>
+      <div id="LevelTxtCon"><h3 id="LevelTxt"></h3></div>
       </div>
       <div class="nameStack">
         <div id="playerNameDisplay">Player</div>
@@ -41,15 +44,11 @@
           <div id="xpBar"></div>
           <div id="xpLevelText">Lvl 1</div>
         </div>
-        <div id="LevelTxt"></div>
+        
       </div>
     </div>
 
     <div class="coinCon">
-      <button class="townBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm">
-        <span id="townBtnIcon">🏘️</span>
-      </button>
-
       <div class="coinbox" id="coinBox">
         <img src="images/coin.png" alt="coin" onerror="this.style.display='none'"/>
         <span id="coins">0</span>
@@ -60,6 +59,7 @@
         <span id="petCount">0</span>
       </div>
     </div>
+    <button class="townBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span id="townBtnIcon">🏘️</span> </button>
   </div>
 
 
@@ -92,6 +92,7 @@
   <!-- TOWN SCREEN -->
   <div id="townScreen" class="screen">
     <div class="townTitle">Town</div>
+    <button class="townBtn2" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span id="townBtnIcon">🏘️</span> </button>
     <div class="townGrid">
       <div class="building" id="buildingShop" onclick="openSupermarket()">
         <div class="icon">🛒</div>
@@ -105,7 +106,7 @@
         <div class="tag">Daily quests + streak</div>
       </div>
 
-      <div class="building" id="buildingZoo" onclick="openZoo()">
+      <div class="building" id="buildingZoo" onclick="openZoo()" >
         <div class="icon">🐾</div>
         <div class="name">Zoo</div>
         <div class="tag">Your captured pets</div>
@@ -129,21 +130,27 @@
 
   <!-- ZOO SCREEN -->
   <div id="zooScreen" class="screen">
-    <div class="zooTitle">Zoo</div>
-    <div class="zooSub">Your captured pets can roam freely here.</div>
+    <!-- <div class="zooTitle">Zoo</div>
+    <div class="zooSub">Your captured pets can roam freely here.</div> -->
 
+    
     <div id="zooYard" title="Tap a pet to view details">
-      <div id="zooRoamLayer"></div>
-      <div id="zooEmpty" class="zooEmpty">No pets yet. Capture wild pets on your farm!</div>
+      <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
+        <div id="zooRoamLayer"></div>
+        <div id="zooEmpty" class="zooEmpty">No pets yet. Capture wild pets on your farm!</div>
+      <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'"/>
     </div>
+    
 
     <div id="zooStats" class="zooStats">Pets: <b>0</b></div>
+    <div class="zooHint">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
+    
     <div class="zooNav">
       <button onclick="openArena()">Arena</button>
       <button onclick="showTown()">Back to Town</button>
       <button onclick="showFarm()">Back to Farm</button>
     </div>
-    <div class="zooHint">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
+    
   </div>
 
 
@@ -182,8 +189,8 @@
 <div id="modal" class="modal">
   <div class="modalBox">
     <div class="modalHeader">
-      <div id="modalTitle"></div>
-      <button class="modalClose" onclick="closeModal()">✕</button>
+      <div id="modalTitleCon"><h2 id="modalTitle"></h2></div>
+      <button class="modalClose" onclick="closeModal()"></button>
     </div>
     <div id="modalContent"></div>
   </div>
