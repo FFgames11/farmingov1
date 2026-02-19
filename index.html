@@ -101,7 +101,7 @@
   <div id="townScreen" class="screen">
 
       <div class="header">
-        <!-- <div class="profileArea">
+        <div class="profileArea">
           <div class="dpandlevelcon">
             <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
             <img src="images/profile.png" alt="profile"/>
@@ -129,11 +129,11 @@
             <span style="font-size:18px;">🐾</span>
             <span id="petCount">0</span>
           </div>
-        </div> -->
+        </div>
     </div>
 
     <div class="townGrid">
-      <button class="towntoRanchBtn" id="townToggleBtn2" onclick="openZoo()" title="Town / Farm"> <span data-title="Ranch">Ranch</span></button>
+      <button class="towntoRanchBtn" id="townToggleBtn2" onclick="openZoo()" title="Town / Farm"> <span id="townBtnIcon" data-title="Ranch">Ranch</span></button>
       <div class="building" id="buildingArena" onclick="openArena()">
         <div class="name" data-title="Arena">Arena</div>
         <div class="tag">Battle (PvP)</div>
@@ -154,7 +154,7 @@
         <div class="tag">Daily quests + streak</div>
       </div>
 
-      <button class="towntoFarmBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span data-title="Farm">Farm</span></button>
+      <button class="towntoFarmBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span id="townBtnIcon" data-title="Farm">Farm</span></button>
 
     </div>
     <div class="townHint">Wild pets enter from the side. Clean poop for rewards!</div>

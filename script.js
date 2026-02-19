@@ -1420,7 +1420,7 @@ function showFarm(){
   farmScreen.style.display = "flex";
   townScreen.style.display = "none";
   if(zooScreen) zooScreen.style.display = "none";
-  townBtnIcon.textContent = "🏘️";
+  // townBtnIcon.textContent = "🏘️";
   // updateToolStripPosition();
 }
 function showTown(which){
@@ -1428,7 +1428,7 @@ function showTown(which){
   farmScreen.style.display = "none";
   townScreen.style.display = "flex";
   if(zooScreen) zooScreen.style.display = "none";
-  townBtnIcon.textContent = "🌾";
+  // townBtnIcon.textContent = "🌾";
 
   function getLibraryBtnPos() {
     const el = document.querySelector("#buildingLibrary");
@@ -1486,7 +1486,7 @@ function showZoo(){
   townScreen.style.display = "none";
   if(zooScreen) zooScreen.style.display = "flex";
   // In the Zoo, this button returns to Farm 🌾
-  townBtnIcon.textContent = "🌾";
+  // townBtnIcon.textContent = "🌾";
 
   // Wait for layout, then place pets inside the yard
   requestAnimationFrame(()=>renderZooRoamingPets());
