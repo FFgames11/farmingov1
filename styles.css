@@ -26,8 +26,8 @@
 }
 
 :root{
-  --ui-font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-
+  --ui-font: 'ArialRounded', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --ui-line-height: 27px;
   --ink:#3d2a16;
   --paper:#fff7e6;
 
@@ -51,6 +51,7 @@ body{
   display:flex;
   justify-content:center;
   font-family: var(--ui-font);
+  line-height:var(--ui-line-height);
 }
 
 #menu, #game{
@@ -234,6 +235,7 @@ body{
   align-items:center;
   gap: 10px;
   z-index: 1;
+  padding: 0 15px;
 }
 .profileArea{
     display: block;
@@ -244,7 +246,7 @@ body{
     border: 3px solid #D3B58D;
     box-shadow: 0px 3px 0px #93691A;
     border-radius: 8px 8px 11px 11px;
-    margin: 24px 34px;
+    margin: 24px 19px;
     width: 231px;
     height: 75px;
     position: relative;
@@ -475,6 +477,13 @@ body{
 /* screens */
 .screen{ flex:1; display:none; flex-direction:column; justify-content:center; }
 #farmScreen{ display:flex; }
+
+.townHeader {
+    height: 300px;
+    display: block;
+    width: 100%;
+}
+
 #townScreen{ 
     display: none;
     align-items: center;
@@ -482,14 +491,22 @@ body{
     border-radius: 0;
     overflow: hidden;
     position: absolute;
-    background: url(images/zoobg.png);
+    background: url('images/townbg.png');
     background-size: cover;
     z-index: 10;
     width: 100%;
     height: 911px !important;
-    padding: 260px 0 70px;
+    padding: 0 0 70px;
+    flex-direction: column;
+    gap: 90px;
+    align-items: center;
 }
 #townScreen > *{ position:relative; z-index:1; }
+
+
+#townScreen .header{
+  width: 100%;
+}
 
 .townTitle{
   width:100%;
@@ -500,28 +517,216 @@ body{
   text-shadow: 0 1px 0 rgba(255,255,255,0.7);
 }
 .townGrid{
-  width:100%;
-  padding: 10px 18px 0;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 .building{
-  background: rgba(253,245,230,0.96);
-  border: 1px solid #D3B58D;
-  border-radius: 16px;
-  filter: drop-shadow(0px 2px 2px #93691A);
-  padding: 16px 10px;
-  cursor:pointer;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap: 8px;
-  user-select:none;
+    background: transparent;
+    position: absolute;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
 }
+
+.building:before{
+   position: absolute;
+   content: '';
+   background: url('images/townmarket.png') no-repeat center center;
+   top: 0;
+   right: 0;
+   margin: 0 auto;
+}
+
+#buildingArena{
+  width: 213px;
+  height: 195px;
+  position: absolute;
+  right: -5px;
+  padding-top: 190px;
+  top: -34px;
+}
+
+#buildingArena:before{
+  width: 295px;
+  height: 235px;
+  top: -10px;
+  right: -25px;
+  background: url('images/townarena.png') no-repeat center center;
+  background-size: contain;
+}
+
+#buildingArena:hover:before{
+  background: url('images/townarenaglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+#buildingMarket{
+  width: 307px;
+  height: 285px;
+  position: absolute;
+  left: -31px;
+  padding-top: 230px;
+  top: 51px;
+}
+
+#buildingMarket:before{
+  width: 345px;
+  height: 265px;
+  background: url('images/townmarket.png') no-repeat center center;
+  background-size: contain;
+  top: -19px;
+  left: -10px;
+}
+
+#buildingMarket:hover:before{
+  background: url('images/townmarketglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+
+#buildingLibrary{
+  width: 307px;
+  height: 285px;
+  position: absolute;
+  right: -41px;
+  padding-top: 280px;
+  top: 201px;
+}
+
+
+#buildingLibrary:before{
+  width: 523px;
+  height: 319px;
+  background: url('images/townlibrary.png') no-repeat center center;
+  background-size: contain;
+  right: -70px;
+  top: -30px;
+}
+
+#buildingLibrary:hover:before{
+  background: url('images/townlibraryglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+
+
+#buildingQuestBoard{
+  width: 307px;
+  height: 285px;
+  position: absolute;
+  left: 10px;
+  padding-top: 269px;
+  top: 361px;
+}
+
+#buildingQuestBoard:before{
+  width: 453px;
+  height: 320px;
+  background: url('images/questboard.png') no-repeat center center;
+  background-size: contain;
+  left: -95px;
+  top: -37px;
+}
+
+#buildingQuestBoard:hover:before{
+  background: url('images/questboardglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+
+.towntoRanchBtn, .towntoFarmBtn{
+  width: 140px;
+  padding-top: 58px;
+  position: relative;
+  border: 0;
+  background: transparent;
+}
+
+.towntoRanchBtn:after {
+  background: url('images/leftarrow.png') no-repeat center center;
+  background-size: contain;
+  content: '';
+  width: 70px;
+  height: 51px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+.towntoFarmBtn:after {
+  background: url('images/rightarrow.png') no-repeat center center;
+  background-size: contain;
+  content: '';
+  width: 70px;
+  height: 51px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+.towntoRanchBtn span, .towntoFarmBtn span{ font: normal 24px / 100% 'Bungee'; color:#FFEA38; font-weight:900; position: relative;}
+.towntoRanchBtn span:before, .towntoFarmBtn span:before{
+    -webkit-text-stroke: 3px #160202;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+}
+
+.towntoFarmBtn {
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+.towntoRanchBtn {
+    top: -50px;
+    left: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .building .icon{ font-size: 34px; line-height:1; }
-.building .name{ font-size: 16px; color:#5D420D; font-weight:900; }
-.building .tag{ font-size: 12px; color:#6b6b6b; text-align:center; }
+.building .name{ font: normal 24px / 100% 'Bungee'; color:#FFEA38; font-weight:900; position: relative;}
+.building .name:before{
+    -webkit-text-stroke: 3px #160202;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+}
+.building .tag{font-size: 12px;color:#fff;text-align:center;display: none;}
+
+
 
 .townHint{
   margin-top: 10px;
@@ -531,9 +736,264 @@ body{
   padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid rgba(0,0,0,0.08);
+  display: none;
+}
+
+.townZooCon{
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.toZooBtn{
+  background: transparent;
+  border: 0;
+  position: relative;
+  left: -10px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  cursor: pointer;
+
+  width: 170px;
+  height: 124px;
+}
+
+.toTownBtn{
+  background: transparent;
+  border: 0;
+  position: relative;
+  right: -10px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 200px;
+  height: 111px;
+}
+
+.toZooBtn:hover:before{
+  background: url('images/barnglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+.toZooBtn:before{
+content: '';
+    background: url('images/barn.png') no-repeat center center;
+    top: -46px;
+    left: -20px;
+    position: absolute;
+    width: 265px;
+    height: 225px;
+    background-size: contain;
+}
+
+.toTownBtn:before{
+    content: '';
+    background: url('images/sellingstalls.png') no-repeat center center;
+    top: -22px;
+    right: -1px;
+    position: absolute;
+    width: 210px;
+    height: 164px;
+    background-size: contain;
+}
+.toTownBtn:hover:before{
+  background: url('images/sellingstallsglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+
+
+.toZooBtn span{
+  font: normal 24px/100% 'Bungee';
+  color: #FFEA38;
+  position: relative;
+  z-index: 0;
+}
+
+.toZooBtn span:before{
+  -webkit-text-stroke: 3px #2f0505;
+  -webkit-text-fill-color: white;
+  paint-order: fill stroke;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  content: attr(data-title);
+}
+
+
+
+.toTownBtn img{
+  width: 200px;
+  position: relative;
+  top: 10px;
+}
+
+.toTownBtn span{
+  font: normal 24px/100% 'Bungee';
+  color: #FFEA38;
+  position: relative;
+  z-index: 0;
+}
+
+.toTownBtn span:before{
+  -webkit-text-stroke: 3px #2f0505;
+  -webkit-text-fill-color: white;
+  paint-order: fill stroke;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  content: attr(data-title);
 }
 
 /* farm area */
+
+
+
+
+.townZooCon2{
+    position: absolute;
+    top: -99px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    z-index: -1;
+}
+
+
+.toTownBtn2{
+  background: transparent;
+  border: 0;
+  position: relative;
+  right: -10px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 170px;
+  height: 124px;
+}
+
+.toFarmBtn2{
+  background: transparent;
+  border: 0;
+  position: relative;
+  left: -10px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 170px;
+  height: 124px;
+}
+
+.toFarmBtn2:before{
+content: '';
+content: '';
+    background: url('images/tofarm.png') no-repeat center center;
+    top: -43px;
+    left: -20px;
+    position: absolute;
+    width: 195px;
+    height: 225px;
+    background-size: contain;
+}
+
+.toFarmBtn2:hover:before{
+  background: url('images/tofarmglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+
+
+.toTownBtn2:before{
+    content: '';
+    background: url('images/sellingstalls.png') no-repeat center center;
+    top: -22px;
+    right: -1px;
+    position: absolute;
+    width: 210px;
+    height: 164px;
+    background-size: contain;
+}
+.toTownBtn2:hover:before{
+  background: url('images/sellingstallsglow.png') no-repeat center center;
+  background-size: contain;
+}
+
+.toTownBtn2 img{
+  width: 200px;
+  position: relative;
+  top: 10px;
+}
+
+.toTownBtn2 span{
+  font: normal 24px/100% 'Bungee';
+  color: #FFEA38;
+  position: relative;
+  z-index: 0;
+}
+
+.toTownBtn2 span:before{
+  -webkit-text-stroke: 3px #2f0505;
+  -webkit-text-fill-color: white;
+  paint-order: fill stroke;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  content: attr(data-title);
+}
+
+
+
+
+.toFarmBtn2 span{
+  font: normal 24px/100% 'Bungee';
+  color: #FFEA38;
+  position: relative;
+  z-index: 0;
+}
+
+.toFarmBtn2 span:before{
+  -webkit-text-stroke: 3px #2f0505;
+  -webkit-text-fill-color: white;
+  paint-order: fill stroke;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  content: attr(data-title);
+}
+
+
+
+
+
+
+/* zoo area */
+
+
 .farmcon{
   margin: 0 auto;
   height: 100%;
@@ -542,7 +1002,7 @@ body{
   flex-direction: column;
   justify-content: center;
   position: relative;
-  top: -10px;
+  top: 22px;
 }
 
 #farmWrap{
@@ -639,8 +1099,21 @@ body{
   display: block;
   font: normal 16px / 100% 'ArialRounded';
   color: #fff;
-  text-shadow: 2px 0 0 #8A6A6A, -2px 0 0 #8A6A6A, 0 2px 0 #8A6A6A, 0 -2px 0 #8A6A6A;
   text-align: center;
+  position: relative;
+  z-index: 0;
+}
+
+.toolBtn span:before{
+    -webkit-text-stroke: 3px #8A6A6A;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
 }
 
 .toolBtn img {
@@ -702,6 +1175,8 @@ body{
   margin: auto;
   height: 90px;
 }
+
+
 .tileCrop img {
   left: 0px;
   right: 0;
@@ -744,26 +1219,57 @@ body{
 .locked > .tileCrop span {
   font: normal 20px / 100% 'ArialRounded';
   color: #FEE22A;
-  text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
+  position: relative;
+  z-index: 0;
+}
+
+.locked > .tileCrop span:before {
+    -webkit-text-stroke: 3px #000;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
 }
 
 
 
 .tileBadge{
   position:absolute;
-  top: -14px;
+  top: -38px;
   left: 50%;
   transform: translateX(-50%);
   padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 11px;
+  background: #FDF0D9;
+  border: 1px solid #D3B58D;
   font-size: 10px;
   color:#2b2b2b;
   box-shadow: 0 6px 12px rgba(0,0,0,0.10);
   display:none;
   white-space:nowrap;
   z-index: 10;
+  filter: drop-shadow();
+  filter: drop-shadow(0 3px 0 #93691A);
+}
+
+.tileBadge:after{
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 9px 7px 0px 7px;
+    border-color: #fdf0d9 transparent transparent transparent;
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    content: '';
+    z-index: 9;
 }
 
 /* growth indicator */
@@ -862,7 +1368,7 @@ body{
   width:60px;
 }
 .entityBar{
-  position:absolute;
+  position:relative;
   width: 58px;
   height: 7px;
   border-radius: 999px;
@@ -872,7 +1378,9 @@ body{
   z-index: 7;
   pointer-events:none;
   transition: left 1400ms ease, top 1400ms ease;
-
+  left: 0 !important;
+  right: 0;
+  top: -10px !important;
 }
 .entityBarFill{
   width:0%;
@@ -932,11 +1440,28 @@ body{
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    font: normal 17px / 100% 'ArialRounded';
-    color: #FFDC72;
-    text-shadow: 2px 0 0 #5D420D, -2px 0 0 #5D420D, 0 2px 0 #5D420D, 0 -2px 0 #5D420D;
     gap: 11px;
 }
+.bottomBtn span{
+    font: normal 17px / 100% 'ArialRounded';
+    color: #FFDC72;
+    position: relative;
+    z-index: 0;
+}
+
+.bottomBtn span:before {
+    -webkit-text-stroke: 3px #5D420D;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
+}
+
+
 .bottomBtn img{ 
     width: 78px;
     margin: 0 auto;
@@ -953,7 +1478,7 @@ body{
   max-width: 519px;
 }
 
-/* modal */
+/* modal generic classes*/
 .modal{
   position:fixed;
   inset:0;
@@ -967,23 +1492,25 @@ body{
 .modalBox{
   width: min(440px, 92vw);
   border-radius: 18px;
-  background: #FDF5E6;
-  border: 1px solid rgba(0,0,0,0.15);
+  background: #B8783F;
+  border: 1px solid #D3B58D;
   box-shadow: 0 14px 30px rgba(0,0,0,0.25);
   overflow:hidden;
+  padding: 10px;
 }
 .modalHeader{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding: 12px 12px 10px;
-  background: rgba(255,255,255,0.65);
+  padding: 10px;
+  border-radius: 10px 10px 0 0;
+  background: #D3B58D;
   border-bottom: 1px solid rgba(0,0,0,0.10);
 }
 #modalTitle{    
     color: #fff;
     position: relative;
-    font: normal 25px / 100% 'ArialRounded';
+    font: normal 25px / 100% 'Bungee';
     z-index: 0;
     margin: 0;
   }
@@ -999,30 +1526,32 @@ body{
     height: 100%;
     font-size: 1em;
 }
-.modalClose{
-  width: 34px;
-  height: 34px;
-  border: 0;
-  background:transparent;
-}
-.modalClose:active{ 
-  transform: translateY(2px); 
-  box-shadow: 0 2px 0 rgba(0,0,0,0.10); 
-}
-#modalContent{ padding: 12px; }
-#modalContent .modalPlayerName {
-  font: normal 25px / 100% 'ArialRounded';
-  color:#8A6A6A;
-}
-#modalContent .playerlocation{
-  font: normal 18px / 100% 'ArialRounded';
-  color:#8A6A6A;
+
+#modalContent{ 
+  padding: 12px; 
+  background: #FCF6EA; 
+  border-radius: 0 0 10px 10px;
+  scrollbar-width: thin; /* auto | thin | none */
+  scrollbar-color: #D3B58D rgba(255,255,255,0.70); /* thumb color track color */
 }
 
-.modalBox button{
-  position: relative;
-  border-radius: 10px;
+#modalContent::-webkit-scrollbar{
+  scrollbar-color: #D3B58D rgba(255,255,255,0.70); /* thumb color track color */
+  scrollbar-width: thin;
 }
+
+
+/*Modal Close Button*/
+.modalClose{
+  width: 40px;
+  height: 40px;
+  border: 4px solid #F05756;
+  background:#AF2927;
+  filter: drop-shadow(0px 3px 0px #AF2927);
+  border-radius: 50px!important;
+  cursor: pointer;
+}
+
 .modalClose::before{     
     position: absolute;
     left: 0;
@@ -1036,10 +1565,24 @@ body{
     top: 0;
     bottom: 0;
 }
-.modalBox button:hover{ transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 3px 0 rgba(0,0,0,0.12); background: #e4d8c1; cursor: pointer;}
-.modalBox button:active{ transform: translateY(2px); filter: brightness(0.98); box-shadow: 0 3px 0 rgba(0,0,0,0.12); }
-.modalBox button:disabled{ opacity:0.55; cursor:not-allowed; }
+.modalClose:hover{
+  transform: translateY(2px)!important; 
+  filter: brightness(0.98)!important; 
+  box-shadow: 0 3px 0 rgba(0,0,0,0.12)!important; 
+  background:#AF2927!important;
+  filter: drop-shadow(0px 0px 0px #AF2927);
+}
+.modalClose:active{ 
+  transform: translateY(2px); 
+  box-shadow: 0 0 0 rgba(0,0,0,0); 
+}
 
+#modalContent .modalCloseCon{
+  margin-top:15px;display:flex;
+}
+
+
+/*Common content styles*/
 
 .resLine{
   display:flex;
@@ -1047,12 +1590,124 @@ body{
   justify-content:center;
   gap:10px;
   margin: 6px 0 10px;
-  padding: 8px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: rgba(255,255,255,0.65);
   border: 1px solid rgba(0,0,0,0.10);
   font-size: 13px;
   color: #2f2116;
+}
+
+/*Modal Content Close Button*/
+.modalBox #modalContent button{ 
+  position: relative; 
+  border-radius: 10px; 
+  width:100%; 
+  padding:10px; 
+  border-radius:10px; 
+  border: 1px solid #e9ddcd; 
+  background:#D3B58D; 
+  color: #fff; 
+}
+.modalBox #modalContent button:hover{ 
+  transform: translateY(-1px); 
+  filter: brightness(1.02);
+  background: #e4d8c1; 
+  cursor: pointer;
+}
+.modalBox #modalContent button:disabled{ 
+  opacity:0.55; 
+  cursor:not-allowed; 
+}
+
+/*-----End of Genric Modal Styles*/
+
+
+.bossBattleModalContent {
+    height: 47vh;
+    overflow-y: scroll;
+}
+.petChoiceBtn img {
+    width: 90px;
+    display: block;
+    text-align: center;
+    margin: 0 auto;
+}
+
+/*Player Profile Modal Styles*/
+
+.playerProfileContent {
+
+}
+
+.playerProfileContent .modalPlayerName {
+  font: normal 25px / 100% 'ArialRounded';
+  color:#8A6A6A;
+  margin:5px 0;
+}
+.playerProfileContent .playerlocation{
+  font: normal 18px / 100% 'ArialRounded';
+  color:#8A6A6A;
+  margin-bottom: 10px;
+}
+
+.playerProfileContent .playerheadercon {
+  text-align:center;
+}
+
+.playerProfileContent .playerheadercon .playerdp{
+  width:80px;height:80px;border-radius:50%;border:4px solid #74DE34;margin:0 auto;overflow:hidden;
+}
+
+.playerProfileContent .playerheadercon .playerdp img{
+  width:100%;height:100%;object-fit:cover;
+}
+
+.playerProfileContent .playerheadercon .modalPlayerName span{
+  cursor:pointer; font-size:14px;
+}
+.playerProfileContent .playerheadercon .playerlocation span{
+  cursor:pointer; font-size:14px;
+}
+
+.playerProfileContent .sectionTitle{
+  text-align:center; margin-top:15px; font-weight:bold;
+}
+
+.playerProfileContent .showcase-container{
+  display:flex; justify-content:center; gap:10px; margin:10px 0;
+}
+
+.playerProfileContent .streak-zone{
+  background:white; padding:10px; border-radius:10px; margin-top:10px; text-align:center; font-weight:bold; color: #B8783F;
+}
+
+/*-----End of Player Profile Modal Styles*/
+
+
+
+/*Player Profile Modal Styles*/
+
+.bossBattleModalContent .modalGrid{     
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center; 
+}
+.petChoiceBtn {
+  width: 48%!important;
+}
+
+
+
+
+
+.cropModalContent{
+  height: 46vh;
+  overflow-y: scroll; 
+  overflow-x: hidden;
+  padding-right: 11px;
 }
 
 .modalGrid{ display:grid; grid-template-columns: 1fr; gap: 10px; }
@@ -1084,13 +1739,17 @@ body{
 .badgeRow{ display:flex; gap: 6px; margin-top: 4px; flex-wrap:wrap; }
 .badge{
   font: normal 14px / 100% 'ArialRounded';
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.65);
   border: 1px solid rgba(0,0,0,0.10);
-  background: #FDA914;
-  margin-top: 5px;
-  padding: 4px 10px;
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
+  font-size: 13px;
+  color: #2f2116;
 }
 .rowBtns{ display:flex; gap: 8px; align-items:center; justify-content:flex-end; }
 
@@ -1452,7 +2111,7 @@ hr.sep{
   height: 125px;
 }
 
-
+/* 
 .zooNav button{
   padding: 10px 12px;
   position: relative;
@@ -1476,9 +2135,9 @@ hr.sep{
     margin: 0 auto;
     top: 4px;
     position: absolute;
-}
+} */
 
-.zooNav button span {
+/* .zooNav button span {
   font: normal 22px/100% 'Bungee';
   color: #fff;
   position: relative;
@@ -1495,7 +2154,7 @@ hr.sep{
     z-index: -1;
     content: attr(data-title);
     height: 100%;
-}
+} */
 
 
 @media (max-width: 720px){

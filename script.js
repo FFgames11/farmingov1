@@ -1672,7 +1672,7 @@ function renderFarm(){
 
     if(!unlockedTiles[i]){
       t.classList.add("locked");
-      cropEls[i].innerHTML = '<img src="images/tilecoin.png" alt="tilecoin"> <span>200</span>';
+      cropEls[i].innerHTML = '<img src="images/tilecoin.png" alt="tilecoin"> <span data-title="200">200</span>';
       continue;
     }
 
@@ -2150,14 +2150,12 @@ function spawnWildPetEntity(type, targetTileIndex){
 
   const barEl = document.createElement("div");
   barEl.className = "entityBar";
-  barEl.style.left = `${startX}px`;
-  barEl.style.top = `${startY + 30}px`;
   const barFillEl = document.createElement("div");
   barFillEl.className = "entityBarFill";
   barEl.appendChild(barFillEl);
 
+  entityEl.appendChild(barEl);
   eventLayer.appendChild(entityEl);
-  eventLayer.appendChild(barEl);
 
   const approachMs = 1400;
 
@@ -3542,16 +3540,19 @@ function startBossBattle(){
 
   // Show the modal to select a pet
   openModal("A wild boss appeared!", `
-    <div class="resLine">You: <b>Pig 🐷</b> vs Wild Boss: <b>Scarecrow</b></div>
-    <div class="smallNote" style="text-align:left;">
-      Choose a pet to fight the boss.
-    </div>
-    <div class="modalGrid" style="margin-top: 10px;">
-      ${petOptions}
-    </div>
-    <div class="smallNote" style="text-align:left;margin-top:12px;">
-      Normal Attack: Beginner question (safe).<br>
-      Heavy Attack: Intermediate/Advanced question (more damage).
+    <div class="bossBattleModalContent">
+      <div class="bossbattleBanner"><img src="images/bossbattlebanner.png" alt="boss battle banner" style="margin-bottom:10px;"></div>
+      <div class="resLine">You: <b>Pig 🐷</b> vs Wild Boss: <b>Scarecrow</b></div>
+      <div class="smallNote" style="text-align:left;">
+        Choose a pet to fight the boss.
+      </div>
+      <div class="modalGrid" style="margin-top: 10px;">
+        ${petOptions}
+      </div>
+      <div class="smallNote" style="text-align:left;margin-top:12px;">
+        Normal Attack: Beginner question (safe).<br>
+        Heavy Attack: Intermediate/Advanced question (more damage).
+      </div>
     </div>
   `);
 }
@@ -3896,9 +3897,11 @@ function openCrops(){
   }).join("");
 
   openModal("Crops", `
-    <div class="resLine">Coins: <b>${coins}</b> • Selected seed: <b>${escapeHtml(selectedSeed)}</b></div>
-    <div class="modalGrid">${lines}</div>
-    <div class="smallNote">Tip: Harvest tiles show READY when finished.</div>
+    <div class="cropModalContent">
+      <div class="resLine">Coins: <b>${coins}</b> • Selected seed: <b>${escapeHtml(selectedSeed)}</b></div>
+      <div class="modalGrid">${lines}</div>
+      <div class="smallNote">Tip: Harvest tiles show READY when finished.</div>
+    </div>
   `);
 }
 function selectSeed(emoji){
@@ -4461,26 +4464,28 @@ function openProfile(){
     scHtml += `<div class="showbox" onclick="pickShowcase(${i})" style="cursor:pointer;">${display}</div>`;
   }
   openModal("Profile", `
-    <div style="text-align:center;">
-      <div style="width:80px;height:80px;border-radius:50%;border:4px solid #74DE34;margin:0 auto;overflow:hidden;">
-        <img src="images/profile.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NjYyIvPjwvc3ZnPg=='">
+    <div class="playerProfileContent">
+      <div class="playerheadercon">
+          <div class="playerdp">
+            <img src="images/profile.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NjYyIvPjwvc3ZnPg=='">
+          </div>
+          <h3 class="modalPlayerName">
+            ${escapeHtml(playerName)} 
+            <span class="editable-field" onclick="editName()">✏️</span>
+          </h3>
+          <div class="playerlocation">
+            📍 ${escapeHtml(playerCountry)} 
+            <span class="editable-field" onclick="editCountry()">✏️</span>
+          </div>
+          <div class="badge">${title}</div>
       </div>
-      <h3 style="margin:5px 0;" class="modalPlayerName">
-        ${escapeHtml(playerName)} 
-        <span class="editable-field" onclick="editName()" style="cursor:pointer; font-size:14px;">✏️</span>
-      </h3>
-      <div class="playerlocation">
-        📍 ${escapeHtml(playerCountry)} 
-        <span class="editable-field" onclick="editCountry()" style="cursor:pointer; font-size:14px;">✏️</span>
+      <div class="sectionTitle" >Crop Showcase (Tap Box)</div>
+      <div class="showcase-container">${scHtml}</div>
+      <div class="streak-zone" >
+        🔥 Login Streak: ${dailyStreak} Days
       </div>
-      <div class="badge">${title}</div>
+      <div class="modalCloseCon"><button onclick="closeModal()">Close</button></div>
     </div>
-    <div class="sectionTitle" style="text-align:center; margin-top:15px; font-weight:bold;">Crop Showcase (Tap Box)</div>
-    <div class="showcase-container" style="display:flex; justify-content:center; gap:10px; margin:10px 0;">${scHtml}</div>
-    <div class="streak-zone" style="background:white; padding:10px; border-radius:10px; margin-top:10px; text-align:center; font-weight:bold;">
-      🔥 Login Streak: ${dailyStreak} Days
-    </div>
-    <div style="margin-top:15px;display:flex;"><button style="width:100%; padding:10px; border-radius:10px;" onclick="closeModal()">Close</button></div>
   `);
 }
 function pickShowcase(idx){

@@ -16,7 +16,6 @@
 <div id="menu">
   <div class="menuCard">
     <img src="images/title.png" alt="title" class="menuTitle">
-    <img src="images/logo.png" alt="Logo" onerror="this.style.display='none'"/>
     <button onclick="startGame()"><span>Play</span></button>
     <div class="buttonGroup2">
       <button onclick="openInfo()" class="button2"><span>What's New</span></button>
@@ -59,26 +58,33 @@
         <span id="petCount">0</span>
       </div>
     </div>
-    <button class="townBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span id="townBtnIcon">🏘️</span> </button>
+    
   </div>
 
 
 
   <!-- FARM SCREEN -->
   <div id="farmScreen" class="screen">
+     
     <div class="farmcon">
+
+      <div class="townZooCon" >
+        <button onclick="openZoo()" class="toZooBtn"><span data-title="Ranch">Ranch</span></button>
+        <button onclick="showTown()" class="toTownBtn"><span data-title="Town">Town</span></button>
+      </div>
+
       <div class="toolStrip" id="toolStrip">
         <!-- Arrow indicator -->
         <div id="toolsArrow"><img src="images/toolArrow.png" alt="toolArrow"></div>
         <!-- Expanding list of tools -->
         <div id="toolsPanel">
-          <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')"><img src="images/harvesttool.png" alt="Harvest"><span>Harvest</span></button>
-          <button class="toolBtn active" id="toolPlantBtn"  onclick="setTool('plant')"><img src="images/planttool.png" alt="Plant"><span>Plant</span></button>
-          <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')"><img src="images/movetool.png" alt="Move"><span>Move</span></button>
-          <button class="toolBtn"  id="toolRemoveBtn" onclick="setTool('remove')"><img src="images/removetool.png" alt="Remove"><span>Remove</span></button>
+          <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')"><img src="images/harvesttool.png" alt="Harvest"><span data-title="Harvest">Harvest</span></button>
+          <button class="toolBtn active" id="toolPlantBtn"  onclick="setTool('plant')"><img src="images/planttool.png" alt="Plant"><span data-title="Plant">Plant</span></button>
+          <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')"><img src="images/movetool.png" alt="Move"><span data-title="Move">Move</span></button>
+          <button class="toolBtn"  id="toolRemoveBtn" onclick="setTool('remove')"><img src="images/removetool.png" alt="Remove"><span data-title="Remove">Remove</span></button>
         </div>
         <!-- Main Button -->
-        <button class="toolBtn" id="toolsToggleBtn" type="button"> <img id="currentToolIcon" src="images/harvesttool.png" alt="Current Tool"><span>Tool</span></button>
+        <button class="toolBtn" id="toolsToggleBtn" type="button"> <img id="currentToolIcon" src="images/harvesttool.png" alt="Current Tool"><span data-title="Tool">Tool</span></button>
       </div>
       <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
       <div id="farmWrap">
@@ -89,41 +95,67 @@
     </div>
   </div>
 
+ 
+
   <!-- TOWN SCREEN -->
   <div id="townScreen" class="screen">
-    <div class="townTitle">Town</div>
-    <button class="townBtn2" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span id="townBtnIcon">🏘️</span> </button>
+
+      <div class="header">
+        <div class="profileArea">
+          <div class="dpandlevelcon">
+            <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
+            <img src="images/profile.png" alt="profile"/>
+          </div>
+          <div id="LevelTxtCon"><h3 id="LevelTxt" data-title="1">1</h3></div>
+          </div>
+          <div class="nameStack">
+            <div id="playerNameDisplay">Player</div>
+            <div id="playerTitleDisplay">Rookie Farmer</div>
+              <div id="xpBarContainer">
+              <div id="xpBar"></div>
+              <div id="xpLevelText" data-title="Lvl 1">0/90</div>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="coinCon">
+          <div class="coinbox" id="coinBox">
+            <img src="images/coin.png" alt="coin" onerror="this.style.display='none'"/>
+            <span id="coins">0</span>
+          </div>
+
+          <div class="coinbox" id="petBox" title="Captured pets">
+            <span style="font-size:18px;">🐾</span>
+            <span id="petCount">0</span>
+          </div>
+        </div>
+    </div>
+
     <div class="townGrid">
-      <div class="building" id="buildingShop" onclick="openSupermarket()">
-        <div class="icon">🛒</div>
-        <div class="name">Supermarket</div>
-        <div class="tag">Boosts + Limited Seeds</div>
-      </div>
-
-      <div class="building" id="buildingQuest" onclick="openQuestBoard()">
-        <div class="icon">📜</div>
-        <div class="name">Quest Board</div>
-        <div class="tag">Daily quests + streak</div>
-      </div>
-
-      <div class="building" id="buildingZoo" onclick="openZoo()" >
-        <div class="icon">🐾</div>
-        <div class="name">Zoo</div>
-        <div class="tag">Your captured pets</div>
-      </div>
-
+      <button class="towntoRanchBtn" id="townToggleBtn2" onclick="openZoo()" title="Town / Farm"> <span data-title="Ranch">Ranch</span></button>
       <div class="building" id="buildingArena" onclick="openArena()">
-        <div class="icon">⚔️</div>
-        <div class="name">Arena</div>
+        <div class="name" data-title="Arena">Arena</div>
         <div class="tag">Battle (PvP)</div>
       </div>
 
+      <div class="building" id="buildingMarket" onclick="openSupermarket()">
+        <div class="name" data-title="Supermarket">Supermarket</div>
+        <div class="tag">Boosts + Limited Seeds</div>
+      </div>
 
       <div class="building" id="buildingLibrary" onclick="openLibrary()">
-        <div class="icon">📚</div>
-        <div class="name">Library</div>
+        <div class="name" data-title="Library">Library</div>
         <div class="tag">Library exam (daily)</div>
       </div>
+      
+      <div class="building" id="buildingQuestBoard" onclick="openQuestBoard()">
+        <div class="name" data-title="Quest Board">Quest Board</div>
+        <div class="tag">Daily quests + streak</div>
+      </div>
+
+      <button class="towntoFarmBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span data-title="Farm">Farm</span></button>
+
     </div>
     <div class="townHint">Wild pets enter from the side. Clean poop for rewards!</div>
   </div>
@@ -132,12 +164,19 @@
   <div id="zooScreen" class="screen">
     <!-- <div class="zooTitle">Zoo</div>
     <div class="zooSub">Your captured pets can roam freely here.</div> -->
-
     
     <div id="zooYard" title="Tap a pet to view details">
+
+      <div class="townZooCon2" >
+        <button onclick="toggleTown()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
+        <button onclick="showTown()" class="toTownBtn2"><span data-title="Town">Town</span></button>
+      </div>
+
       <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
+
         <div id="zooRoamLayer"></div>
         <div id="zooEmpty" class="zooEmpty"><span>No pets yet. Capture wild pets on your farm!</span></div>
+
       <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'"/>
     </div>
     
@@ -146,9 +185,9 @@
     <div class="zooHint" data-title="Tip: Open Town 🏘️ to visit the Library and Quest Board.">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
 
     <div class="zooNav">
-      <button onclick="openArena()"><span data-title="Arena">Arena</span></button>
-      <button onclick="showTown()"><span data-title="Town">Town</span></button>
-      <button onclick="showFarm()"><span data-title="Farm">Farm</span></button>
+      <button class="bottomBtn" id="btnCrops" onclick="openArena()">
+        <img src="images/crops.png" alt="crops" onerror="this.style.display='none'"><span data-title="Arena">Arena</span>
+      </button>
     </div>
     
   </div>
@@ -157,16 +196,19 @@
   <!-- Bottom nav -->
   <div class="bottomNav">
     <div id="bottomBar">
-      <button class="bottomBtn" id="btnCrops" onclick="openCrops()"><img src="images/crops.png" alt="crops" onerror="this.style.display='none'"> Crops</button>
+      <button class="bottomBtn" id="btnCrops" onclick="openCrops()">
+        <img src="images/crops.png" alt="crops" onerror="this.style.display='none'"><span data-title="Crops">Crops</span>
+      </button>
       <button class="bottomBtn" onclick="openHarvestShop()">
-        <img src="images/shop.png" alt="market"> Market
+        <img src="images/shop.png" alt="market"> <span data-title="Market">Market</span>
       </button>
       <button class="bottomBtn" onclick="openInventory()">
-        <img src="images/inventory.png" alt="bag"> Inventory
+        <img src="images/inventory.png" alt="bag"> <span data-title="Inventory">Inventory</span>
       </button>
-      <button class="bottomBtn" id="btnZoo" onclick="openZoo()"><img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> Zoo</button>
+      <button class="bottomBtn" id="btnZoo" onclick="openZoo()">
+        <img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> <span data-title="Ranch">Ranch</span>
+      </button>
     </div>
-  
   </div>
 </div>
 
