@@ -327,7 +327,7 @@ const BATTLE_ANIMALS = {
   "pig": { 
       "name": "Pig", 
       "emoji": "🐷", 
-      "imagepath": "images/pig.png",
+      "imagepath": '<img src="images/pig.png" alt="pig">',
       "rarity": "Starter", 
       "base": { 
         "atk": 5, 
@@ -353,7 +353,7 @@ const BATTLE_ANIMALS = {
   "rabbit": {
     "name": "Rabbit",
     "emoji": "🐰",
-    "imagepath": "images/rabbit.png",
+    "imagepath": '<img src="images/rabbit.png" alt="rabbit">',
     "rarity": "Common",
     "base": {
       "atk": 5,
@@ -380,7 +380,7 @@ const BATTLE_ANIMALS = {
   "dog": {
     "name": "Dog",
     "emoji": "🐶",
-    "imagepath": "images/dog.png",
+    "imagepath": '<img src="images/dog.png" alt="dog">',
     "rarity": "Common",
     "base": {
       "atk": 6,
@@ -407,7 +407,7 @@ const BATTLE_ANIMALS = {
   "deer": {
     "name": "Deer",
     "emoji": "🦌",
-    "imagepath": "images/deer.png",
+    "imagepath": '<img src="images/deer.png" alt="deer">',
     "rarity": "Uncommon",
     "base": {
       "atk": 4,
@@ -434,7 +434,7 @@ const BATTLE_ANIMALS = {
   "cat": {
     "name": "Cat",
     "emoji": "🐱",
-    "imagepath": "images/cat.png",
+    "imagepath": '<img src="images/cat.png" alt="cat">',
     "rarity": "Uncommon",
     "base": {
       "atk": 7,
@@ -461,7 +461,7 @@ const BATTLE_ANIMALS = {
   "lion": {
     "name": "Lion",
     "emoji": "🦁",
-    "imagepath": "images/lion.png",
+    "imagepath": '<img src="images/lion.png" alt="lion">',
     "rarity": "Epic",
     "base": {
       "atk": 9,
@@ -488,7 +488,7 @@ const BATTLE_ANIMALS = {
   "panda": {
     "name": "Panda",
     "emoji": "🐼",
-    "imagepath": "images/panda.png",
+    "imagepath": '<img src="images/panda.png" alt="panda">',
     "rarity": "Rare",
     "base": {
       "atk": 5,
@@ -515,7 +515,7 @@ const BATTLE_ANIMALS = {
   "fox": {
     "name": "Fox",
     "emoji": "🦊",
-    "imagepath": "images/fox.png",
+    "imagepath": '<img src="images/fox.png" alt="fox">',
     "rarity": "Rare",
     "base": {
       "atk": 6,
@@ -542,7 +542,7 @@ const BATTLE_ANIMALS = {
   "alligator": {
     "name": "Alligator",
     "emoji": "🐊",
-    "imagepath": "images/alligator.png",
+    "imagepath": '<img src="images/alligator.png" alt="alligator">',
     "rarity": "Epic",
     "base": {
       "atk": 8,
@@ -1767,9 +1767,9 @@ function setTool(tool){
   }
 
   // Optional: close panel after selecting
-  if (toolsPanel) {
-    toolsPanel.classList.remove("toolsOpen");
-  }
+  // if (toolsPanel) {
+  //   toolsPanel.classList.remove("toolsOpen");
+  // }
 
   if (toolsArrow) {
     toolsArrow.classList.remove("toolsOpenArrow");
