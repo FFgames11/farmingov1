@@ -741,7 +741,25 @@ let nextPetSpawnAt = 0;
 let nextBossSpawnAt = 0;
 
 function saveState(){
+  
+
   try{
+    const gameState = {
+      coins, xp, level,
+      playerName, playerTitle,
+      playerCountry, inventory, showcase, // ADD THESE 3
+      playerCountry, // ADDED
+      selectedSeed, seeds,
+      inventory,     // ADDED
+      unlockedTiles, tileStates,
+      zooPets, roamingPetUids: [],
+      boosts,
+      nextPetSpawnAt,
+      nextBossSpawnAt,
+      streak,
+      lastLoginISO: new Date().toISOString()
+    };
+
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
       playerName, playerTitle,
@@ -757,6 +775,11 @@ function saveState(){
     }));
   }catch(e){}
 }
+
+
+
+
+
 
 function loadState(){
   try{
