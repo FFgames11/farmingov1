@@ -1,6 +1,3 @@
-
-
-
 window.addEventListener("DOMContentLoaded", () => {
   
 });
