@@ -83,6 +83,58 @@ async function loadFromCloud() {
 <div id="menu">
   <div class="menuCard">
     <img src="images/title.png" alt="title" class="menuTitle">
+
+    <div id="authModal" style="
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55); z-index: 9999; font-family: system-ui, Arial;
+    ">
+      <div style="
+        width: 360px; max-width: 92vw; background: #fff; border-radius: 14px;
+        padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      ">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <div style="font-size: 16px; font-weight: 700;">Cloud Save</div>
+          <button id="authClose" style="border:none; background:transparent; font-size:18px; cursor:pointer;">×</button>
+        </div>
+
+        <div style="margin-top: 10px; font-size: 13px; opacity: .85;">
+          Log in to sync your progress across devices.
+        </div>
+
+        <div style="margin-top: 12px; display:flex; flex-direction:column; gap:10px;">
+          <input id="authEmail" type="email" placeholder="Email"
+            style="padding:10px 12px; border:1px solid #ddd; border-radius:10px; outline:none;">
+          <input id="authPassword" type="password" placeholder="Password"
+            style="padding:10px 12px; border:1px solid #ddd; border-radius:10px; outline:none;">
+        </div>
+
+        <div style="margin-top: 12px; display:flex; gap:10px;">
+          <button id="btnLogin" style="
+            flex:1; padding:10px 12px; border:none; border-radius:10px; cursor:pointer;
+            background:#111; color:#fff; font-weight:600;
+          ">Log in</button>
+
+          <button id="btnSignup" style="
+            flex:1; padding:10px 12px; border:1px solid #111; border-radius:10px; cursor:pointer;
+            background:#fff; color:#111; font-weight:600;
+          ">Sign up</button>
+        </div>
+
+        <div style="margin-top: 10px; display:flex; justify-content:space-between; align-items:center;">
+          <button id="btnLogout" style="
+            padding:8px 10px; border:1px solid #ddd; border-radius:10px; cursor:pointer; background:#fff;
+          ">Log out</button>
+          <div id="authStatus" style="font-size: 12px; opacity:.85; text-align:right;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional: a button you can place anywhere to open login -->
+    <button id="openAuth" style="
+      position: fixed; right: 14px; bottom: 14px; z-index: 9998;
+      padding:10px 12px; border-radius: 12px; border: none; cursor: pointer;
+    ">Cloud</button>
+
     <button onclick="startGame()"><span>Play</span></button>
     <div class="buttonGroup2">
       <button onclick="openInfo()" class="button2"><span>What's New</span></button>
