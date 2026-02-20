@@ -1,6 +1,4 @@
 
-window.addEventListener("DOMContentLoaded", () => {
-  
   const SUPABASE_URL = "https://eqwdjutsmellvbqjvhzx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxd2RqdXRzbWVsbHZicWp2aHp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1NjYzMTcsImV4cCI6MjA4NzE0MjMxN30.0U10MPyhKwchFuTdLEBOvSjx4yD6MhUKU9_lKuMnFb0";
 
@@ -65,6 +63,8 @@ async function loadFromCloud() {
   return data?.save ?? null;
 }
 
+window.addEventListener("DOMContentLoaded", () => {
+  
 });
 
 // --- Supabase init ---
