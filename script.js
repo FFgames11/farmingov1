@@ -2462,7 +2462,7 @@ function openPetDetails(uid){
   openModal("Pet", `
     <div class="itemCard">
       <div class="itemLeft">
-        <div class="itemIcon">${escapeHtml(pet.emoji)}</div>
+        <div class="itemIcon">${pet.imagepath}</div>
         <div class="itemMeta">
           <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span style="opacity:.65;">Lv${lvl}</span>` : ""}</div>
           <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
@@ -2475,7 +2475,7 @@ function openPetDetails(uid){
       ${combineNote}
       <div class="rowBtns">
         ${combineBtn}
-        <button onclick="closeModal()">Close</button>
+        <button onclick="closeModal()"><span><small data-title="Close">Close</small></span></button>
       </div>
     </div>
   `);
@@ -2641,7 +2641,7 @@ function openArenaPetSelect(side){
           </div>
         </div>
         <div class="rowBtns">
-          <button onclick="selectArenaPet('${side}','${p.uid}')">Select</button>
+          <button onclick="selectArenaPet('${side}','${p.uid}')"><span><small data-title="Select">Select</small></span></button>
         </div>
       </div>
     `;
@@ -2650,15 +2650,17 @@ function openArenaPetSelect(side){
   const title = (side==="p1") ? "Select your animal" : "Select opponent animal";
 
   openModal(title, `
-    <div class="smallNote" style="text-align:left;">
+    <div class="petSelectionContent">
+      <div class="smallNote" style="text-align:left;">
       Quiz Mode decides whether each action requires answering a question.
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <button style="flex:1;" onclick="toggleArenaQuiz()">${arenaDraft?.quizOn ? "Quiz: ON" : "Quiz: OFF"}</button>
-      <button style="flex:1;" onclick="openArena()">Back</button>
-    </div>
-    <div class="modalGrid" style="margin-top:10px;">
-      ${cards}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button style="flex:1;" onclick="toggleArenaQuiz()">${arenaDraft?.quizOn ? "Quiz: ON" : "Quiz: OFF"}</button>
+        <button style="flex:1;" onclick="openArena()">Back</button>
+      </div>
+      <div class="modalGrid" style="margin-top:10px;">
+        ${cards}
+      </div>
     </div>
   `);
 }
@@ -3946,9 +3948,9 @@ function openCrops(){
         </div>
         <div class="rowBtns">
           <button ${locked || coins<c.seedCost ? "disabled":""} onclick="buySeed('${c.emoji}')">
-            ${locked ? "Locked" : "Buy"}
+            <span><small data-title='${locked ? "Locked" : "Buy"}'>${locked ? "Locked" : "Buy"}</small></span>
           </button>
-          <button ${locked || coins<c.seedCost ? "disabled":""} onclick="selectSeed('${c.emoji}')">Select</button>
+          <button ${locked || coins<c.seedCost ? "disabled":""} onclick="selectSeed('${c.emoji}')"><span><small data-title="Select">Select</small></span></button>
         </div>
       </div>
     `;
@@ -4009,7 +4011,7 @@ function openSupermarket(){
           </div>
         </div>
         <div class="rowBtns">
-          <button ${coins<b.cost?"disabled":""} onclick="buyBoost('${b.key}', ${b.cost})">Buy</button>
+          <button ${coins<b.cost?"disabled":""} onclick="buyBoost('${b.key}', ${b.cost})"><span><small data-title="Buy">Buy</small></span></button>
         </div>
       </div>
     `;
@@ -4031,7 +4033,7 @@ function openSupermarket(){
         </div>
       </div>
       <div class="rowBtns">
-        <button ${coins<150?"disabled":""} onclick="rollLimitedSeed()">Roll</button>
+        <button ${coins<150?"disabled":""} onclick="rollLimitedSeed()"><span><small data-title="Roll">Roll</small></span></button>
       </div>
     </div>
 
@@ -4146,7 +4148,7 @@ function openQuestBoard(){
         </div>
         <div class="rowBtns">
           <button ${(!done || q.claimed) ? "disabled" : ""} onclick="claimQuest('${q.id}')">
-            ${q.claimed ? "Claimed" : (done ? "Claim" : "In progress")}
+            <span><small data-title='${q.claimed ? "Claimed" : (done ? "Claim" : "In progress")}'>${q.claimed ? "Claimed" : (done ? "Claim" : "In progress")}</small></span>
           </button>
         </div>
       </div>
@@ -4202,7 +4204,7 @@ function openLibrary(){
           </div>
         </div>
         <div class="rowBtns">
-          <button ${bDone ? "disabled" : ""} onclick="startLibraryExam('beginner')">${bDone ? "Done" : "Start"}</button>
+          <button ${bDone ? "disabled" : ""} onclick="startLibraryExam('beginner')"><span><small data-title='${bDone ? "Done" : "Start"}'>${bDone ? "Done" : "Start"}</small></span></button>          
         </div>
       </div>
 
@@ -4216,7 +4218,7 @@ function openLibrary(){
           </div>
         </div>
         <div class="rowBtns">
-          <button ${iDone ? "disabled" : ""} onclick="startLibraryExam('intermediate')">${iDone ? "Done" : "Start"}</button>
+          <button ${iDone ? "disabled" : ""} onclick="startLibraryExam('intermediate')"><span><small data-title='${iDone ? "Done" : "Start"}'>${iDone ? "Done" : "Start"}</small></span></button>
         </div>
       </div>
 
@@ -4230,7 +4232,7 @@ function openLibrary(){
           </div>
         </div>
         <div class="rowBtns">
-          <button ${aDone ? "disabled" : ""} onclick="startLibraryExam('advanced')">${aDone ? "Done" : "Start"}</button>
+          <button ${aDone ? "disabled" : ""} onclick="startLibraryExam('advanced')"><span><small data-title='${aDone ? "Done" : "Start"}'>${aDone ? "Done" : "Start"}</small></span></button>
         </div>
       </div>
     </div>
@@ -4469,8 +4471,8 @@ function openHarvestShop() {
         <div class="itemLeft"><div class="itemIcon">${c.isImage?`<img src="${c.grown}" style="width:30px">`:c.emoji}</div>
         <div><b>${c.name}</b> (x${qty})</div></div>
         <div class="rowBtns">
-          <button onclick="sellCrop('${c.emoji}', 1)">Sell 1</button>
-          <button onclick="sellCrop('${c.emoji}', ${qty})">All</button>
+          <button onclick="sellCrop('${c.emoji}', 1)"><span><small data-title="Sell 1">Sell 1</small></span></button>
+          <button onclick="sellCrop('${c.emoji}', ${qty})"><span><small data-title="All">All</small></span></button>
         </div>
       </div>`;
     }
