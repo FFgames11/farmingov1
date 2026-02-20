@@ -1,4 +1,8 @@
 
+window.addEventListener("DOMContentLoaded", () => {
+  // all auth UI + listeners here
+});
+
 // --- Supabase init ---
 const supabase = window.supabase.createClient(
   window.SUPABASE_URL,
