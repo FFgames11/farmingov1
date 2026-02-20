@@ -666,6 +666,7 @@ function combinePet(uidToUpgrade){
     animalId: a.animalId,
     level: nextLv,
     emoji: meta.emoji,
+    imagepath: meta.imagepath,
     name: meta.name,
     rarity: meta.rarity
   };

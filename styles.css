@@ -1728,7 +1728,7 @@ content: '';
 }
 .itemLeft{ display:flex; align-items:center; gap: 10px; }
 .itemIcon{
-  width: 44px;
+  width: 137px;
   height: auto;
   border-radius: 14px;
   background: rgba(255,255,255,0.80);
@@ -1737,6 +1737,10 @@ content: '';
   align-items:center;
   justify-content:center;
   font-size: 24px;
+}
+
+.itemIcon img{
+      width: 90px;
 }
 .itemMeta .itemName{ font-weight: 900; color: #3b2716; }
 .itemMeta .itemSub{ font-size: 12px; opacity: 0.85; }
