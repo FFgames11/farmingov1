@@ -2061,8 +2061,8 @@ function gainXP(amount){
    WILD PET SPAWN INTERVAL (SLOWER)
 ========================================================= */
 function scheduleNextPetSpawn(){
-  let min = 5000;
-  let max = 5000;
+  let min = 10_000;
+  let max = 15_000;
   if(petSpawnsBlocked()){
     min += 40_000;
     max += 80_000;

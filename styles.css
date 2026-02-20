@@ -224,7 +224,7 @@ body{
   font-weight: 900;
   color: #2b1c10;
   display:none;
-  z-index: 9998;
+  z-index: 1000;
 }
 #toast span{ margin-right: 8px; }
 
@@ -235,7 +235,7 @@ body{
   align-items:center;
   gap: 10px;
   padding: 0 15px;
-  z-index: 9999;
+  z-index: 999;
 }
 .profileArea{
     display: block;
@@ -1623,6 +1623,9 @@ content: '';
 
 /*-----End of Genric Modal Styles*/
 
+.bossbattleBanner img{
+  width: 100%;
+}
 
 .bossBattleModalContent {
     height: 47vh;
