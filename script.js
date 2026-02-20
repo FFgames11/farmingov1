@@ -2,74 +2,6 @@ window.addEventListener("DOMContentLoaded", () => {
 const SUPABASE_URL = "https://eqwdjutsmellvbqjvhzx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxd2RqdXRzbWVsbHZicWp2aHp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1NjYzMTcsImV4cCI6MjA4NzE0MjMxN30.0U10MPyhKwchFuTdLEBOvSjx4yD6MhUKU9_lKuMnFb0";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-
-async function signUp(email, password) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) throw error;
-  return data;
-}
-
-async function signIn(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  return data;
-}
-
-async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-}
-
-async function saveToCloud(gameStateObj) {
-  const { data: authData } = await supabase.auth.getUser();
-  const user = authData?.user;
-  if (!user) throw new Error("Not logged in");
-
-  const payload = {
-    user_id: user.id,
-    save: gameStateObj
-  };
-
-  const { error } = await supabase
-    .from("game_saves")
-    .upsert(payload, { onConflict: "user_id" });
-
-  if (error) throw error;
-}
-
-
-async function loadFromCloud() {
-  const { data: authData } = await supabase.auth.getUser();
-  const user = authData?.user;
-  if (!user) throw new Error("Not logged in");
-
-  const { data, error } = await supabase
-    .from("game_saves")
-    .select("save")
-    .eq("user_id", user.id)
-    .single();
-
-  if (error) {
-    // If no row yet, return null instead of crashing
-    if (error.code === "PGRST116") return null;
-    throw error;
-  }
-
-  return data?.save ?? null;
-}
-
-
-const gameState = {
-  coins,
-  inventory,
-  farmTiles,
-  streak,
-  lastLoginISO: new Date().toISOString()
-};
-
-
 
 // --- Supabase init ---
 const supabase = window.supabase.createClient(
@@ -232,7 +164,6 @@ setInterval(() => {
 }, 30000);
 
 
-});
 
 
 /* =========================================================
