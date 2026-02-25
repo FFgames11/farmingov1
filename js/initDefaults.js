@@ -182,7 +182,11 @@ function editName(){
 function saveName(){
   const val = $("newNameInput").value.trim();
   if(val) playerName = val;
-  saveState(); updateUI(); openProfile();
+  saveState();
+  updateUI();
+  openProfile();
+  // Push name change to cloud immediately (updates players table + game_saves)
+  if (typeof window.saveToCloud === "function") window.saveToCloud();
 }
 function editCountry(){
   openModal("Edit Country", `
@@ -196,5 +200,9 @@ function editCountry(){
 function saveCountry(){
   const val = $("newCountryInput").value.trim();
   if(val) playerCountry = val;
-  saveState(); updateUI(); openProfile();
+  saveState();
+  updateUI();
+  openProfile();
+  // Push country change to cloud immediately
+  if (typeof window.saveToCloud === "function") window.saveToCloud();
 }
