@@ -267,20 +267,11 @@ function onWildPetClicked(){
       return;
     }
 
-    const base = activeWildPet.type.capture;
-    const bonus = captureBonusByBoost();
-    const finalChance = Math.min(0.99, base + bonus);
-    const roll = Math.random();
-
-    if(roll <= finalChance){
-      fb.className = "quizFeedback good";
-      fb.innerHTML = `Correct! Capture success! 🐾`;
-      capturePet(activeWildPet.type);
-      questProgress("capture", 1);
-    }else{
-      fb.className = "quizFeedback bad";
-      fb.innerHTML = `Correct, but it escaped!`;
-    }
+    // Capture is guaranteed on a correct answer (100% chance)
+    fb.className = "quizFeedback good";
+    fb.innerHTML = `Correct! Capture success! 🐾`;
+    capturePet(activeWildPet.type);
+    questProgress("capture", 1);
 
     setTimeout(()=>{
       despawnWildPet();
@@ -291,4 +282,3 @@ function onWildPetClicked(){
     }, 850);
   });
 }
-

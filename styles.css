@@ -1956,38 +1956,36 @@ hr.sep{
   position: fixed;
   inset: 0;
   display:none;
-  z-index: 9997; /* under modal(9999), above game */
+  z-index: 10000; /* above everything including modal */
   pointer-events:auto;
 }
 #tutorialOverlay .tutorialBlocker{
   position:fixed;
   inset:0;
-  /* Solid dark backdrop — always visible when tutorial is active */
-  background: rgba(0,0,0,0.55);
+  /* Starts transparent — JS sets rgba(0,0,0,0.55) for noHighlight steps */
+  background: transparent;
   pointer-events: none;
+  z-index: 0;
 }
 #tutorialHighlight{
   position:fixed;
-  /* Default offscreen — JS moves it onto the target element */
   left: -9999px;
   top: -9999px;
   width: 0;
   height: 0;
   border-radius: 16px;
-  /* Punches a transparent hole through the .tutorialBlocker overlay */
+  /* box-shadow creates the dark overlay; the element itself is the transparent cutout.
+     Must sit above the blocker so the shadow renders correctly. */
   box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
   border: 2px solid rgba(255,255,255,0.85);
   outline: 2px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.02);
-  pointer-events:none;
-  /* Smooth movement between targets */
-  transition: left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease;
+  background: transparent;
+  pointer-events: none;
+  z-index: 1;
+  transition: left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease;
 }
 #tutorialArrowSvg{
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
+  display: none;
   pointer-events:none;
 }
 #tutorialBubble{
@@ -2003,6 +2001,7 @@ hr.sep{
   align-items:flex-start;
   user-select:none;
   pointer-events:none; /* click anywhere to advance; bubble does not eat events */
+  z-index: 2; /* above highlight(1) and blocker(0) */
 }
 #tutorialMascot{
   font-size: 44px;

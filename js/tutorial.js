@@ -20,19 +20,14 @@ function shouldShowTutorial(){
 
 function tutorialTargetRect(target){
   if(!target) return null;
-
-  // Custom rect object
   if(typeof target === "object" && target.left!=null && target.top!=null && target.width!=null && target.height!=null){
     return target;
   }
-
-  // Element
   if(target instanceof Element){
     const r = target.getBoundingClientRect();
     if(r.width < 2 || r.height < 2) return null;
     return { left:r.left, top:r.top, width:r.width, height:r.height };
   }
-
   return null;
 }
 
@@ -42,35 +37,47 @@ function viewportRect(){
 
 /*
   positionTutorial
-  If noHighlight is true: hide the spotlight, center the bubble, clear the arrow.
+  ─ noHighlight=true  → blocker shows dark bg; highlight is hidden (no box-shadow);
+                         bubble is centered; no arrow.
+  ─ noHighlight=false → blocker is transparent; highlight's box-shadow creates both
+                         the dark overlay AND the transparent cutout over the target.
 */
 function positionTutorial(rect, placementHint, noHighlight){
   const pad = 10;
   const v = viewportRect();
+  const blocker = tut.overlay ? tut.overlay.querySelector(".tutorialBlocker") : null;
 
   if(noHighlight){
-    // Move highlight offscreen (zero size so the cutout disappears)
-    tut.hi.style.width  = "0px";
-    tut.hi.style.height = "0px";
-    tut.hi.style.left   = "-9999px";
-    tut.hi.style.top    = "-9999px";
+    // Solid dark background from the blocker
+    if(blocker) blocker.style.background = "rgba(0,0,0,0.55)";
 
-    // Clear arrow
+    // Hide the highlight completely — no box-shadow, moved off-screen
+    tut.hi.style.left      = "-9999px";
+    tut.hi.style.top       = "-9999px";
+    tut.hi.style.width     = "0px";
+    tut.hi.style.height    = "0px";
+    tut.hi.style.boxShadow = "none";
+
+    // No arrow
     tut.arrow.innerHTML = "";
 
-    // Center bubble
+    // Center the bubble
     tut.bubble.style.left    = "10px";
     tut.bubble.style.top     = "10px";
     tut.bubble.style.display = "flex";
-    const bRect0 = tut.bubble.getBoundingClientRect();
-    const bw = bRect0.width;
-    const bh = bRect0.height;
-    tut.bubble.style.left = Math.round((v.w - bw) / 2) + "px";
-    tut.bubble.style.top  = Math.round((v.h - bh) / 2) + "px";
+    const b0 = tut.bubble.getBoundingClientRect();
+    tut.bubble.style.left = Math.round((v.w - b0.width)  / 2) + "px";
+    tut.bubble.style.top  = Math.round((v.h - b0.height) / 2) + "px";
     return;
   }
 
-  // --- Normal highlight mode ---
+  // ── Highlight mode ──
+  // Blocker is transparent — the highlight's box-shadow does the darkening
+  if(blocker) blocker.style.background = "transparent";
+
+  // Restore box-shadow in case it was removed in a noHighlight step
+  tut.hi.style.boxShadow = "0 0 0 9999px rgba(0,0,0,0.55)";
+
   const hPad = 8;
   const hl = Math.max(6, rect.left - hPad);
   const ht = Math.max(6, rect.top  - hPad);
@@ -127,10 +134,11 @@ function positionTutorial(rect, placementHint, noHighlight){
   tut.bubble.style.left = bx + "px";
   tut.bubble.style.top  = by + "px";
 
-  drawArrow({ hl, ht, hw, hh, bx, by, bw, bh });
+  // Arrow removed
 }
 
-function drawArrow({hl,ht,hw,hh,bx,by,bw,bh}){
+function drawArrow({hl,ht,hw,hh,bx,by,bw,bh}){ return; // Arrow removed
+
   const v = viewportRect();
   const start = { x: bx + bw/2, y: by + bh/2 };
   const end   = { x: hl + hw/2, y: ht + hh/2 };
@@ -201,7 +209,6 @@ function renderTutorialStep(isReflow=false){
   tut.title.textContent = s.title || "Tutorial";
   tut.text.textContent  = s.text  || "";
 
-  // Give the DOM a frame to settle (especially after screen switches)
   requestAnimationFrame(()=>{
     const noHighlight = !!s.noHighlight;
 
