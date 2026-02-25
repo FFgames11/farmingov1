@@ -88,12 +88,17 @@ window.addEventListener("DOMContentLoaded", () => {
   // saved name with the "Player" default before loadState() has run.
   async function syncPlayerName(userId) {
     const name = window.playerName;
+    // Guard: don't overwrite a real name with the unloaded default
     if (!name || name === "Player") return;
 
+    // Use upsert so the row is CREATED if the DB trigger hasn't fired yet
+    // (e.g. email confirmation pending, or trigger not set up).
     const { error } = await supabase
       .from("players")
-      .update({ player_name: name })
-      .eq("player_id", userId);
+      .upsert(
+        { player_id: userId, user_id: userId, player_name: name },
+        { onConflict: "player_id" }
+      );
 
     if (error) console.error("syncPlayerName error:", error.message);
   }
@@ -153,7 +158,8 @@ window.addEventListener("DOMContentLoaded", () => {
   async function signIn(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    return data;
+    // Return the user directly so the login handler can set _currentUser immediately
+    return { user: data.user, session: data.session };
   }
 
   async function signOut() {
@@ -179,15 +185,24 @@ window.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("authPassword").value;
     try {
       setAuthStatus("Logging in…");
-      await signIn(email, password);
+      const { user } = await signIn(email, password);
+
+      // Set _currentUser immediately from the signIn response.
+      // onAuthStateChange fires asynchronously and may not have updated
+      // _currentUser yet by the time loadFromCloud() runs below.
+      _currentUser = user;
+
       setAuthStatus("Logged in! Loading save…");
 
       const saved = await loadFromCloud();
       if (saved) {
         applyGameState(saved);
+        // After applying the cloud save, sync the restored name to players table
+        await syncPlayerName(user.id);
         setAuthStatus(`Save loaded ✓  (${window.playerName})`);
       } else {
-        // First login — push local progress so it isn't lost
+        // First login — no cloud save yet, push local state up
+        await syncPlayerName(user.id);
         await saveToCloud();
         setAuthStatus("No cloud save yet — local progress uploaded.");
       }
