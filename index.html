@@ -487,20 +487,26 @@
   const bar  = document.getElementById("loadingBarInner");
   const tip  = document.getElementById("loadingTip");
   let progress = 0;
+  let finished = false;
 
   const tipInterval = setInterval(() => {
     tipIdx = (tipIdx + 1) % tips.length;
     if (tip) tip.textContent = tips[tipIdx];
   }, 700);
 
+  // Bar fills steadily to 85% on its own, then waits for finishLoading()
   const barInterval = setInterval(() => {
-    progress = Math.min(progress + (Math.random() * 18 + 6), 90);
+    progress = Math.min(progress + (Math.random() * 12 + 8), 85);
     if (bar) bar.style.width = progress + "%";
-  }, 200);
+    if (progress >= 85) clearInterval(barInterval);
+  }, 150);
 
-  window.finishLoading = function() {
+  function doFinish() {
+    if (finished) return;
+    finished = true;
     clearInterval(tipInterval);
     clearInterval(barInterval);
+    clearTimeout(fallbackTimer);
     if (bar) bar.style.width = "100%";
     setTimeout(() => {
       const ls = document.getElementById("loadingScreen");
@@ -522,7 +528,17 @@
         if (menu) menu.style.display = "flex";
       }
     }, 300);
-  };
+  }
+
+  window.finishLoading = doFinish;
+
+  // Hard fallback: if finishLoading() is never called (e.g. a JS error
+  // in another script stops initDefaults.js from finishing), force-dismiss
+  // the loading screen after 5 seconds so the player isn't stuck.
+  var fallbackTimer = setTimeout(() => {
+    console.warn("finishLoading() not called — forcing loading screen dismiss");
+    doFinish();
+  }, 5000);
 
   // Hide menu and auth until loading finishes
   document.addEventListener("DOMContentLoaded", () => {
