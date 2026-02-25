@@ -19,17 +19,39 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ── UI refs ─────────────────────────────────────────── */
-  const authModal  = document.getElementById("authModal");
   const authStatus = document.getElementById("authStatus");
 
-  function openAuthModal()  { authModal.style.display = "flex"; }
-  function closeAuthModal() { authModal.style.display = "none"; }
+  // Auth screen navigation
+  function openAuthScreen() {
+    document.getElementById("authScreen").style.display = "flex";
+    document.getElementById("menu").style.display = "none";
+  }
+  function closeAuthScreen() {
+    document.getElementById("authScreen").style.display = "none";
+  }
 
-  document.getElementById("openAuth").addEventListener("click", openAuthModal);
-  document.getElementById("authClose").addEventListener("click", closeAuthModal);
-  authModal.addEventListener("click", (e) => { if (e.target === authModal) closeAuthModal(); });
+  // Keep these as no-ops for any legacy code that calls them
+  function openAuthModal()  { openAuthScreen(); }
+  function closeAuthModal() { closeAuthScreen(); }
 
-  function setAuthStatus(msg) { authStatus.textContent = msg || ""; }
+  document.getElementById("openAuth").addEventListener("click", openAuthScreen);
+  document.getElementById("authClose").addEventListener("click", closeAuthScreen);
+
+  function setAuthStatus(msg) {
+    if (authStatus) authStatus.textContent = msg || "";
+  }
+
+  // Tab switcher (login / signup)
+  window.switchAuthTab = function(tab) {
+    const isLogin = tab === "login";
+    document.getElementById("tabLogin").classList.toggle("active", isLogin);
+    document.getElementById("tabSignup").classList.toggle("active", !isLogin);
+    document.getElementById("btnLogin").style.display  = isLogin ? "block" : "none";
+    document.getElementById("btnSignup").style.display = isLogin ? "none"  : "block";
+  };
+
+  // Expose so the cloud btn in-game can open it
+  window.openAuthScreen = openAuthScreen;
 
   /* ── Cached session ──────────────────────────────────── */
   // Cache the current user locally so we never need to call getUser() repeatedly.
@@ -229,7 +251,9 @@ window.addEventListener("DOMContentLoaded", () => {
         setAuthStatus("No cloud save yet — local progress uploaded.");
       }
 
-      closeAuthModal();
+      closeAuthScreen();
+      // Go to main menu after successful login
+      document.getElementById("menu").style.display = "flex";
     } catch (err) {
       setAuthStatus(err.message);
     }
@@ -253,10 +277,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (_currentUser) {
       setAuthStatus(`Signed in: ${_currentUser.email}`);
+      // Update the in-game cloud button tooltip
+      const btn = document.getElementById("cloudSaveBtn");
+      if (btn) btn.title = `Signed in: ${_currentUser.email}`;
       // Wait for loadState() to restore window.playerName before syncing
       setTimeout(() => syncPlayerName(_currentUser.id), 600);
     } else {
       setAuthStatus("Not signed in.");
+      const btn = document.getElementById("cloudSaveBtn");
+      if (btn) btn.title = "Cloud Save (not signed in)";
     }
   });
 

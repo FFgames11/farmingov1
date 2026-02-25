@@ -56,6 +56,9 @@
   initTiles();
   updateUI();
   updateToolUI();
+
+  // Signal the loading screen that the game is ready
+  if (typeof window.finishLoading === "function") window.finishLoading();
 })();
 
 
@@ -185,7 +188,6 @@ function saveName(){
   saveState();
   updateUI();
   openProfile();
-  // Push name change to cloud immediately (updates players table + game_saves)
   if (typeof window.saveToCloud === "function") window.saveToCloud();
 }
 function editCountry(){
@@ -203,6 +205,5 @@ function saveCountry(){
   saveState();
   updateUI();
   openProfile();
-  // Push country change to cloud immediately
   if (typeof window.saveToCloud === "function") window.saveToCloud();
 }

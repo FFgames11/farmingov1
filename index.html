@@ -6,6 +6,7 @@
 <title>Cat Farm (Coins + Battle Pets + Boss)</title>
 
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -73,58 +74,79 @@
 
 <body>
 
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="loadingContent">
+    <div class="loadingLogo">
+      <img src="images/title.png" alt="Cat Farm" class="loadingTitle" onerror="this.style.display='none'">
+    </div>
+    <div class="loadingBarOuter">
+      <div class="loadingBarInner" id="loadingBarInner"></div>
+    </div>
+    <div class="loadingTip" id="loadingTip">Growing crops…</div>
+    <div class="loadingPaws">🐾</div>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="authBg">
+    <div class="authCloud authCloud1"></div>
+    <div class="authCloud authCloud2"></div>
+    <div class="authCloud authCloud3"></div>
+    <div class="authFlower authFlower1">🌸</div>
+    <div class="authFlower authFlower2">🌻</div>
+    <div class="authFlower authFlower3">🍀</div>
+  </div>
+
+  <div class="authCard">
+    <div class="authLogoArea">
+      <img src="images/title.png" alt="Cat Farm" class="authTitleImg" onerror="this.style.display='none'">
+      <p class="authTagline">Farm, Learn &amp; Catch Pets! 🐾</p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="authTabs">
+      <button class="authTab active" id="tabLogin" onclick="switchAuthTab('login')">Log In</button>
+      <button class="authTab" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+
+    <div class="authForm">
+      <div class="authInputGroup">
+        <span class="authInputIcon">✉️</span>
+        <input id="authEmail" type="email" placeholder="Email address" autocomplete="email">
+      </div>
+      <div class="authInputGroup">
+        <span class="authInputIcon">🔒</span>
+        <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password">
+      </div>
+
+      <button class="authSubmitBtn" id="btnLogin" onclick="void(0)">Log In</button>
+      <button class="authSubmitBtn authSubmitSecondary" id="btnSignup" onclick="void(0)" style="display:none;">Create Account</button>
+
+      <div class="authDivider"><span>or</span></div>
+      <button class="authGuestBtn" onclick="startGame()">▶ Play as Guest</button>
+    </div>
+
+    <div id="authStatus" class="authStatus"></div>
+
+    <!-- Hidden logout (used by supabase.js) -->
+    <button id="btnLogout" style="display:none;"></button>
+    <!-- Hidden close (used by supabase.js) -->
+    <button id="authClose" style="display:none;"></button>
+    <!-- Hidden openAuth (used by supabase.js) -->
+    <button id="openAuth" style="display:none;"></button>
+  </div>
+
+  <div class="authFooter">
+    <span>🌾 Your progress syncs across devices when logged in</span>
+  </div>
+</div>
+
 <!-- MAIN MENU -->
 <div id="menu">
   <div class="menuCard">
     <img src="images/title.png" alt="title" class="menuTitle">
-
-    <div id="authModal" style="
-      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.55); z-index: 9999; font-family: system-ui, Arial;
-    ">
-      <div style="
-        width: 360px; max-width: 92vw; background: #fff; border-radius: 14px;
-        padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-      ">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-          <div style="font-size: 16px; font-weight: 700;">Cloud Save</div>
-          <button id="authClose" style="border:none; background:transparent; font-size:18px; cursor:pointer;">×</button>
-        </div>
-
-        <div style="margin-top: 10px; font-size: 13px; opacity: .85;">
-          Log in to sync your progress across devices.
-        </div>
-
-        <div style="margin-top: 12px; display:flex; flex-direction:column; gap:10px;">
-          <input id="authEmail" type="email" placeholder="Email"
-            style="padding:10px 12px; border:1px solid #ddd; border-radius:10px; outline:none;">
-          <input id="authPassword" type="password" placeholder="Password"
-            style="padding:10px 12px; border:1px solid #ddd; border-radius:10px; outline:none;">
-        </div>
-
-        <div style="margin-top: 12px; display:flex; gap:10px;">
-          <button id="btnLogin" style="
-            flex:1; padding:10px 12px; border:none; border-radius:10px; cursor:pointer;
-            background:#111; color:#fff; font-weight:600;
-          ">Log in</button>
-
-          <button id="btnSignup" style="
-            flex:1; padding:10px 12px; border:1px solid #111; border-radius:10px; cursor:pointer;
-            background:#fff; color:#111; font-weight:600;
-          ">Sign up</button>
-        </div>
-
-        <div style="margin-top: 10px; display:flex; justify-content:space-between; align-items:center;">
-          <button id="btnLogout" style="
-            padding:8px 10px; border:1px solid #ddd; border-radius:10px; cursor:pointer; background:#fff;
-          ">Log out</button>
-          <div id="authStatus" style="font-size: 12px; opacity:.85; text-align:right;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Optional: a button you can place anywhere to open login -->
-    <button id="openAuth" style="position: fixed; right: 14px; bottom: 14px; z-index: 9998;padding:10px 12px; border-radius: 12px; border: none; cursor: pointer;">Cloud</button>
 
     <button onclick="startGame()"><span>Play</span></button>
     <div class="buttonGroup2">
@@ -167,6 +189,8 @@
         <span style="font-size:18px;">🐾</span>
         <span id="petCount">0</span>
       </div>
+
+      <button id="cloudSaveBtn" class="cloudSaveBtn" onclick="openAuthScreen()" title="Cloud Save">☁️</button>
     </div>
     
   </div>
@@ -445,5 +469,69 @@
 <!-- 9. Auth — load last (depends on game being ready) -->
 <script src="js/supabase.js"></script>
 
+
+<!-- Auth + Loading screen logic -->
+<script>
+(function(){
+  const tips = [
+    "Watering crops… 🌱",
+    "Feeding wild cats… 🐱",
+    "Sharpening harvest tools… 🔨",
+    "Counting coins… 🪙",
+    "Waking up pets… 🐾",
+    "Preparing the farm… 🌾",
+    "Loading quiz questions… 📚",
+    "Building the town… 🏘️",
+  ];
+  let tipIdx = 0;
+  const bar  = document.getElementById("loadingBarInner");
+  const tip  = document.getElementById("loadingTip");
+  let progress = 0;
+
+  const tipInterval = setInterval(() => {
+    tipIdx = (tipIdx + 1) % tips.length;
+    if (tip) tip.textContent = tips[tipIdx];
+  }, 700);
+
+  const barInterval = setInterval(() => {
+    progress = Math.min(progress + (Math.random() * 18 + 6), 90);
+    if (bar) bar.style.width = progress + "%";
+  }, 200);
+
+  window.finishLoading = function() {
+    clearInterval(tipInterval);
+    clearInterval(barInterval);
+    if (bar) bar.style.width = "100%";
+    setTimeout(() => {
+      const ls = document.getElementById("loadingScreen");
+      if (ls) {
+        ls.classList.add("fade-out");
+        setTimeout(() => { ls.style.display = "none"; }, 500);
+      }
+      // Show auth screen on first visit, or menu if returning player
+      const hasSave = !!localStorage.getItem("catfarm_state_v5");
+      if (!hasSave) {
+        const as = document.getElementById("authScreen");
+        if (as) as.style.display = "flex";
+        const menu = document.getElementById("menu");
+        if (menu) menu.style.display = "none";
+      } else {
+        const as = document.getElementById("authScreen");
+        if (as) as.style.display = "none";
+        const menu = document.getElementById("menu");
+        if (menu) menu.style.display = "flex";
+      }
+    }, 300);
+  };
+
+  // Hide menu and auth until loading finishes
+  document.addEventListener("DOMContentLoaded", () => {
+    const menu = document.getElementById("menu");
+    if (menu) menu.style.display = "none";
+    const auth = document.getElementById("authScreen");
+    if (auth) auth.style.display = "none";
+  });
+})();
+</script>
 </body>
 </html>
