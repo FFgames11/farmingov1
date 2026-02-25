@@ -87,12 +87,12 @@ window.addEventListener("DOMContentLoaded", () => {
   // This only syncs name changes. Guard against overwriting a real
   // saved name with the "Player" default before loadState() has run.
   async function syncPlayerName(userId) {
-    const name = window.playerName;
-    // Guard: don't overwrite a real name with the unloaded default
-    if (!name || name === "Player") return;
+    // Always upsert the players row — even with the default name "Player".
+    // This is critical: game_saves has a FK → players.player_id, so the
+    // players row MUST exist before we can write to game_saves.
+    // We removed the "Player" guard that was skipping this call.
+    const name = window.playerName || "Player";
 
-    // Use upsert so the row is CREATED if the DB trigger hasn't fired yet
-    // (e.g. email confirmation pending, or trigger not set up).
     const { error } = await supabase
       .from("players")
       .upsert(
@@ -108,16 +108,34 @@ window.addEventListener("DOMContentLoaded", () => {
     const user = _currentUser;
     if (!user) return; // not logged in — silently skip
 
+    // Step 1: Ensure the players row exists FIRST.
+    // game_saves has a FK → players.player_id, so this must exist before
+    // we can insert into game_saves. syncPlayerName uses upsert so it
+    // creates the row if missing, updates it if it already exists.
     await syncPlayerName(user.id);
 
-    const { error } = await supabase
-      .from("game_saves")
-      .upsert(
-        { player_id: user.id, save: getGameState() },
-        { onConflict: "player_id" }
-      );
+    const state = getGameState();
 
-    if (error) console.error("saveToCloud error:", error.message);
+    // Step 2: Try UPDATE (row already exists in game_saves)
+    const { data: updated, error: updateError } = await supabase
+      .from("game_saves")
+      .update({ save: state, updated_at: new Date().toISOString() })
+      .eq("player_id", user.id)
+      .select("save_id");
+
+    if (updateError) {
+      console.error("saveToCloud update error:", updateError.message);
+      return;
+    }
+
+    // Step 3: No row matched → INSERT (first save for this player)
+    if (!updated || updated.length === 0) {
+      const { error: insertError } = await supabase
+        .from("game_saves")
+        .insert({ player_id: user.id, save: state });
+
+      if (insertError) console.error("saveToCloud insert error:", insertError.message);
+    }
   }
 
   /* ── Cloud load ──────────────────────────────────────── */
