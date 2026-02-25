@@ -2,16 +2,72 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Cat Farm (Coins + Battle Pets + Boss)</title>
-
-
 
 <link rel="stylesheet" href="styles.css">
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- Mobile scaling: keeps the 552×911 canvas pixel-perfect on any phone -->
+<script>
+(function(){
+  var DESIGN_W = 552;
+  var DESIGN_H = 911;
+
+  function applyScale(){
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var isLandscape = vw > vh;
+    var scale, originX, originY;
+
+    if(isLandscape && vw < 1024){
+      // Landscape mobile: fit height
+      scale = Math.min(vh / DESIGN_H, vw / DESIGN_W);
+      originX = 0; originY = 0;
+    } else if(vw < DESIGN_W){
+      // Portrait mobile: fit width
+      scale = vw / DESIGN_W;
+      originX = 0; originY = 0;
+    } else {
+      // Desktop / tablet: no scaling needed
+      scale = 1;
+      originX = null; originY = null;
+    }
+
+    ['menu','game'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      if(scale !== 1){
+        el.style.transform = 'scale(' + scale + ')';
+        el.style.transformOrigin = (originX !== null ? originX+'px '+originY+'px' : 'top center');
+      } else {
+        el.style.transform = '';
+        el.style.transformOrigin = '';
+      }
+    });
+
+    // Shrink body to match scaled canvas so page doesn't scroll
+    if(scale !== 1){
+      document.body.style.height = Math.ceil(DESIGN_H * scale) + 'px';
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.height = '';
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Run on load and whenever the viewport changes
+  window.addEventListener('resize', applyScale);
+  window.addEventListener('orientationchange', function(){
+    setTimeout(applyScale, 120); // slight delay for orientation to settle
+  });
+
+  // Run immediately (DOM is partially parsed at this point) and after load
+  applyScale();
+  window.addEventListener('DOMContentLoaded', applyScale);
+})();
+</script>
 
 </head>
 
@@ -73,7 +129,7 @@
     <button onclick="startGame()"><span>Play</span></button>
     <div class="buttonGroup2">
       <button onclick="openInfo()" class="button2"><span>What's New</span></button>
-      <button onclick="openInfo()" class="button2"><span>Leaderboard</span></button>
+      <button onclick="openLeaderboard()" class="button2"><span>Leaderboard</span></button>
     </div>
   </div>
 </div>
@@ -115,8 +171,6 @@
     
   </div>
 
-
-
   <!-- FARM SCREEN -->
   <div id="farmScreen" class="screen">
      
@@ -153,38 +207,8 @@
 
   <!-- TOWN SCREEN -->
   <div id="townScreen" class="screen">
-
-      <div class="header">
-        <div class="profileArea">
-          <div class="dpandlevelcon">
-            <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
-            <img src="images/profile.png" alt="profile"/>
-          </div>
-          <div id="LevelTxtCon"><h3 id="LevelTxt" data-title="1">1</h3></div>
-          </div>
-          <div class="nameStack">
-            <div id="playerNameDisplay">Player</div>
-            <div id="playerTitleDisplay">Rookie Farmer</div>
-              <div id="xpBarContainer">
-              <div id="xpBar"></div>
-              <div id="xpLevelText" data-title="Lvl 1">0/90</div>
-            </div>
-            
-          </div>
-        </div>
-
-        <div class="coinCon">
-          <div class="coinbox" id="coinBox">
-            <img src="images/coin.png" alt="coin" onerror="this.style.display='none'"/>
-            <span id="coins">0</span>
-          </div>
-
-          <div class="coinbox" id="petBox" title="Captured pets">
-            <span style="font-size:18px;">🐾</span>
-            <span id="petCount">0</span>
-          </div>
-        </div>
-    </div>
+    <!-- Spacer to push townGrid below the shared header -->
+    <div class="townHeaderSpacer"></div>
 
     <div class="townGrid">
       <button class="towntoRanchBtn" id="townToggleBtn2" onclick="openZoo()" title="Town / Farm"> <span id="townBtnIcon" data-title="Ranch">Ranch</span></button>
@@ -246,6 +270,88 @@
     
   </div>
 
+  <!-- ARENA BATTLE SCREEN -->
+  <div id="arenaScreen" class="screen">
+
+    <!-- TOP HALF: battle field -->
+    <div id="arenaBattleField">
+
+      <!-- Player side (bottom-left) -->
+      <div id="arenaPlayerSide" class="arenaSide arenaPlayerSide">
+        <div class="arenaAnimalName" id="arenaP1Name"></div>
+        <div class="arenaHpBar">
+          <div class="arenaHpFill" id="arenaP1HpFill"></div>
+        </div>
+        <div class="arenaHpLabel" id="arenaP1HpLabel"></div>
+        <div class="arenaAnimalSprite" id="arenaP1Sprite"></div>
+        <div class="arenaStatusRow" id="arenaP1Status"></div>
+        <!-- Platform: swap src to use your own asset -->
+        <div class="arenaPlatform" id="arenaP1Platform"></div>
+      </div>
+
+      <!-- Enemy side (top-right) -->
+      <div id="arenaEnemySide" class="arenaSide arenaEnemySide">
+        <div class="arenaAnimalName" id="arenaP2Name"></div>
+        <div class="arenaHpBar">
+          <div class="arenaHpFill" id="arenaP2HpFill"></div>
+        </div>
+        <div class="arenaHpLabel" id="arenaP2HpLabel"></div>
+        <div class="arenaAnimalSprite" id="arenaP2Sprite"></div>
+        <div class="arenaStatusRow" id="arenaP2Status"></div>
+        <!-- Platform: swap src to use your own asset -->
+        <div class="arenaPlatform" id="arenaP2Platform"></div>
+      </div>
+
+      <!-- Battle log ribbon -->
+      <div id="arenaBattleLog"></div>
+
+    </div>
+
+    <!-- BOTTOM HALF: action panel -->
+    <div id="arenaActionPanel">
+
+      <!-- Default skill buttons -->
+      <div id="arenaSkillButtons">
+        <div class="arenaRoundLabel" id="arenaRoundLabel">Round 1</div>
+        <div class="arenaSkillRow">
+          <button class="arenaSkillBtn arenaSkillNormal" id="btnArenaAttack" onclick="arenaScreenUseSkill('attack')">
+            <span class="arenaBtnTitle">Normal</span>
+            <span class="arenaBtnSub" id="arenaAttackSkillName"></span>
+          </button>
+          <button class="arenaSkillBtn arenaSkillHeavy" id="btnArenaHeavy" onclick="arenaScreenUseSkill('heavy')">
+            <span class="arenaBtnTitle">Heavy</span>
+            <span class="arenaBtnSub" id="arenaHeavySkillName"></span>
+          </button>
+
+        </div>
+        <button class="arenaExitBtn" onclick="exitArenaScreen()">✕ Forfeit</button>
+      </div>
+
+      <!-- Word-connect challenge (shown when skill is pressed) -->
+      <div id="arenaWordChallenge" style="display:none;">
+        <div class="arenaWordPrompt">Connect the letters to spell:</div>
+        <div class="arenaWordTarget" id="arenaWordTarget"></div>
+        <div class="arenaWordCanvas">
+          <canvas id="arenaWordBgCanvas"></canvas>
+          <canvas id="arenaWordCanvas"></canvas>
+        </div>
+        <div class="arenaWordProgress" id="arenaWordProgress"></div>
+        <button class="arenaWordResetBtn" onclick="arenaWordReset()">↺ Reset</button>
+      </div>
+
+    </div>
+
+    <!-- Loading overlay (shown while "loading") -->
+    <div id="arenaLoadingOverlay">
+      <div class="arenaLoadingBox">
+        <div class="arenaLoadingIcon">⚔️</div>
+        <div class="arenaLoadingTitle">Preparing Battle…</div>
+        <div class="arenaLoadingBarWrap"><div class="arenaLoadingBarFill" id="arenaLoadingBarFill"></div></div>
+        <div class="arenaLoadingHint" id="arenaLoadingHint">Loading assets…</div>
+      </div>
+    </div>
+
+  </div>
 
   <!-- Bottom nav -->
   <div class="bottomNav">
@@ -292,7 +398,52 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<!-- 1. Utilities & Config (no dependencies) -->
+<script src="js/utils.js"></script>
+<script src="js/gameBalance.js"></script>
+<script src="js/quizBank.js"></script>
+
+<!-- 2. Data / State -->
+<script src="js/arenaData.js"></script>
+<script src="js/petsData.js"></script>
+<script src="js/boosts.js"></script>
+
+<!-- 3. Core Systems -->
+<script src="js/saveLoad.js"></script>
+<script src="js/xpLevel.js"></script>
+<script src="js/questionRenderer.js"></script>
+
+<!-- 4. UI & Navigation -->
+<script src="js/ui.js"></script>
+<script src="js/tutorial.js"></script>
+<script src="js/uiUpdate.js"></script>
+
+<!-- 5. Game Screens -->
+<script src="js/farmGrid.js"></script>
+<script src="js/plantingHarvesting.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/zoo.js"></script>
+<script src="js/arena.js"></script>
+<script src="js/arenaScreen.js"></script>
+<script src="js/bossFight.js"></script>
+
+<!-- 6. Wild Pets -->
+<script src="js/wildPetSpawn.js"></script>
+<script src="js/wildPetEntity.js"></script>
+
+<!-- 7. Quests, Shop, Library -->
+<script src="js/dailyQuests.js"></script>
+<script src="js/shopInventory.js"></script>
+<script src="js/libraryExam.js"></script>
+
+<!-- 8. World / Init -->
+<script src="js/tileUnlock.js"></script>
+<script src="js/gameLoop.js"></script>
+<script src="js/startGame.js"></script>
+<script src="js/initDefaults.js"></script>
+
+<!-- 9. Auth — load last (depends on game being ready) -->
+<script src="js/supabase.js"></script>
 
 </body>
 </html>
