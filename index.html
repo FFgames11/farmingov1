@@ -190,7 +190,8 @@
         <span id="petCount">0</span>
       </div>
 
-      <button id="cloudSaveBtn" class="cloudSaveBtn" onclick="openAuthScreen()" title="Cloud Save">☁️</button>
+      <button id="logoutBtn" class="logoutBtn" onclick="handleLogout()" title="Log out" style="display:none;">🚪</button>
+      <button id="cloudSaveBtn" class="cloudSaveBtn" onclick="openAuthScreen()" title="Sign in to Cloud Save">☁️</button>
     </div>
     
   </div>
@@ -514,12 +515,21 @@
         ls.classList.add("fade-out");
         setTimeout(() => { ls.style.display = "none"; }, 500);
       }
-      // Always show auth screen after loading.
-      // Players can log in or tap "Play as Guest" to skip to the menu.
-      const as = document.getElementById("authScreen");
-      if (as) as.style.display = "flex";
-      const menu = document.getElementById("menu");
-      if (menu) menu.style.display = "none";
+      // If a session token exists in localStorage, skip the auth screen
+      // and go straight to the menu. The supabase client will restore
+      // the session automatically when it initialises.
+      const hasSession = Object.keys(localStorage).some(k => k.includes("supabase") && k.includes("auth"));
+      if (hasSession) {
+        const as = document.getElementById("authScreen");
+        if (as) as.style.display = "none";
+        const menu = document.getElementById("menu");
+        if (menu) menu.style.display = "flex";
+      } else {
+        const as = document.getElementById("authScreen");
+        if (as) as.style.display = "flex";
+        const menu = document.getElementById("menu");
+        if (menu) menu.style.display = "none";
+      }
     }, 300);
   }
 

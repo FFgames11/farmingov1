@@ -367,3 +367,24 @@
 .cloudSaveBtn:hover {
   background: rgba(255,255,255,0.6);
 }
+
+/* =========================================================
+   LOGOUT BUTTON (in-game header, beside pet count)
+========================================================= */
+.logoutBtn {
+  display: none; /* shown via JS when logged in */
+  align-items: center;
+  justify-content: center;
+  background: rgba(220, 80, 60, 0.18);
+  border: 1.5px solid rgba(220, 80, 60, 0.35);
+  border-radius: 10px;
+  font-size: 15px;
+  padding: 4px 7px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.2s, border-color 0.2s;
+}
+.logoutBtn:hover {
+  background: rgba(220, 80, 60, 0.35);
+  border-color: rgba(220, 80, 60, 0.6);
+}

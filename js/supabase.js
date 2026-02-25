@@ -23,11 +23,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Auth screen navigation
   function openAuthScreen() {
-    document.getElementById("authScreen").style.display = "flex";
-    document.getElementById("menu").style.display = "none";
+    const as = document.getElementById("authScreen");
+    if (as) as.style.display = "flex";
+    const menu = document.getElementById("menu");
+    if (menu) menu.style.display = "none";
   }
   function closeAuthScreen() {
-    document.getElementById("authScreen").style.display = "none";
+    const as = document.getElementById("authScreen");
+    if (as) as.style.display = "none";
   }
 
   // Keep these as no-ops for any legacy code that calls them
@@ -41,6 +44,14 @@ window.addEventListener("DOMContentLoaded", () => {
     if (authStatus) authStatus.textContent = msg || "";
   }
 
+  // Show/hide the logout + cloud buttons based on session state
+  function updateHeaderButtons(loggedIn) {
+    const logoutBtn   = document.getElementById("logoutBtn");
+    const cloudSaveBtn = document.getElementById("cloudSaveBtn");
+    if (logoutBtn)    logoutBtn.style.display    = loggedIn ? "flex"   : "none";
+    if (cloudSaveBtn) cloudSaveBtn.style.display = loggedIn ? "none"   : "flex";
+  }
+
   // Tab switcher (login / signup)
   window.switchAuthTab = function(tab) {
     const isLogin = tab === "login";
@@ -48,6 +59,21 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tabSignup").classList.toggle("active", !isLogin);
     document.getElementById("btnLogin").style.display  = isLogin ? "block" : "none";
     document.getElementById("btnSignup").style.display = isLogin ? "none"  : "block";
+  };
+
+  // In-game logout handler (called by the 🚪 button)
+  window.handleLogout = async function() {
+    try {
+      // Save current progress before logging out
+      await saveToCloud();
+      // Sign out from Supabase — this clears the session token from localStorage
+      await signOut();
+      _currentUser = null;
+      updateHeaderButtons(false);
+      setAuthStatus("Logged out.");
+    } catch (err) {
+      console.error("Logout error:", err.message);
+    }
   };
 
   // Expose so the cloud btn in-game can open it
@@ -255,6 +281,7 @@ window.addEventListener("DOMContentLoaded", () => {
       // Show main menu after successful login
       const menu = document.getElementById("menu");
       if (menu) menu.style.display = "flex";
+      updateHeaderButtons(true);
     } catch (err) {
       setAuthStatus(err.message);
     }
@@ -278,15 +305,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (_currentUser) {
       setAuthStatus(`Signed in: ${_currentUser.email}`);
-      // Update the in-game cloud button tooltip
-      const btn = document.getElementById("cloudSaveBtn");
-      if (btn) btn.title = `Signed in: ${_currentUser.email}`;
+      updateHeaderButtons(true);
       // Wait for loadState() to restore window.playerName before syncing
       setTimeout(() => syncPlayerName(_currentUser.id), 600);
     } else {
       setAuthStatus("Not signed in.");
-      const btn = document.getElementById("cloudSaveBtn");
-      if (btn) btn.title = "Cloud Save (not signed in)";
+      updateHeaderButtons(false);
     }
   });
 
