@@ -61,20 +61,40 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnSignup").style.display = isLogin ? "none"  : "block";
   };
 
-  // In-game logout handler (called by the 🚪 button)
-  window.handleLogout = async function() {
-    try {
-      // Save current progress before logging out
-      await saveToCloud();
-      // Sign out from Supabase — this clears the session token from localStorage
-      await signOut();
-      _currentUser = null;
-      updateHeaderButtons(false);
-      setAuthStatus("Logged out.");
-    } catch (err) {
-      console.error("Logout error:", err.message);
-    }
+  // In-game logout handler — shows confirmation modal first
+  window.handleLogout = function() {
+    const modal = document.getElementById("logoutModal");
+    if (modal) modal.style.display = "flex";
   };
+
+  // Wire up the modal buttons
+  document.addEventListener("DOMContentLoaded", function() {
+    const yesBtn = document.getElementById("logoutConfirmYes");
+    const noBtn  = document.getElementById("logoutConfirmNo");
+    const modal  = document.getElementById("logoutModal");
+
+    if (noBtn) noBtn.addEventListener("click", function() {
+      if (modal) modal.style.display = "none";
+    });
+
+    if (yesBtn) yesBtn.addEventListener("click", async function() {
+      if (modal) modal.style.display = "none";
+      try {
+        // Save progress first
+        await saveToCloud();
+        // Sign out — clears the Supabase session token from localStorage
+        await signOut();
+        _currentUser = null;
+        updateHeaderButtons(false);
+        // Show loading screen briefly then re-route to login
+        if (typeof window.showLoadingThenRoute === "function") {
+          window.showLoadingThenRoute();
+        }
+      } catch (err) {
+        console.error("Logout error:", err.message);
+      }
+    });
+  });
 
   // Expose so the cloud btn in-game can open it
   window.openAuthScreen = openAuthScreen;

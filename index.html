@@ -88,6 +88,133 @@
   </div>
 </div>
 
+
+<!-- Loading + Auth screen logic — must run BEFORE game scripts -->
+<script>
+(function(){
+  // ── Bar animation ──────────────────────────────────────
+  var tips = [
+    "Watering crops… 🌱",
+    "Feeding wild cats… 🐱",
+    "Sharpening harvest tools… 🔨",
+    "Counting coins… 🪙",
+    "Waking up pets… 🐾",
+    "Preparing the farm… 🌾",
+    "Loading quiz questions… 📚",
+    "Building the town… 🏘️",
+  ];
+  var tipIdx = 0;
+  var progress = 0;
+  var finished = false;
+
+  var tipInterval = setInterval(function() {
+    tipIdx = (tipIdx + 1) % tips.length;
+    var tip = document.getElementById("loadingTip");
+    if (tip) tip.textContent = tips[tipIdx];
+  }, 700);
+
+  var barInterval = setInterval(function() {
+    progress = Math.min(progress + (Math.random() * 12 + 8), 85);
+    var bar = document.getElementById("loadingBarInner");
+    if (bar) bar.style.width = progress + "%";
+    if (progress >= 85) clearInterval(barInterval);
+  }, 150);
+
+  // ── Screen router ──────────────────────────────────────
+  function routeAfterLoad() {
+    // Check for existing Supabase session token in localStorage
+    var hasSession = Object.keys(localStorage).some(function(k) {
+      return k.indexOf("supabase") !== -1 && k.indexOf("auth") !== -1;
+    });
+    var as   = document.getElementById("authScreen");
+    var menu = document.getElementById("menu");
+    if (hasSession) {
+      if (as)   as.style.display   = "none";
+      if (menu) menu.style.display = "flex";
+    } else {
+      if (as)   as.style.display   = "flex";
+      if (menu) menu.style.display = "none";
+    }
+  }
+
+  // ── Finish loading ─────────────────────────────────────
+  function doFinish() {
+    if (finished) return;
+    finished = true;
+    clearInterval(tipInterval);
+    clearInterval(barInterval);
+    clearTimeout(fallbackTimer);
+
+    var bar = document.getElementById("loadingBarInner");
+    if (bar) bar.style.width = "100%";
+
+    setTimeout(function() {
+      var ls = document.getElementById("loadingScreen");
+      if (ls) {
+        ls.classList.add("fade-out");
+        setTimeout(function() { ls.style.display = "none"; }, 500);
+      }
+      routeAfterLoad();
+    }, 300);
+  }
+
+  // ── Logout: show loading briefly then re-route ─────────
+  window.showLoadingThenRoute = function() {
+    finished = false;
+    progress = 0;
+    var ls = document.getElementById("loadingScreen");
+    if (ls) {
+      ls.classList.remove("fade-out");
+      ls.style.display = "flex";
+    }
+    var bar = document.getElementById("loadingBarInner");
+    if (bar) bar.style.width = "0%";
+
+    // Fast fill to 100% and re-route
+    var fill = 0;
+    var fillInterval = setInterval(function() {
+      fill = Math.min(fill + 25, 100);
+      if (bar) bar.style.width = fill + "%";
+      if (fill >= 100) {
+        clearInterval(fillInterval);
+        setTimeout(function() {
+          ls.classList.add("fade-out");
+          setTimeout(function() {
+            ls.style.display = "none";
+            ls.classList.remove("fade-out");
+            finished = true;
+            routeAfterLoad();
+          }, 500);
+        }, 200);
+      }
+    }, 60);
+  };
+
+  // ── Public API ─────────────────────────────────────────
+  window.finishLoading = doFinish;
+
+  window.guestPlay = function() {
+    var as   = document.getElementById("authScreen");
+    var menu = document.getElementById("menu");
+    if (as)   as.style.display   = "none";
+    if (menu) menu.style.display = "flex";
+  };
+
+  // Fallback: if initDefaults.js crashes and never calls finishLoading(),
+  // dismiss after 6s so the player isn't permanently stuck.
+  var fallbackTimer = setTimeout(function() {
+    console.warn("finishLoading() not called — forcing dismiss");
+    doFinish();
+  }, 6000);
+
+  // Hide menu on first paint so it doesn't flash before loading finishes
+  document.addEventListener("DOMContentLoaded", function() {
+    var menu = document.getElementById("menu");
+    if (menu) menu.style.display = "none";
+  });
+})();
+</script>
+
 <!-- AUTH SCREEN -->
 <div id="authScreen" style="display:none;">
   <div class="authBg">
@@ -471,92 +598,24 @@
 <script src="js/supabase.js"></script>
 
 
-<!-- Auth + Loading screen logic -->
-<script>
-(function(){
-  const tips = [
-    "Watering crops… 🌱",
-    "Feeding wild cats… 🐱",
-    "Sharpening harvest tools… 🔨",
-    "Counting coins… 🪙",
-    "Waking up pets… 🐾",
-    "Preparing the farm… 🌾",
-    "Loading quiz questions… 📚",
-    "Building the town… 🏘️",
-  ];
-  let tipIdx = 0;
-  const bar  = document.getElementById("loadingBarInner");
-  const tip  = document.getElementById("loadingTip");
-  let progress = 0;
-  let finished = false;
 
-  const tipInterval = setInterval(() => {
-    tipIdx = (tipIdx + 1) % tips.length;
-    if (tip) tip.textContent = tips[tipIdx];
-  }, 700);
 
-  // Bar fills steadily to 85% on its own, then waits for finishLoading()
-  const barInterval = setInterval(() => {
-    progress = Math.min(progress + (Math.random() * 12 + 8), 85);
-    if (bar) bar.style.width = progress + "%";
-    if (progress >= 85) clearInterval(barInterval);
-  }, 150);
+<!-- LOGOUT CONFIRM MODAL -->
+<div id="logoutModal" style="
+  display:none; position:fixed; inset:0; z-index:9500;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.5);
+">
+  <div class="logoutModalCard">
+    <div class="logoutModalIcon">🚪</div>
+    <div class="logoutModalTitle">Log Out?</div>
+    <div class="logoutModalSub">Your progress will be saved to the cloud before logging out.</div>
+    <div class="logoutModalBtns">
+      <button class="logoutModalYes" id="logoutConfirmYes">Yes, Log Out</button>
+      <button class="logoutModalNo"  id="logoutConfirmNo">Cancel</button>
+    </div>
+  </div>
+</div>
 
-  function doFinish() {
-    if (finished) return;
-    finished = true;
-    clearInterval(tipInterval);
-    clearInterval(barInterval);
-    clearTimeout(fallbackTimer);
-    if (bar) bar.style.width = "100%";
-    setTimeout(() => {
-      const ls = document.getElementById("loadingScreen");
-      if (ls) {
-        ls.classList.add("fade-out");
-        setTimeout(() => { ls.style.display = "none"; }, 500);
-      }
-      // If a session token exists in localStorage, skip the auth screen
-      // and go straight to the menu. The supabase client will restore
-      // the session automatically when it initialises.
-      const hasSession = Object.keys(localStorage).some(k => k.includes("supabase") && k.includes("auth"));
-      if (hasSession) {
-        const as = document.getElementById("authScreen");
-        if (as) as.style.display = "none";
-        const menu = document.getElementById("menu");
-        if (menu) menu.style.display = "flex";
-      } else {
-        const as = document.getElementById("authScreen");
-        if (as) as.style.display = "flex";
-        const menu = document.getElementById("menu");
-        if (menu) menu.style.display = "none";
-      }
-    }, 300);
-  }
-
-  window.finishLoading = doFinish;
-
-  // Guest play: hide auth screen, show menu
-  window.guestPlay = function() {
-    const as = document.getElementById("authScreen");
-    if (as) as.style.display = "none";
-    const menu = document.getElementById("menu");
-    if (menu) menu.style.display = "flex";
-  };
-
-  // Hard fallback: if finishLoading() is never called (e.g. a JS error
-  // in another script stops initDefaults.js from finishing), force-dismiss
-  // the loading screen after 5 seconds so the player isn't stuck.
-  var fallbackTimer = setTimeout(() => {
-    console.warn("finishLoading() not called — forcing loading screen dismiss");
-    doFinish();
-  }, 5000);
-
-  // Keep menu and auth hidden until loading finishes
-  document.addEventListener("DOMContentLoaded", () => {
-    const menu = document.getElementById("menu");
-    if (menu) menu.style.display = "none";
-  });
-})();
-</script>
 </body>
 </html>
