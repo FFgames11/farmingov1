@@ -269,7 +269,7 @@ function onWildPetClicked(){
 
     const base = activeWildPet.type.capture;
     const bonus = captureBonusByBoost();
-    const finalChance = Math.min(0.95, base + bonus);
+    const finalChance = Math.min(0.99, base + bonus);
     const roll = Math.random();
 
     if(roll <= finalChance){
