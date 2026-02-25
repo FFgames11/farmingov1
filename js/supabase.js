@@ -252,8 +252,9 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
       closeAuthScreen();
-      // Go to main menu after successful login
-      document.getElementById("menu").style.display = "flex";
+      // Show main menu after successful login
+      const menu = document.getElementById("menu");
+      if (menu) menu.style.display = "flex";
     } catch (err) {
       setAuthStatus(err.message);
     }
