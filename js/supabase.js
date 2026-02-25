@@ -43,28 +43,19 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ── Game state collector ────────────────────────────── */
-  // Mirrors exactly what saveState() in saveLoad.js writes to localStorage.
-  // Called only on explicit saves (login, logout, name change, auto-save).
-  // NOT hooked into the 250ms game loop.
+  // Reads directly from localStorage instead of window.* variables.
+  // The game variables (coins, xp, etc.) are plain `let` declarations in
+  // saveLoad.js — they are NOT properties of window, so window.coins === undefined.
+  // saveState() already writes the complete correct state to localStorage every
+  // 250ms via the game loop, so localStorage is always the freshest source.
   function getGameState() {
-    return {
-      coins:           window.coins,
-      xp:              window.xp,
-      level:           window.level,
-      playerName:      window.playerName,
-      playerTitle:     window.playerTitle,
-      playerCountry:   window.playerCountry,
-      inventory:       window.inventory,
-      showcase:        window.showcase,
-      selectedSeed:    window.selectedSeed,
-      seeds:           window.seeds,
-      unlockedTiles:   window.unlockedTiles,
-      tileStates:      window.tileStates,
-      zooPets:         window.zooPets,
-      boosts:          window.boosts,
-      nextPetSpawnAt:  window.nextPetSpawnAt,
-      nextBossSpawnAt: window.nextBossSpawnAt,
-    };
+    try {
+      const raw = localStorage.getItem("catfarm_state_v5");
+      if (raw) return JSON.parse(raw);
+    } catch (e) {
+      console.error("getGameState parse error:", e);
+    }
+    return {};
   }
 
   /* ── Apply cloud save to game globals ───────────────── */
