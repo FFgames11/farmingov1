@@ -77,12 +77,25 @@ window.addEventListener("DOMContentLoaded", () => {
   // The DB trigger handles INSERT on signup automatically.
   // This only syncs name changes. Guard against overwriting a real
   // saved name with the "Player" default before loadState() has run.
+  // Helper: read the real player name from localStorage.
+  // We cannot use window.playerName because game variables are plain `let`
+  // declarations in saveLoad.js — they are not properties of window.
+  function getPlayerName() {
+    try {
+      const raw = localStorage.getItem("catfarm_state_v5");
+      if (raw) {
+        const st = JSON.parse(raw);
+        if (st && st.playerName && st.playerName !== "Player") return st.playerName;
+      }
+    } catch (e) {}
+    return "Player";
+  }
+
   async function syncPlayerName(userId) {
-    // Always upsert the players row — even with the default name "Player".
-    // This is critical: game_saves has a FK → players.player_id, so the
-    // players row MUST exist before we can write to game_saves.
-    // We removed the "Player" guard that was skipping this call.
-    const name = window.playerName || "Player";
+    // Always upsert the players row so the FK constraint for game_saves is
+    // satisfied. Read the name from localStorage (the ground truth) rather
+    // than window.playerName which is a plain `let` and not on window.
+    const name = getPlayerName();
 
     const { error } = await supabase
       .from("players")
