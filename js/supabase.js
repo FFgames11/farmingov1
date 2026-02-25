@@ -25,6 +25,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function setAuthStatus(msg) { authStatus.textContent = msg || ""; }
 
+  /* ── Cached session ──────────────────────────────────── */
+  // Cache the current user locally so we never need to call getUser() repeatedly.
+  // getUser() acquires a Navigator LockManager lock each time — calling it from
+  // a setInterval causes lock contention and the "timed out waiting 10000ms" error.
+  let _currentUser = null;
+
+  // Seed the cache once on load from the existing session (no network lock needed)
+  supabase.auth.getSession().then(({ data }) => {
+    _currentUser = data?.session?.user ?? null;
+  });
+
   /* ── Game state collector ────────────────────────────── */
   // Mirrors exactly what saveState() in saveLoad.js writes to localStorage.
   // Called only on explicit saves (login, logout, name change, auto-save).
@@ -83,11 +94,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   /* ── Cloud save ──────────────────────────────────────── */
   async function saveToCloud() {
-    const { data: authData } = await supabase.auth.getUser();
-    const user = authData?.user;
+    const user = _currentUser;
     if (!user) return; // not logged in — silently skip
 
-    // Sync name to players table alongside the game save
     await syncPlayerName(user.id);
 
     const { error } = await supabase
@@ -102,8 +111,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   /* ── Cloud load ──────────────────────────────────────── */
   async function loadFromCloud() {
-    const { data: authData } = await supabase.auth.getUser();
-    const user = authData?.user;
+    const user = _currentUser;
     if (!user) return null;
 
     const { data, error } = await supabase
@@ -195,13 +203,15 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ── Auth state listener ─────────────────────────────── */
-  // Fires on page load if a session already exists (returning player).
-  // Wait 600ms so loadState() has time to restore window.playerName
-  // from localStorage before we try to sync it.
+  // onAuthStateChange is the single source of truth for _currentUser.
+  // It fires on login, logout, and token refresh — no lock contention.
   supabase.auth.onAuthStateChange((_event, session) => {
-    if (session?.user) {
-      setAuthStatus(`Signed in: ${session.user.email}`);
-      setTimeout(() => syncPlayerName(session.user.id), 600);
+    _currentUser = session?.user ?? null;
+
+    if (_currentUser) {
+      setAuthStatus(`Signed in: ${_currentUser.email}`);
+      // Wait for loadState() to restore window.playerName before syncing
+      setTimeout(() => syncPlayerName(_currentUser.id), 600);
     } else {
       setAuthStatus("Not signed in.");
     }
