@@ -36,10 +36,6 @@ let nextPetSpawnAt = 0;
 let nextBossSpawnAt = 0;
 
 function saveState(){
-  // Do not write while the game UI is hidden (i.e. during/after logout).
-  // The game loop calls this every 250ms — without this guard it would
-  // overwrite the cleared localStorage with the previous account's data.
-  if(window.gameUIHidden) return;
   try{
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
@@ -50,12 +46,39 @@ function saveState(){
       zooPets, roamingPetUids: [],
       boosts,
       nextPetSpawnAt,
-      nextBossSpawnAt,
-      tutorialDone: !!localStorage.getItem("catfarm_tutorial_done_v2")
+      nextBossSpawnAt
     }));
   }catch(e){}
 }
 
+
+// Resets all in-memory game variables back to their defaults.
+// Must be called on logout and before a new account's data is loaded,
+// otherwise the previous account's values linger in memory even after
+// localStorage is cleared.
+function resetGameState(){
+  coins        = 30;
+  xp           = 0;
+  level        = 1;
+  playerName   = "Player";
+  playerTitle  = "Rookie Farmer";
+  playerCountry = "Philippines";
+  inventory    = {};
+  showcase     = [null, null, null, null];
+  selectedSeed = "🥕";
+  seeds        = {};
+  unlockedTiles = new Array(TILE_COUNT).fill(false);
+  tileStates   = new Array(TILE_COUNT).fill(null).map(_=>({ state:"empty", crop:"", plantedAt:0, finishAt:0 }));
+  zooPets      = [];
+  roamingPetUids = [];
+  nextPetSpawnAt  = 0;
+  nextBossSpawnAt = 0;
+  if(typeof boosts !== "undefined"){
+    boosts.fertilizer    = 0;
+    boosts.net           = 0;
+    boosts.scarecrowUntil = 0;
+  }
+}
 
 function loadState(){
   try{
@@ -123,16 +146,5 @@ function loadState(){
 
     nextPetSpawnAt = Number(st.nextPetSpawnAt || 0);
     nextBossSpawnAt = Number(st.nextBossSpawnAt || 0);
-
-    // Restore tutorial completion flag from cloud save.
-    // If tutorialDone is true, write the key so shouldShowTutorial() returns false.
-    // If tutorialDone is false/absent, remove the key so it shows on first play.
-    try{
-      if(st.tutorialDone){
-        localStorage.setItem("catfarm_tutorial_done_v2", "1");
-      } else {
-        localStorage.removeItem("catfarm_tutorial_done_v2");
-      }
-    }catch(e){}
   }catch(e){}
 }

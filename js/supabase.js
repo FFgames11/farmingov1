@@ -127,9 +127,10 @@ window.addEventListener("DOMContentLoaded", () => {
         // Step 2: Save to cloud before wiping anything
         await saveToCloud();
 
-        // Step 3: Wipe ALL game localStorage keys NOW — synchronously.
-        // Must happen before signOut() so the 250ms game loop cannot
-        // write stale data back between these two async calls.
+        // Step 3: Reset in-memory variables AND wipe localStorage synchronously.
+        // Both must happen together — clearing storage alone leaves the previous
+        // account's values alive in JS memory (playerName, coins, xp, etc.).
+        if (typeof resetGameState === "function") resetGameState();
         clearAllGameStorage();
 
         // Step 4: Sign out from Supabase (clears auth token from localStorage)
@@ -392,20 +393,21 @@ window.addEventListener("DOMContentLoaded", () => {
 
       const saved = await loadFromCloud();
       if (saved) {
-        // Existing account — wipe local storage first, then restore from cloud
+        // Existing account — reset memory + wipe storage, then restore from cloud
+        if (typeof resetGameState === "function") resetGameState();
         clearAllGameStorage();
         applyGameState(saved);
         await syncPlayerName(user.id);
         setAuthStatus(`Save loaded ✓  (${window.playerName})`);
       } else {
-        // Brand new account — wipe any leftover localStorage from a previous
-        // account or the default game state, then start completely fresh.
-        // Do NOT push local state to cloud — it doesn't belong to this account.
+        // Brand new account — reset memory + wipe storage so nothing from the
+        // previous account leaks in. Do NOT push local state to cloud.
+        if (typeof resetGameState === "function") resetGameState();
         clearAllGameStorage();
+        if (typeof updateUI   === "function") updateUI();
+        if (typeof renderFarm === "function") renderFarm();
         await syncPlayerName(user.id);
         setAuthStatus("New account — starting fresh!");
-        // Cloud save will be created automatically on the first auto-save (30s)
-        // or when the player makes their first profile change.
       }
 
       // Re-enable game loop writes for the new account
