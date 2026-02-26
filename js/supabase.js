@@ -98,8 +98,9 @@ window.addEventListener("DOMContentLoaded", () => {
     if (zooScreen)   zooScreen.style.display   = "none";
     if (arenaScreen) arenaScreen.style.display = "none";
 
-    // Clear game save from localStorage so next login loads fresh from cloud
-    localStorage.removeItem("catfarm_state_v5");
+    // Wipe ALL game localStorage keys so the next account that logs in
+    // starts completely clean with no data from this account.
+    clearAllGameStorage();
   }
 
   // Logout modal — wire buttons directly, we're already inside DOMContentLoaded
@@ -163,30 +164,71 @@ window.addEventListener("DOMContentLoaded", () => {
   // saveLoad.js — they are NOT properties of window, so window.coins === undefined.
   // saveState() already writes the complete correct state to localStorage every
   // 250ms via the game loop, so localStorage is always the freshest source.
+  // Wipe every game-owned localStorage key
+  function clearAllGameStorage() {
+    const keys = [
+      "catfarm_state_v5",
+      "catfarm_daily_quests_v5",
+      "catfarm_daily_date_v5",
+      "catfarm_daily_streak_v5",
+      "catfarm_last_complete_date_v5",
+      "catfarm_library_exam_v1",
+      "catfarm_tutorial_done_v2",
+    ];
+    for (const k of keys) localStorage.removeItem(k);
+  }
+
+  // All localStorage keys the game uses. Stored together in the cloud save
+  // so a fresh browser gets a complete restore with no stale values from
+  // a previously logged-in account.
+  const LS_KEYS = [
+    "catfarm_state_v5",
+    "catfarm_daily_quests_v5",
+    "catfarm_daily_date_v5",
+    "catfarm_daily_streak_v5",
+    "catfarm_last_complete_date_v5",
+    "catfarm_library_exam_v1",
+    "catfarm_tutorial_done_v2",
+  ];
+
   function getGameState() {
-    try {
-      const raw = localStorage.getItem("catfarm_state_v5");
-      const state = raw ? JSON.parse(raw) : {};
-      // Always inject tutorialDone fresh from its own key — do not rely on
-      // the 250ms saveState() loop having written it before cloud save fires.
-      state.tutorialDone = !!localStorage.getItem("catfarm_tutorial_done_v2");
-      return state;
-    } catch (e) {
-      console.error("getGameState parse error:", e);
+    const bundle = {};
+    for (const key of LS_KEYS) {
+      const val = localStorage.getItem(key);
+      if (val !== null) bundle[key] = val;
     }
-    return {};
+    // Always inject tutorialDone fresh — do not rely on saveState() timing
+    bundle["catfarm_tutorial_done_v2"] = localStorage.getItem("catfarm_tutorial_done_v2") || null;
+    return bundle;
   }
 
   /* ── Apply cloud save to game globals ───────────────── */
   // Writes cloud data into localStorage under STATE_KEY then calls loadState()
   // so all existing migration + validation logic in saveLoad.js runs automatically.
-  function applyGameState(state) {
-    if (!state || typeof state !== "object") return;
+  function applyGameState(bundle) {
+    if (!bundle || typeof bundle !== "object") return;
     try {
-      localStorage.setItem("catfarm_state_v5", JSON.stringify(state));
-      if (typeof loadState  === "function") loadState();
-      if (typeof updateUI   === "function") updateUI();
-      if (typeof renderFarm === "function") renderFarm();
+      // First wipe all game keys so no stale values from the previous account remain
+      clearAllGameStorage();
+
+      // Restore every key that was saved in the bundle
+      for (const key of LS_KEYS) {
+        const val = bundle[key];
+        if (val !== null && val !== undefined) {
+          localStorage.setItem(key, val);
+        }
+      }
+
+      // Legacy support: if the bundle IS the old flat state object (no LS_KEYS structure),
+      // fall back to writing it as the main state key directly
+      if (!bundle["catfarm_state_v5"] && (bundle.coins !== undefined || bundle.playerName)) {
+        localStorage.setItem("catfarm_state_v5", JSON.stringify(bundle));
+      }
+
+      if (typeof loadState        === "function") loadState();
+      if (typeof loadDailyQuests  === "function") loadDailyQuests();
+      if (typeof updateUI         === "function") updateUI();
+      if (typeof renderFarm       === "function") renderFarm();
     } catch (e) {
       console.error("applyGameState error:", e);
     }
