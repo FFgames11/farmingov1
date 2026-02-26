@@ -98,9 +98,8 @@ window.addEventListener("DOMContentLoaded", () => {
     if (zooScreen)   zooScreen.style.display   = "none";
     if (arenaScreen) arenaScreen.style.display = "none";
 
-    // Wipe ALL game localStorage keys so the next account that logs in
-    // starts completely clean with no data from this account.
-    clearAllGameStorage();
+    // Note: clearAllGameStorage() is called explicitly BEFORE cleanGameUI()
+    // in the logout handler so it runs synchronously before signOut().
   }
 
   // Logout modal — wire buttons directly, we're already inside DOMContentLoaded
@@ -122,11 +121,25 @@ window.addEventListener("DOMContentLoaded", () => {
     _logoutYesBtn.addEventListener("click", async () => {
       if (_logoutModal) _logoutModal.style.display = "none";
       try {
+        // Step 1: Mute game loop immediately so saveState() stops writing
+        window.gameUIHidden = true;
+
+        // Step 2: Save to cloud before wiping anything
         await saveToCloud();
+
+        // Step 3: Wipe ALL game localStorage keys NOW — synchronously.
+        // Must happen before signOut() so the 250ms game loop cannot
+        // write stale data back between these two async calls.
+        clearAllGameStorage();
+
+        // Step 4: Sign out from Supabase (clears auth token from localStorage)
         await signOut();
         _currentUser = null;
         updateHeaderButtons(false);
+
+        // Step 5: Hide all UI panels
         cleanGameUI();
+
         if (typeof window.showLoadingThenRoute === "function") {
           window.showLoadingThenRoute();
         }

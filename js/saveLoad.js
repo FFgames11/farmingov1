@@ -36,6 +36,10 @@ let nextPetSpawnAt = 0;
 let nextBossSpawnAt = 0;
 
 function saveState(){
+  // Do not write while the game UI is hidden (i.e. during/after logout).
+  // The game loop calls this every 250ms — without this guard it would
+  // overwrite the cleared localStorage with the previous account's data.
+  if(window.gameUIHidden) return;
   try{
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
