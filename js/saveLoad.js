@@ -46,7 +46,8 @@ function saveState(){
       zooPets, roamingPetUids: [],
       boosts,
       nextPetSpawnAt,
-      nextBossSpawnAt
+      nextBossSpawnAt,
+      tutorialDone: !!localStorage.getItem("catfarm_tutorial_done_v2")
     }));
   }catch(e){}
 }
@@ -118,6 +119,10 @@ function loadState(){
 
     nextPetSpawnAt = Number(st.nextPetSpawnAt || 0);
     nextBossSpawnAt = Number(st.nextBossSpawnAt || 0);
+
+    // Restore tutorial completion flag so a fresh browser doesn't re-show it
+    if(st.tutorialDone) {
+      try{ localStorage.setItem("catfarm_tutorial_done_v2", "1"); }catch(e){}
+    }
   }catch(e){}
 }
-

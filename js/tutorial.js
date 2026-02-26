@@ -14,7 +14,15 @@ const tut = {
 };
 
 function shouldShowTutorial(){
-  try{ return !localStorage.getItem(TUTORIAL_KEY); }
+  try{
+    // Check localStorage key first
+    if(localStorage.getItem(TUTORIAL_KEY)) return false;
+    // Also check save state directly in case cloud save was applied
+    // but the localStorage key hasn't been written yet
+    const raw = localStorage.getItem("catfarm_state_v5");
+    if(raw){ const st = JSON.parse(raw); if(st && st.tutorialDone) return false; }
+    return true;
+  }
   catch(e){ return true; }
 }
 

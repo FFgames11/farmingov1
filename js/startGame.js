@@ -2,6 +2,7 @@
    START GAME / INFO
 ========================================================= */
 function startGame(){
+  window.gameUIHidden = false; // re-enable toasts and modals
   menu.style.display = "none";
   gameDiv.style.display = "flex";
   showFarm();

@@ -65,6 +65,9 @@ window.addEventListener("DOMContentLoaded", () => {
   // Hides all game screens/panels so they don't bleed through the login screen.
   // Does NOT stop the game loop (no stored interval ID), but hides #game entirely.
   function cleanGameUI() {
+    // Mute all in-game toasts and modals while UI is hidden
+    window.gameUIHidden = true;
+
     // Hide game and menu divs
     const gameDiv = document.getElementById("game");
     const menuDiv = document.getElementById("menu");

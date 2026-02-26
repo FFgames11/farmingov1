@@ -18,6 +18,7 @@ function escapeHtml(str){
 }
 function openModal(title, html){
   if(tutorialState?.active) return; // prevent random popups during tutorial
+  if(window.gameUIHidden) return;   // game is hidden (login screen showing)
   modal.style.display = "flex";
   modalTitle.textContent = title;
   modalTitle.setAttribute('data-title', title);
@@ -62,6 +63,7 @@ function todayKey(){
   return `${y}-${m}-${day}`;
 }
 function showToast(msg, ms=1100){
+  if(window.gameUIHidden) return;   // game is hidden (login screen showing)
   toastText.textContent = msg;
   toast.style.display = "block";
   clearTimeout(showToast._t);
@@ -71,4 +73,3 @@ function uid(){
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-
