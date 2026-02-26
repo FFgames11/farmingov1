@@ -121,19 +121,35 @@
   }, 150);
 
   // ── Screen router ──────────────────────────────────────
-  function routeAfterLoad() {
-    // Check for existing Supabase session token in localStorage
-    var hasSession = Object.keys(localStorage).some(function(k) {
-      return k.indexOf("supabase") !== -1 && k.indexOf("auth") !== -1;
-    });
+  // forceLogin=true skips the session check and always shows login
+  function routeAfterLoad(forceLogin) {
     var as   = document.getElementById("authScreen");
     var menu = document.getElementById("menu");
-    if (hasSession) {
-      if (as)   as.style.display   = "none";
-      if (menu) menu.style.display = "flex";
-    } else {
+    if (forceLogin) {
       if (as)   as.style.display   = "flex";
       if (menu) menu.style.display = "none";
+      return;
+    }
+    // Use getSession from the Supabase client if available,
+    // otherwise fall back to checking localStorage for the token key.
+    if (window._supabaseCheckSession) {
+      window._supabaseCheckSession(function(hasSession) {
+        if (as)   as.style.display   = hasSession ? "none" : "flex";
+        if (menu) menu.style.display = hasSession ? "flex" : "none";
+      });
+    } else {
+      // Fallback before supabase.js loads: check localStorage directly
+      var hasSession = false;
+      for (var k in localStorage) {
+        if (k.indexOf("sb-") === 0 && k.indexOf("-auth-token") !== -1) {
+          try {
+            var v = JSON.parse(localStorage.getItem(k));
+            if (v && v.access_token) { hasSession = true; break; }
+          } catch(e) {}
+        }
+      }
+      if (as)   as.style.display   = hasSession ? "none" : "flex";
+      if (menu) menu.style.display = hasSession ? "flex" : "none";
     }
   }
 
@@ -154,23 +170,19 @@
         ls.classList.add("fade-out");
         setTimeout(function() { ls.style.display = "none"; }, 500);
       }
-      routeAfterLoad();
+      routeAfterLoad(false);
     }, 300);
   }
 
-  // ── Logout: show loading briefly then re-route ─────────
+  // ── Logout: show loading briefly then show login screen ──
   window.showLoadingThenRoute = function() {
     finished = false;
     progress = 0;
-    var ls = document.getElementById("loadingScreen");
-    if (ls) {
-      ls.classList.remove("fade-out");
-      ls.style.display = "flex";
-    }
+    var ls  = document.getElementById("loadingScreen");
     var bar = document.getElementById("loadingBarInner");
+    if (ls) { ls.classList.remove("fade-out"); ls.style.display = "flex"; }
     if (bar) bar.style.width = "0%";
 
-    // Fast fill to 100% and re-route
     var fill = 0;
     var fillInterval = setInterval(function() {
       fill = Math.min(fill + 25, 100);
@@ -178,12 +190,12 @@
       if (fill >= 100) {
         clearInterval(fillInterval);
         setTimeout(function() {
-          ls.classList.add("fade-out");
+          if (ls) ls.classList.add("fade-out");
           setTimeout(function() {
-            ls.style.display = "none";
-            ls.classList.remove("fade-out");
+            if (ls) { ls.style.display = "none"; ls.classList.remove("fade-out"); }
             finished = true;
-            routeAfterLoad();
+            // After logout, always show the login screen
+            routeAfterLoad(true);
           }, 500);
         }, 200);
       }

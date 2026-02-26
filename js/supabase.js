@@ -61,32 +61,29 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnSignup").style.display = isLogin ? "none"  : "block";
   };
 
-  // In-game logout handler — shows confirmation modal first
+  // Logout modal — wire buttons directly, we're already inside DOMContentLoaded
+  const _logoutModal  = document.getElementById("logoutModal");
+  const _logoutYesBtn = document.getElementById("logoutConfirmYes");
+  const _logoutNoBtn  = document.getElementById("logoutConfirmNo");
+
   window.handleLogout = function() {
-    const modal = document.getElementById("logoutModal");
-    if (modal) modal.style.display = "flex";
+    if (_logoutModal) _logoutModal.style.display = "flex";
   };
 
-  // Wire up the modal buttons
-  document.addEventListener("DOMContentLoaded", function() {
-    const yesBtn = document.getElementById("logoutConfirmYes");
-    const noBtn  = document.getElementById("logoutConfirmNo");
-    const modal  = document.getElementById("logoutModal");
-
-    if (noBtn) noBtn.addEventListener("click", function() {
-      if (modal) modal.style.display = "none";
+  if (_logoutNoBtn) {
+    _logoutNoBtn.addEventListener("click", () => {
+      if (_logoutModal) _logoutModal.style.display = "none";
     });
+  }
 
-    if (yesBtn) yesBtn.addEventListener("click", async function() {
-      if (modal) modal.style.display = "none";
+  if (_logoutYesBtn) {
+    _logoutYesBtn.addEventListener("click", async () => {
+      if (_logoutModal) _logoutModal.style.display = "none";
       try {
-        // Save progress first
         await saveToCloud();
-        // Sign out — clears the Supabase session token from localStorage
         await signOut();
         _currentUser = null;
         updateHeaderButtons(false);
-        // Show loading screen briefly then re-route to login
         if (typeof window.showLoadingThenRoute === "function") {
           window.showLoadingThenRoute();
         }
@@ -94,7 +91,7 @@ window.addEventListener("DOMContentLoaded", () => {
         console.error("Logout error:", err.message);
       }
     });
-  });
+  }
 
   // Expose so the cloud btn in-game can open it
   window.openAuthScreen = openAuthScreen;
@@ -104,6 +101,14 @@ window.addEventListener("DOMContentLoaded", () => {
   // getUser() acquires a Navigator LockManager lock each time — calling it from
   // a setInterval causes lock contention and the "timed out waiting 10000ms" error.
   let _currentUser = null;
+
+  // Expose a session checker for the loading screen router.
+  // Uses getSession() (no network lock) to reliably detect active sessions.
+  window._supabaseCheckSession = function(callback) {
+    supabase.auth.getSession().then(function(res) {
+      callback(!!(res.data && res.data.session && res.data.session.user));
+    }).catch(function() { callback(false); });
+  };
 
   // Seed the cache once on load from the existing session (no network lock needed)
   supabase.auth.getSession().then(({ data }) => {
