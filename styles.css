@@ -1040,7 +1040,7 @@ content: '';
     align-items: center;
     padding: 8px 10px;
     border-radius: 50px;
-    z-index: 9997;
+    z-index: 999;
     height: auto;
     width: 100%;
     max-width: max-content;
