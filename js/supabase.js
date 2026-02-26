@@ -166,7 +166,11 @@ window.addEventListener("DOMContentLoaded", () => {
   function getGameState() {
     try {
       const raw = localStorage.getItem("catfarm_state_v5");
-      if (raw) return JSON.parse(raw);
+      const state = raw ? JSON.parse(raw) : {};
+      // Always inject tutorialDone fresh from its own key — do not rely on
+      // the 250ms saveState() loop having written it before cloud save fires.
+      state.tutorialDone = !!localStorage.getItem("catfarm_tutorial_done_v2");
+      return state;
     } catch (e) {
       console.error("getGameState parse error:", e);
     }

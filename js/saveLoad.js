@@ -120,9 +120,15 @@ function loadState(){
     nextPetSpawnAt = Number(st.nextPetSpawnAt || 0);
     nextBossSpawnAt = Number(st.nextBossSpawnAt || 0);
 
-    // Restore tutorial completion flag so a fresh browser doesn't re-show it
-    if(st.tutorialDone) {
-      try{ localStorage.setItem("catfarm_tutorial_done_v2", "1"); }catch(e){}
-    }
+    // Restore tutorial completion flag from cloud save.
+    // If tutorialDone is true, write the key so shouldShowTutorial() returns false.
+    // If tutorialDone is false/absent, remove the key so it shows on first play.
+    try{
+      if(st.tutorialDone){
+        localStorage.setItem("catfarm_tutorial_done_v2", "1");
+      } else {
+        localStorage.removeItem("catfarm_tutorial_done_v2");
+      }
+    }catch(e){}
   }catch(e){}
 }

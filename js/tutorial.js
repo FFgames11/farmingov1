@@ -254,6 +254,9 @@ function endTutorial(){
   try{ localStorage.setItem(TUTORIAL_KEY, "1"); }catch(e){}
   window.removeEventListener("keydown", tutorialKeyHandler);
   window.removeEventListener("resize", tutorialReflow);
+  // Push to cloud immediately so tutorial completion syncs to other devices
+  // without waiting for the 30-second auto-save interval.
+  if(typeof window.saveToCloud === "function") window.saveToCloud();
 }
 
 function tutorialIsActive(){
