@@ -66,8 +66,17 @@ function resetGameState(){
   inventory    = {};
   showcase     = [null, null, null, null];
   selectedSeed = "🥕";
+  // Give starter seeds — same as initDefaults.js does on first load
   seeds        = {};
+  if(typeof CROPS !== "undefined"){
+    CROPS.forEach(c => { if(!(c.emoji in seeds)) seeds[c.emoji] = 0; });
+  }
+  seeds["🥕"] = 3;
+  seeds["🌽"] = 2;
+  // Unlock first two tiles — same as initDefaults.js does on first load
   unlockedTiles = new Array(TILE_COUNT).fill(false);
+  unlockedTiles[0] = true;
+  unlockedTiles[1] = true;
   tileStates   = new Array(TILE_COUNT).fill(null).map(_=>({ state:"empty", crop:"", plantedAt:0, finishAt:0 }));
   zooPets      = [];
   roamingPetUids = [];
@@ -78,6 +87,15 @@ function resetGameState(){
     boosts.net           = 0;
     boosts.scarecrowUntil = 0;
   }
+  // Reset tutorial state so it triggers correctly for new accounts
+  if(typeof tutorialState !== "undefined"){
+    tutorialState.active = false;
+    tutorialState.step   = 0;
+    tutorialState.steps  = [];
+  }
+  // Hide tutorial overlay if it was open
+  const tutOverlay = document.getElementById("tutorialOverlay");
+  if(tutOverlay) tutOverlay.style.display = "none";
 }
 
 function loadState(){

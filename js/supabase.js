@@ -404,6 +404,7 @@ window.addEventListener("DOMContentLoaded", () => {
         // previous account leaks in. Do NOT push local state to cloud.
         if (typeof resetGameState === "function") resetGameState();
         clearAllGameStorage();
+        if (typeof initTiles  === "function") initTiles();
         if (typeof updateUI   === "function") updateUI();
         if (typeof renderFarm === "function") renderFarm();
         await syncPlayerName(user.id);
