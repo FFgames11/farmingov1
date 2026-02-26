@@ -392,16 +392,24 @@ window.addEventListener("DOMContentLoaded", () => {
 
       const saved = await loadFromCloud();
       if (saved) {
+        // Existing account — wipe local storage first, then restore from cloud
+        clearAllGameStorage();
         applyGameState(saved);
-        // After applying the cloud save, sync the restored name to players table
         await syncPlayerName(user.id);
         setAuthStatus(`Save loaded ✓  (${window.playerName})`);
       } else {
-        // First login — no cloud save yet, push local state up
+        // Brand new account — wipe any leftover localStorage from a previous
+        // account or the default game state, then start completely fresh.
+        // Do NOT push local state to cloud — it doesn't belong to this account.
+        clearAllGameStorage();
         await syncPlayerName(user.id);
-        await saveToCloud();
-        setAuthStatus("No cloud save yet — local progress uploaded.");
+        setAuthStatus("New account — starting fresh!");
+        // Cloud save will be created automatically on the first auto-save (30s)
+        // or when the player makes their first profile change.
       }
+
+      // Re-enable game loop writes for the new account
+      window.gameUIHidden = false;
 
       // Ensure game div is hidden — player goes to menu first, then Play
       const gameDiv = document.getElementById("game");
