@@ -332,6 +332,7 @@
       </div>
 
       <button id="logoutBtn" class="logoutBtn" onclick="handleLogout()" title="Log out" style="display:none;">🚪</button>
+      <button id="friendsBtn" class="friendsBtn" onclick="openFriendsPanel()" title="Friends" style="display:none;">👥</button>
       <button id="cloudSaveBtn" class="cloudSaveBtn" onclick="openAuthScreen()" title="Sign in to Cloud Save">☁️</button>
     </div>
     
@@ -341,6 +342,13 @@
   <div id="farmScreen" class="screen">
      
     <div class="farmcon">
+      <!-- Farm like counter — shown when logged in -->
+      <div id="farmLikeBar" style="display:none;">
+        <button id="farmLikeBtn" class="farmLikeBtn" onclick="likeFriend()">
+          <span id="farmLikeHeart">🤍</span>
+          <span id="farmLikeCount">0</span>
+        </button>
+      </div>
 
       <div class="townZooCon" >
         <button onclick="openZoo()" class="toZooBtn"><span data-title="Ranch">Ranch</span></button>
@@ -628,6 +636,76 @@
       <button class="logoutModalYes" id="logoutConfirmYes">Yes, Log Out</button>
       <button class="logoutModalNo"  id="logoutConfirmNo">Cancel</button>
     </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     FRIENDS PANEL
+═══════════════════════════════════════════════════ -->
+<div id="friendsPanel" style="display:none; position:fixed; inset:0; z-index:7000; align-items:flex-end; justify-content:center; background:rgba(0,0,0,0.45);">
+  <div class="friendsPanelCard">
+    <!-- Header -->
+    <div class="friendsPanelHeader">
+      <div class="friendsPanelTitle">👥 Friends</div>
+      <button class="friendsPanelClose" onclick="closeFriendsPanel()">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="friendsTabs">
+      <button class="friendsTab active" id="ftabFriends" onclick="switchFriendsTab('friends')">Friends</button>
+      <button class="friendsTab" id="ftabRequests" onclick="switchFriendsTab('requests')">
+        Requests <span id="friendRequestBadge" class="friendBadge" style="display:none;">0</span>
+      </button>
+      <button class="friendsTab" id="ftabAdd" onclick="switchFriendsTab('add')">Add</button>
+    </div>
+
+    <!-- Friends list tab -->
+    <div id="ftabContentFriends" class="friendsTabContent">
+      <div id="friendsList" class="friendsScrollList">
+        <div class="friendsEmpty">Loading friends…</div>
+      </div>
+    </div>
+
+    <!-- Requests tab -->
+    <div id="ftabContentRequests" class="friendsTabContent" style="display:none;">
+      <div id="requestsList" class="friendsScrollList">
+        <div class="friendsEmpty">No pending requests.</div>
+      </div>
+    </div>
+
+    <!-- Add friend tab -->
+    <div id="ftabContentAdd" class="friendsTabContent" style="display:none;">
+      <div class="friendsAddSection">
+        <p class="friendsAddLabel">Enter a player's username to send a friend request:</p>
+        <div class="friendsAddRow">
+          <input id="friendSearchInput" class="friendsAddInput" type="text" placeholder="Player name…" />
+          <button class="friendsAddBtn" onclick="searchAndAddFriend()">Send</button>
+        </div>
+        <div id="friendAddStatus" class="friendAddStatus"></div>
+        <div id="friendSearchResults" class="friendSearchResults"></div>
+      </div>
+
+      <!-- My like count -->
+      <div class="friendsLikesBox">
+        <span class="friendsLikesIcon">❤️</span>
+        <div>
+          <div class="friendsLikesCount" id="myLikeCount">0</div>
+          <div class="friendsLikesLabel">Total farm likes received</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     VISIT MODE OVERLAY
+     Shown when viewing a friend's farm (read-only)
+═══════════════════════════════════════════════════ -->
+<div id="visitModeBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:6500; pointer-events:none;">
+  <div class="visitModeBanner">
+    <span id="visitingName">👀 Visiting Player's Farm</span>
+    <button class="visitLeaveBtn" onclick="leaveVisit()" style="pointer-events:all;">← Leave</button>
   </div>
 </div>
 

@@ -454,6 +454,423 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+
+  /* ═══════════════════════════════════════════════════════
+     FRIENDS SYSTEM
+  ═══════════════════════════════════════════════════════ */
+
+  // ── State ──────────────────────────────────────────────
+  let _visitingPlayerId = null;   // null = own farm, string = visiting someone
+  let _visitingSaveData  = null;  // snapshot of visited farm
+  let _currentFriendsTab = "friends";
+
+  // ── Panel open/close ───────────────────────────────────
+  window.openFriendsPanel = async function() {
+    const panel = document.getElementById("friendsPanel");
+    if (panel) panel.style.display = "flex";
+    switchFriendsTab("friends");
+    await loadFriendsList();
+    await loadMyLikeCount();
+  };
+
+  window.closeFriendsPanel = function() {
+    const panel = document.getElementById("friendsPanel");
+    if (panel) panel.style.display = "none";
+  };
+
+  window.switchFriendsTab = function(tab) {
+    _currentFriendsTab = tab;
+    ["friends","requests","add"].forEach(t => {
+      const btn     = document.getElementById("ftab" + t.charAt(0).toUpperCase() + t.slice(1));
+      const content = document.getElementById("ftabContent" + t.charAt(0).toUpperCase() + t.slice(1));
+      if (btn)     btn.classList.toggle("active", t === tab);
+      if (content) content.style.display = t === tab ? "flex" : "none";
+    });
+    if (tab === "requests") loadFriendRequests();
+    if (tab === "friends")  loadFriendsList();
+    if (tab === "add")      loadMyLikeCount();
+  };
+
+  // ── Helpers ────────────────────────────────────────────
+  function friendInitial(name) {
+    return (name || "?").charAt(0).toUpperCase();
+  }
+
+  function setFriendsListHTML(containerId, html) {
+    const el = document.getElementById(containerId);
+    if (el) el.innerHTML = html;
+  }
+
+  function setFriendAddStatus(msg, color) {
+    const el = document.getElementById("friendAddStatus");
+    if (el) { el.textContent = msg; el.style.color = color || "#e85a1a"; }
+  }
+
+  function updateFriendRequestBadge(count) {
+    const badge = document.getElementById("friendRequestBadge");
+    const btnBadge = document.querySelector("#friendsBtn .friendsBtnBadge");
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? "inline" : "none";
+    }
+    if (btnBadge) {
+      btnBadge.textContent = count;
+      btnBadge.style.display = count > 0 ? "inline" : "none";
+    }
+  }
+
+  // ── Load friends list ──────────────────────────────────
+  async function loadFriendsList() {
+    const user = _currentUser;
+    if (!user) { setFriendsListHTML("friendsList", '<div class="friendsEmpty">Sign in to see friends.</div>'); return; }
+
+    setFriendsListHTML("friendsList", '<div class="friendsEmpty">Loading…</div>');
+
+    // Get all accepted friendships where this user is either side
+    const { data, error } = await supabase
+      .from("friendships")
+      .select("id, requester_id, receiver_id, players_requester:players!friendships_requester_id_fkey(player_name), players_receiver:players!friendships_receiver_id_fkey(player_name)")
+      .eq("status", "accepted")
+      .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
+
+    if (error) { setFriendsListHTML("friendsList", '<div class="friendsEmpty">Error loading friends.</div>'); return; }
+    if (!data || data.length === 0) {
+      setFriendsListHTML("friendsList", '<div class="friendsEmpty">No friends yet. Add some! 🐾</div>');
+      return;
+    }
+
+    const rows = data.map(f => {
+      const iAmRequester = f.requester_id === user.id;
+      const friendId   = iAmRequester ? f.receiver_id : f.requester_id;
+      const friendName = iAmRequester
+        ? (f.players_receiver?.player_name || "Unknown")
+        : (f.players_requester?.player_name || "Unknown");
+      return `
+        <div class="friendRow">
+          <div class="friendAvatar">${friendInitial(friendName)}</div>
+          <div class="friendInfo">
+            <div class="friendName">${escapeHtml(friendName)}</div>
+            <div class="friendSub">Friend</div>
+          </div>
+          <div class="friendActions">
+            <button class="friendActBtn friendActVisit" onclick="visitFriend('${friendId}','${escapeHtml(friendName)}')">🌾 Visit</button>
+            <button class="friendActBtn friendActRemove" onclick="removeFriend('${f.id}')">Remove</button>
+          </div>
+        </div>`;
+    }).join("");
+
+    setFriendsListHTML("friendsList", rows);
+  }
+
+  // ── Load incoming requests ─────────────────────────────
+  async function loadFriendRequests() {
+    const user = _currentUser;
+    if (!user) { setFriendsListHTML("requestsList", '<div class="friendsEmpty">Sign in to see requests.</div>'); return; }
+
+    setFriendsListHTML("requestsList", '<div class="friendsEmpty">Loading…</div>');
+
+    const { data, error } = await supabase
+      .from("friendships")
+      .select("id, requester_id, players_requester:players!friendships_requester_id_fkey(player_name)")
+      .eq("receiver_id", user.id)
+      .eq("status", "pending");
+
+    if (error) { setFriendsListHTML("requestsList", '<div class="friendsEmpty">Error loading requests.</div>'); return; }
+
+    updateFriendRequestBadge(data?.length || 0);
+
+    if (!data || data.length === 0) {
+      setFriendsListHTML("requestsList", '<div class="friendsEmpty">No pending requests.</div>');
+      return;
+    }
+
+    const rows = data.map(f => {
+      const name = f.players_requester?.player_name || "Unknown";
+      return `
+        <div class="friendRow">
+          <div class="friendAvatar">${friendInitial(name)}</div>
+          <div class="friendInfo">
+            <div class="friendName">${escapeHtml(name)}</div>
+            <div class="friendSub">Wants to be friends</div>
+          </div>
+          <div class="friendActions">
+            <button class="friendActBtn friendActAccept" onclick="acceptFriend('${f.id}')">✓ Accept</button>
+            <button class="friendActBtn friendActDecline" onclick="declineFriend('${f.id}')">✕</button>
+          </div>
+        </div>`;
+    }).join("");
+
+    setFriendsListHTML("requestsList", rows);
+  }
+
+  // ── Search + send friend request ───────────────────────
+  window.searchAndAddFriend = async function() {
+    const user = _currentUser;
+    if (!user) { setFriendAddStatus("Sign in first."); return; }
+
+    const query = (document.getElementById("friendSearchInput")?.value || "").trim();
+    if (!query) { setFriendAddStatus("Enter a player name."); return; }
+
+    setFriendAddStatus("Searching…", "#a07840");
+
+    // Search players by name (case-insensitive)
+    const { data, error } = await supabase
+      .from("players")
+      .select("player_id, player_name")
+      .ilike("player_name", query)
+      .neq("player_id", user.id)
+      .limit(5);
+
+    if (error || !data || data.length === 0) {
+      setFriendAddStatus("No player found with that name.");
+      document.getElementById("friendSearchResults").innerHTML = "";
+      return;
+    }
+
+    setFriendAddStatus("");
+    const results = data.map(p => `
+      <div class="friendRow">
+        <div class="friendAvatar">${friendInitial(p.player_name)}</div>
+        <div class="friendInfo">
+          <div class="friendName">${escapeHtml(p.player_name)}</div>
+        </div>
+        <div class="friendActions">
+          <button class="friendActBtn friendActAccept" onclick="sendFriendRequest('${p.player_id}','${escapeHtml(p.player_name)}')">+ Add</button>
+        </div>
+      </div>`).join("");
+
+    document.getElementById("friendSearchResults").innerHTML = results;
+  };
+
+  window.sendFriendRequest = async function(receiverId, receiverName) {
+    const user = _currentUser;
+    if (!user) return;
+
+    // Check not already friends or pending
+    const { data: existing } = await supabase
+      .from("friendships")
+      .select("id, status")
+      .or(`and(requester_id.eq.${user.id},receiver_id.eq.${receiverId}),and(requester_id.eq.${receiverId},receiver_id.eq.${user.id})`)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      const s = existing[0].status;
+      setFriendAddStatus(s === "accepted" ? "Already friends!" : "Request already sent.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("friendships")
+      .insert({ requester_id: user.id, receiver_id: receiverId, status: "pending" });
+
+    if (error) { setFriendAddStatus("Error sending request."); return; }
+    setFriendAddStatus(`Friend request sent to ${receiverName}! 🐾`, "#3da855");
+    document.getElementById("friendSearchResults").innerHTML = "";
+    document.getElementById("friendSearchInput").value = "";
+  };
+
+  // ── Accept / decline / remove ──────────────────────────
+  window.acceptFriend = async function(friendshipId) {
+    const { error } = await supabase
+      .from("friendships")
+      .update({ status: "accepted" })
+      .eq("id", friendshipId);
+    if (!error) { loadFriendRequests(); loadFriendsList(); }
+  };
+
+  window.declineFriend = async function(friendshipId) {
+    const { error } = await supabase
+      .from("friendships")
+      .delete()
+      .eq("id", friendshipId);
+    if (!error) loadFriendRequests();
+  };
+
+  window.removeFriend = async function(friendshipId) {
+    const { error } = await supabase
+      .from("friendships")
+      .delete()
+      .eq("id", friendshipId);
+    if (!error) loadFriendsList();
+  };
+
+  // ── Visit a friend's farm ──────────────────────────────
+  window.visitFriend = async function(friendId, friendName) {
+    const user = _currentUser;
+    if (!user) return;
+
+    closeFriendsPanel();
+
+    // Fetch their latest save
+    const { data, error } = await supabase
+      .from("game_saves")
+      .select("save")
+      .eq("player_id", friendId)
+      .single();
+
+    if (error || !data?.save) {
+      if (typeof showToast === "function") showToast(`${friendName} has no farm yet 😿`);
+      return;
+    }
+
+    // Store our own farm state so we can restore on leave
+    _visitingPlayerId = friendId;
+    _visitingSaveData = data.save;
+
+    // Apply friend's state visually (tiles, crops only — don't overwrite localStorage)
+    applyVisitState(data.save);
+
+    // Show visit banner
+    const banner = document.getElementById("visitModeBar");
+    const label  = document.getElementById("visitingName");
+    if (banner) banner.style.display = "block";
+    if (label)  label.textContent = `👀 Visiting ${friendName}'s Farm`;
+
+    // Show like button for visited farm
+    updateLikeButton(friendId);
+    const likeBar = document.getElementById("farmLikeBar");
+    if (likeBar) likeBar.style.display = "block";
+
+    // Make sure we're on the farm screen
+    if (typeof showFarm === "function") showFarm();
+  };
+
+  // Apply a save snapshot to the farm visually without touching localStorage
+  function applyVisitState(bundle) {
+    try {
+      const raw = bundle["catfarm_state_v5"] || (typeof bundle === "string" ? bundle : JSON.stringify(bundle));
+      const st  = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (!st) return;
+      // Override tile/crop display only
+      if (Array.isArray(st.tileStates))   tileStates   = st.tileStates;
+      if (Array.isArray(st.unlockedTiles)) unlockedTiles = st.unlockedTiles;
+      if (typeof renderFarm === "function") renderFarm();
+    } catch(e) { console.error("applyVisitState error:", e); }
+  }
+
+  // Leave visit — restore own farm
+  window.leaveVisit = function() {
+    _visitingPlayerId = null;
+    _visitingSaveData  = null;
+
+    const banner = document.getElementById("visitModeBar");
+    if (banner) banner.style.display = "none";
+
+    // Restore own tiles from localStorage
+    if (typeof loadState  === "function") loadState();
+    if (typeof renderFarm === "function") renderFarm();
+
+    // Update like bar for own farm
+    const likeBar = document.getElementById("farmLikeBar");
+    if (likeBar) likeBar.style.display = _currentUser ? "block" : "none";
+    if (_currentUser) updateLikeButton(null);
+  };
+
+  // ── Farm likes ─────────────────────────────────────────
+  // Show own like count on farm screen when logged in
+  async function loadMyLikeCount() {
+    const user = _currentUser;
+    if (!user) return;
+    const { count, error } = await supabase
+      .from("farm_likes")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", user.id);
+    const el = document.getElementById("myLikeCount");
+    if (el) el.textContent = error ? "?" : (count || 0);
+  }
+
+  // Update the like button state for a given farm owner
+  // ownerId = null means own farm (can't like own farm)
+  async function updateLikeButton(ownerId) {
+    const user = _currentUser;
+    const heart = document.getElementById("farmLikeHeart");
+    const countEl = document.getElementById("farmLikeCount");
+    if (!heart || !countEl) return;
+
+    if (!ownerId || !user || ownerId === user.id) {
+      // Own farm — show total likes received
+      heart.textContent = "❤️";
+      const { count } = await supabase
+        .from("farm_likes")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user?.id || "");
+      countEl.textContent = count || 0;
+      return;
+    }
+
+    // Visiting — check if we already liked this farm
+    const { data: existing } = await supabase
+      .from("farm_likes")
+      .select("id")
+      .eq("liker_id", user.id)
+      .eq("owner_id", ownerId)
+      .limit(1);
+
+    const liked = existing && existing.length > 0;
+    heart.textContent = liked ? "❤️" : "🤍";
+
+    const { count } = await supabase
+      .from("farm_likes")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", ownerId);
+    countEl.textContent = count || 0;
+  }
+
+  // Like or unlike the currently visited farm
+  window.likeFriend = async function() {
+    const user = _currentUser;
+    if (!user || !_visitingPlayerId) return;  // can't like own farm
+
+    const { data: existing } = await supabase
+      .from("farm_likes")
+      .select("id")
+      .eq("liker_id", user.id)
+      .eq("owner_id", _visitingPlayerId)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      // Already liked — unlike
+      await supabase.from("farm_likes").delete().eq("id", existing[0].id);
+    } else {
+      // Like
+      await supabase.from("farm_likes").insert({ liker_id: user.id, owner_id: _visitingPlayerId });
+    }
+    // Refresh button state
+    await updateLikeButton(_visitingPlayerId);
+  };
+
+  // Poll for pending requests every 60s while logged in
+  async function pollFriendRequests() {
+    const user = _currentUser;
+    if (!user) return;
+    const { count } = await supabase
+      .from("friendships")
+      .select("id", { count: "exact", head: true })
+      .eq("receiver_id", user.id)
+      .eq("status", "pending");
+    updateFriendRequestBadge(count || 0);
+  }
+  setInterval(pollFriendRequests, 60_000);
+
+  // ── Expose updateHeaderButtons to also toggle friends btn ──
+  const _origUpdateHeaderButtons = updateHeaderButtons;
+  updateHeaderButtons = function(loggedIn) {
+    _origUpdateHeaderButtons(loggedIn);
+    const friendsBtn = document.getElementById("friendsBtn");
+    if (friendsBtn) friendsBtn.style.display = loggedIn ? "flex" : "none";
+    const likeBar = document.getElementById("farmLikeBar");
+    if (likeBar) likeBar.style.display = loggedIn ? "block" : "none";
+    if (loggedIn) {
+      pollFriendRequests();
+      // Own farm — show like count
+      const liker = document.getElementById("farmLikeHeart");
+      if (liker) liker.textContent = "❤️";
+      updateLikeButton(null);
+    } else {
+      updateFriendRequestBadge(0);
+    }
+  };
+
   /* ── Auto-save every 30 s ────────────────────────────── */
   // Intentionally NOT hooked into the 250ms game loop in gameLoop.js.
   // The loop already calls saveState() (localStorage) every 250ms.
