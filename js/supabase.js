@@ -61,6 +61,44 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnSignup").style.display = isLogin ? "none"  : "block";
   };
 
+  // ── Clean up the game UI on logout ───────────────────────
+  // Hides all game screens/panels so they don't bleed through the login screen.
+  // Does NOT stop the game loop (no stored interval ID), but hides #game entirely.
+  function cleanGameUI() {
+    // Hide game and menu divs
+    const gameDiv = document.getElementById("game");
+    const menuDiv = document.getElementById("menu");
+    if (gameDiv) gameDiv.style.display = "none";
+    if (menuDiv) menuDiv.style.display = "none";
+
+    // Close tools panel if open
+    const toolsPanel = document.getElementById("toolsPanel");
+    const toolsArrow  = document.getElementById("toolsArrow");
+    if (toolsPanel) toolsPanel.classList.remove("open");
+    if (toolsArrow)  toolsArrow.classList.remove("open");
+
+    // Close any open modal
+    const modal = document.getElementById("modal");
+    if (modal) modal.style.display = "none";
+
+    // Hide tutorial overlay
+    const tut = document.getElementById("tutorialOverlay");
+    if (tut) tut.style.display = "none";
+
+    // Reset all sub-screens back to farm so next login starts clean
+    const farmScreen = document.getElementById("farmScreen");
+    const townScreen = document.getElementById("townScreen");
+    const zooScreen  = document.getElementById("zooScreen");
+    const arenaScreen = document.getElementById("arenaScreen");
+    if (farmScreen)  farmScreen.style.display  = "flex";
+    if (townScreen)  townScreen.style.display  = "none";
+    if (zooScreen)   zooScreen.style.display   = "none";
+    if (arenaScreen) arenaScreen.style.display = "none";
+
+    // Clear game save from localStorage so next login loads fresh from cloud
+    localStorage.removeItem("catfarm_state_v5");
+  }
+
   // Logout modal — wire buttons directly, we're already inside DOMContentLoaded
   const _logoutModal  = document.getElementById("logoutModal");
   const _logoutYesBtn = document.getElementById("logoutConfirmYes");
@@ -84,6 +122,7 @@ window.addEventListener("DOMContentLoaded", () => {
         await signOut();
         _currentUser = null;
         updateHeaderButtons(false);
+        cleanGameUI();
         if (typeof window.showLoadingThenRoute === "function") {
           window.showLoadingThenRoute();
         }
@@ -302,8 +341,11 @@ window.addEventListener("DOMContentLoaded", () => {
         setAuthStatus("No cloud save yet — local progress uploaded.");
       }
 
+      // Ensure game div is hidden — player goes to menu first, then Play
+      const gameDiv = document.getElementById("game");
+      if (gameDiv) gameDiv.style.display = "none";
+
       closeAuthScreen();
-      // Show main menu after successful login
       const menu = document.getElementById("menu");
       if (menu) menu.style.display = "flex";
       updateHeaderButtons(true);

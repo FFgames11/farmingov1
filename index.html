@@ -208,7 +208,9 @@
   window.guestPlay = function() {
     var as   = document.getElementById("authScreen");
     var menu = document.getElementById("menu");
+    var game = document.getElementById("game");
     if (as)   as.style.display   = "none";
+    if (game) game.style.display = "none";
     if (menu) menu.style.display = "flex";
   };
 
