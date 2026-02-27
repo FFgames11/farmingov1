@@ -829,8 +829,10 @@ window.addEventListener("DOMContentLoaded", () => {
   window.visitFriend = async function(friendId, friendName) {
     const user = _currentUser;
     if (!user) return;
+    if (friendId === user.id) return; // can't visit own farm
 
-    closeFriendsPanel();
+    // Close the friends modal
+    if (typeof closeModal === "function") closeModal();
 
     // Fetch their latest save
     const { data, error } = await supabase
@@ -840,61 +842,79 @@ window.addEventListener("DOMContentLoaded", () => {
       .single();
 
     if (error || !data?.save) {
-      if (typeof showToast === "function") showToast(`${friendName} has no farm yet 😿`);
+      if (typeof showMessage === "function")
+        showMessage("Empty Farm", `<div class="smallNote">${escapeHtml(friendName)} hasn't started farming yet 🌱</div>`);
       return;
     }
 
-    // Store our own farm state so we can restore on leave
+    // Remember we're visiting and who
     _visitingPlayerId = friendId;
-    _visitingSaveData = data.save;
+    _visitingSaveData  = data.save;
+    window.visitMode   = true;  // blocks clickTile in tools.js
 
-    // Apply friend's state visually (tiles, crops only — don't overwrite localStorage)
+    // Go to farm screen first
+    if (typeof showFarm === "function") showFarm();
+
+    // Apply their tiles visually (read-only — never touches localStorage)
     applyVisitState(data.save);
 
-    // Show visit banner
-    const banner = document.getElementById("visitModeBar");
-    const label  = document.getElementById("visitingName");
-    if (banner) banner.style.display = "block";
-    if (label)  label.textContent = `👀 Visiting ${friendName}'s Farm`;
+    // Hide game header and bottom nav
+    const header    = document.querySelector(".header");
+    const bottomBar = document.getElementById("bottomBar");
+    const toolStrip = document.getElementById("toolStrip");
+    if (header)    header.style.display    = "none";
+    if (bottomBar) bottomBar.style.display = "none";
+    if (toolStrip) toolStrip.style.display = "none";
 
-    // Show like button for visited farm
-    updateLikeButton(friendId);
-    const likeBar = document.getElementById("farmLikeBar");
-    if (likeBar) likeBar.style.display = "block";
+    // Show the visit bar
+    const visitBar  = document.getElementById("visitBar");
+    const visitName = document.getElementById("visitBarName");
+    if (visitBar)  visitBar.style.display  = "flex";
+    if (visitName) visitName.textContent   = `${friendName}'s Farm`;
 
-    // Make sure we're on the farm screen
-    if (typeof showFarm === "function") showFarm();
+    // Set up like button state
+    await updateLikeButton(friendId);
   };
 
-  // Apply a save snapshot to the farm visually without touching localStorage
+  // Apply a friend's save snapshot to the farm visually
+  // Never writes to localStorage — only updates in-memory tile arrays
   function applyVisitState(bundle) {
     try {
-      const raw = bundle["catfarm_state_v5"] || (typeof bundle === "string" ? bundle : JSON.stringify(bundle));
-      const st  = typeof raw === "string" ? JSON.parse(raw) : raw;
+      let st = null;
+      if (bundle["catfarm_state_v5"]) {
+        const raw = bundle["catfarm_state_v5"];
+        st = typeof raw === "string" ? JSON.parse(raw) : raw;
+      } else if (bundle.tileStates || bundle.unlockedTiles) {
+        st = bundle; // legacy flat save
+      }
       if (!st) return;
-      // Override tile/crop display only
-      if (Array.isArray(st.tileStates))   tileStates   = st.tileStates;
+      if (Array.isArray(st.tileStates))    tileStates    = st.tileStates;
       if (Array.isArray(st.unlockedTiles)) unlockedTiles = st.unlockedTiles;
       if (typeof renderFarm === "function") renderFarm();
     } catch(e) { console.error("applyVisitState error:", e); }
   }
 
-  // Leave visit — restore own farm
+  // Leave visit — restore own farm and UI
   window.leaveVisit = function() {
     _visitingPlayerId = null;
     _visitingSaveData  = null;
+    window.visitMode   = false;
 
-    const banner = document.getElementById("visitModeBar");
-    if (banner) banner.style.display = "none";
+    // Hide visit bar
+    const visitBar = document.getElementById("visitBar");
+    if (visitBar) visitBar.style.display = "none";
+
+    // Restore header and bottom nav
+    const header    = document.querySelector(".header");
+    const bottomBar = document.getElementById("bottomBar");
+    const toolStrip = document.getElementById("toolStrip");
+    if (header)    header.style.display    = "";
+    if (bottomBar) bottomBar.style.display = "";
+    if (toolStrip) toolStrip.style.display = "";
 
     // Restore own tiles from localStorage
     if (typeof loadState  === "function") loadState();
     if (typeof renderFarm === "function") renderFarm();
-
-    // Update like bar for own farm
-    const likeBar = document.getElementById("farmLikeBar");
-    if (likeBar) likeBar.style.display = _currentUser ? "block" : "none";
-    if (_currentUser) updateLikeButton(null);
   };
 
   // ── Farm likes ─────────────────────────────────────────
@@ -1035,13 +1055,8 @@ window.addEventListener("DOMContentLoaded", () => {
     _origUpdateHeaderButtons(loggedIn);
     const friendsBtn = document.getElementById("friendsBtn");
     if (friendsBtn) friendsBtn.style.display = loggedIn ? "flex" : "none";
-    const likeBar = document.getElementById("farmLikeBar");
-    if (likeBar) likeBar.style.display = loggedIn ? "block" : "none";
     if (loggedIn) {
       pollFriendRequests();
-      // Own farm — show like count
-      const liker = document.getElementById("farmLikeHeart");
-      if (liker) liker.textContent = "❤️";
       updateLikeButton(null);
     } else {
       updateFriendRequestBadge(0);

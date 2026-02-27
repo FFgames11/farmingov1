@@ -74,6 +74,7 @@ function clearMoveSelection(){
 function clickTile(i){
   if(tutorialIsActive()) return;
   if(bossBattle && bossBattle.active) return; // avoid weird overlap
+  if(window.visitMode) return; // visiting another farm — read-only
 
   // MOVE tool: if a source is selected, this click is treated as destination pick
   if(currentTool === "move" && moveSourceIndex !== null){
@@ -285,4 +286,3 @@ function harvestQuiz(tileIndex){
     }
   });
 }
-

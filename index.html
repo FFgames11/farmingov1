@@ -301,6 +301,24 @@
 <div id="game">
   <div id="toast"><span>⚠️</span><span id="toastText">A wild pet has appeared!</span></div>
 
+  <!-- VISIT MODE BAR — replaces header + bottom nav while visiting a friend -->
+  <div id="visitBar" style="display:none;">
+    <div class="visitBarInner">
+      <button class="visitBackBtn" onclick="leaveVisit()">
+        <img src="images/toolArrow.png" alt="back" style="width:16px;height:16px;transform:rotate(180deg);filter:brightness(10);" onerror="this.style.display='none'">
+        Back
+      </button>
+      <div class="visitBarInfo">
+        <span class="visitBarLabel">Visiting</span>
+        <span class="visitBarName" id="visitBarName">Player's Farm</span>
+      </div>
+      <button class="visitLikeBtn" id="visitLikeBtn" onclick="handleFarmLikeClick()">
+        <span id="farmLikeHeart">🤍</span>
+        <span id="farmLikeCount">0</span>
+      </button>
+    </div>
+  </div>
+
   <div class="header">
     <div class="profileArea">
       <div class="dpandlevelcon">
@@ -342,14 +360,6 @@
   <div id="farmScreen" class="screen">
      
     <div class="farmcon">
-      <!-- Farm like counter — shown when logged in -->
-      <div id="farmLikeBar" style="display:none;">
-        <button id="farmLikeBtn" class="farmLikeBtn" onclick="handleFarmLikeClick()">
-          <span id="farmLikeHeart">🤍</span>
-          <span id="farmLikeCount">0</span>
-        </button>
-      </div>
-
       <div class="townZooCon" >
         <button onclick="openZoo()" class="toZooBtn"><span data-title="Ranch">Ranch</span></button>
         <button onclick="showTown()" class="toTownBtn"><span data-title="Town">Town</span></button>
@@ -639,17 +649,6 @@
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════
-     VISIT MODE OVERLAY
-     Shown when viewing a friend's farm (read-only)
-═══════════════════════════════════════════════════ -->
-<div id="visitModeBar" style="display:none; position:fixed; top:0; left:0; right:0; z-index:6500; pointer-events:none;">
-  <div class="visitModeBanner">
-    <span id="visitingName">👀 Visiting Player's Farm</span>
-    <button class="visitLeaveBtn" onclick="leaveVisit()" style="pointer-events:all;">← Leave</button>
-  </div>
-</div>
 
 </body>
 </html>

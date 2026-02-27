@@ -494,34 +494,7 @@
   display: none;
 }
 
-/* =========================================================
-   FARM LIKE BAR
-========================================================= */
-#farmLikeBar {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  z-index: 100;
-}
-.farmLikeBtn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,0.82);
-  border: 2px solid rgba(232, 90, 90, 0.4);
-  border-radius: 99px;
-  padding: 4px 12px 4px 8px;
-  cursor: pointer;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  color: #c03030;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  transition: transform 0.15s, background 0.2s;
-}
-.farmLikeBtn:hover { background: rgba(255,240,240,0.95); }
-.farmLikeBtn:active { transform: scale(0.93); }
-#farmLikeHeart { font-size: 16px; }
+
 
 /* =========================================================
    FRIENDS PANEL (inside game modal)
@@ -749,33 +722,86 @@
 }
 
 /* =========================================================
-   VISIT MODE BANNER
+   VISIT MODE BAR
 ========================================================= */
-.visitModeBanner {
+#visitBar {
+  width: 100%;
+  background: linear-gradient(135deg, #3d2a0a 0%, #7a4a10 100%);
+  padding: 10px 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  flex-shrink: 0;
+  z-index: 100;
+}
+.visitBarInner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(90deg, #3d2a0a, #7a4a10);
-  padding: 10px 16px;
-  color: #fff;
-  font-family: 'Nunito', sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  gap: 10px;
 }
-.visitLeaveBtn {
-  padding: 6px 14px;
+.visitBackBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
   border: none;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.18);
   color: #fff;
   font-family: 'Nunito', sans-serif;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
-.visitLeaveBtn:hover { background: rgba(255,255,255,0.35); }
+.visitBackBtn:hover  { background: rgba(255,255,255,0.3); }
+.visitBackBtn:active { background: rgba(255,255,255,0.12); }
+
+.visitBarInfo {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+.visitBarLabel {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 1px;
+}
+.visitBarName {
+  display: block;
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.visitLikeBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+.visitLikeBtn:hover  { background: rgba(255, 100, 100, 0.4); }
+.visitLikeBtn:active { transform: scale(0.92); }
+#farmLikeHeart { font-size: 16px; }
 
 /* Suggested players section header */
 .friendsSuggestedHeader {
