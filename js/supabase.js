@@ -534,7 +534,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     if (tab === "requests") loadFriendRequests();
     if (tab === "friends")  loadFriendsList();
-    if (tab === "add")      loadMyLikeCount();
+    if (tab === "add")      { loadMyLikeCount(); loadSuggestedPlayers(); }
   };
 
   // ── Helpers ────────────────────────────────────────────
