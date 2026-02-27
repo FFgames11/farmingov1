@@ -603,43 +603,98 @@ window.addEventListener("DOMContentLoaded", () => {
     setFriendsListHTML("requestsList", rows);
   }
 
-  // ── Search + send friend request ───────────────────────
-  window.searchAndAddFriend = async function() {
-    const user = _currentUser;
-    if (!user) { setFriendAddStatus("Sign in first."); return; }
-
-    const query = (document.getElementById("friendSearchInput")?.value || "").trim();
-    if (!query) { setFriendAddStatus("Enter a player name."); return; }
-
-    setFriendAddStatus("Searching…", "#a07840");
-
-    // Search players by name (case-insensitive)
-    const { data, error } = await supabase
-      .from("players")
-      .select("player_id, player_name")
-      .ilike("player_name", query)
-      .neq("player_id", user.id)
-      .limit(5);
-
-    if (error || !data || data.length === 0) {
-      setFriendAddStatus("No player found with that name.");
-      document.getElementById("friendSearchResults").innerHTML = "";
-      return;
-    }
-
-    setFriendAddStatus("");
-    const results = data.map(p => `
-      <div class="friendRow">
+  // ── Render a player result row (shared by search + suggested list) ────
+  function renderPlayerRow(p, user, existingIds) {
+    const alreadyLinked = existingIds.has(p.player_id);
+    return `
+      <div class="friendRow" id="playerRow_${p.player_id}">
         <div class="friendAvatar">${friendInitial(p.player_name)}</div>
         <div class="friendInfo">
           <div class="friendName">${escapeHtml(p.player_name)}</div>
         </div>
         <div class="friendActions">
-          <button class="friendActBtn friendActAccept" onclick="sendFriendRequest('${p.player_id}','${escapeHtml(p.player_name)}')">+ Add</button>
+          ${alreadyLinked
+            ? `<span class="friendActBtn" style="background:#f5ead5;color:#a07840;cursor:default;">Added</span>`
+            : `<button class="friendActBtn friendActAccept" onclick="sendFriendRequest('${p.player_id}','${escapeHtml(p.player_name)}')">＋ Send</button>`
+          }
+          <button class="friendActBtn friendActRemove" title="Block (coming soon)" onclick="showToast('Block feature coming soon 🚧')" style="opacity:0.6;">🚫</button>
         </div>
-      </div>`).join("");
+      </div>`;
+  }
 
-    document.getElementById("friendSearchResults").innerHTML = results;
+  // ── Get IDs of players already connected (friend or pending) ────────
+  async function getConnectedPlayerIds(userId) {
+    const { data } = await supabase
+      .from("friendships")
+      .select("requester_id, receiver_id")
+      .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
+    const ids = new Set();
+    (data || []).forEach(f => {
+      ids.add(f.requester_id);
+      ids.add(f.receiver_id);
+    });
+    ids.delete(userId);
+    return ids;
+  }
+
+  // ── Load all other players as suggested list ─────────────────────────
+  async function loadSuggestedPlayers() {
+    const user = _currentUser;
+    if (!user) return;
+
+    const suggestedEl = document.getElementById("suggestedPlayersList");
+    if (!suggestedEl) return;
+    suggestedEl.innerHTML = '<div class="friendsEmpty">Loading players…</div>';
+
+    const [{ data, error }, existingIds] = await Promise.all([
+      supabase.from("players").select("player_id, player_name").neq("player_id", user.id).order("player_name").limit(30),
+      getConnectedPlayerIds(user.id)
+    ]);
+
+    if (error || !data || data.length === 0) {
+      suggestedEl.innerHTML = '<div class="friendsEmpty">No other players found.</div>';
+      return;
+    }
+
+    suggestedEl.innerHTML = data.map(p => renderPlayerRow(p, user, existingIds)).join("");
+  }
+
+  // ── Search players by name ───────────────────────────────────────────
+  window.searchAndAddFriend = async function() {
+    const user = _currentUser;
+    if (!user) { setFriendAddStatus("Sign in first."); return; }
+
+    const query = (document.getElementById("friendSearchInput")?.value || "").trim();
+    if (!query) {
+      // Empty query — just reload the suggested list
+      setFriendAddStatus("");
+      document.getElementById("friendSearchResults").innerHTML = "";
+      await loadSuggestedPlayers();
+      return;
+    }
+
+    setFriendAddStatus("Searching…", "#a07840");
+
+    // Use %query% wildcards for partial name match
+    const [{ data, error }, existingIds] = await Promise.all([
+      supabase.from("players").select("player_id, player_name")
+        .ilike("player_name", `%${query}%`)
+        .neq("player_id", user.id)
+        .limit(10),
+      getConnectedPlayerIds(user.id)
+    ]);
+
+    if (error) { setFriendAddStatus("Search error. Try again."); return; }
+
+    if (!data || data.length === 0) {
+      setFriendAddStatus(`No player found matching "${query}".`);
+      document.getElementById("friendSearchResults").innerHTML = "";
+      return;
+    }
+
+    setFriendAddStatus(`Found ${data.length} player${data.length > 1 ? "s" : ""}`, "#3da855");
+    document.getElementById("friendSearchResults").innerHTML =
+      data.map(p => renderPlayerRow(p, user, existingIds)).join("");
   };
 
   window.sendFriendRequest = async function(receiverId, receiverName) {
@@ -655,7 +710,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (existing && existing.length > 0) {
       const s = existing[0].status;
-      setFriendAddStatus(s === "accepted" ? "Already friends!" : "Request already sent.");
+      setFriendAddStatus(s === "accepted" ? "Already friends!" : "Request already sent.", "#a07840");
+      swapSendBtn(receiverId);
       return;
     }
 
@@ -664,10 +720,25 @@ window.addEventListener("DOMContentLoaded", () => {
       .insert({ requester_id: user.id, receiver_id: receiverId, status: "pending" });
 
     if (error) { setFriendAddStatus("Error sending request."); return; }
-    setFriendAddStatus(`Friend request sent to ${receiverName}! 🐾`, "#3da855");
-    document.getElementById("friendSearchResults").innerHTML = "";
-    document.getElementById("friendSearchInput").value = "";
+
+    setFriendAddStatus(`Request sent to ${receiverName}! 🐾`, "#3da855");
+    swapSendBtn(receiverId);
   };
+
+  // Replace the Send button with an "Added" label in-place
+  function swapSendBtn(playerId) {
+    const row = document.getElementById(`playerRow_${playerId}`);
+    if (!row) return;
+    const btn = row.querySelector(".friendActAccept");
+    if (btn) {
+      btn.textContent = "✓ Sent";
+      btn.style.background = "#f5ead5";
+      btn.style.color = "#a07840";
+      btn.style.boxShadow = "none";
+      btn.onclick = null;
+      btn.style.cursor = "default";
+    }
+  }
 
   // ── Accept / decline / remove ──────────────────────────
   window.acceptFriend = async function(friendshipId) {
