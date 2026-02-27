@@ -21,7 +21,7 @@ function openPetDetails(uid){
   let combineNote = "";
   if(meta && lvl < 5){
     const dupCount = zooPets.filter(p=>p.uid!==uid && p.animalId===pet.animalId && (p.level||1)===lvl).length;
-    combineBtn = `<button ${dupCount ? "" : "disabled"} onclick="combinePet('${pet.uid}')">Combine</button>`;
+    combineBtn = `<button ${dupCount ? "" : "disabled"} onclick="combinePet('${pet.uid}')"><span data-title="Combine">Combine</span></button>`;
     combineNote = `<div class="smallNote" style="text-align:left;">Combine needs 2 copies of the same animal and the same level. (${dupCount ? "Ready" : "Need 1 more"})</div>`;
   }
 
