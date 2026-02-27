@@ -344,7 +344,7 @@
     <div class="farmcon">
       <!-- Farm like counter — shown when logged in -->
       <div id="farmLikeBar" style="display:none;">
-        <button id="farmLikeBtn" class="farmLikeBtn" onclick="likeFriend()">
+        <button id="farmLikeBtn" class="farmLikeBtn" onclick="handleFarmLikeClick()">
           <span id="farmLikeHeart">🤍</span>
           <span id="farmLikeCount">0</span>
         </button>
@@ -639,72 +639,6 @@
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════
-     FRIENDS PANEL
-═══════════════════════════════════════════════════ -->
-<div id="friendsPanel" style="display:none; position:fixed; inset:0; z-index:7000; align-items:flex-end; justify-content:center; background:rgba(0,0,0,0.45);">
-  <div class="friendsPanelCard">
-    <!-- Header -->
-    <div class="friendsPanelHeader">
-      <div class="friendsPanelTitle">👥 Friends</div>
-      <button class="friendsPanelClose" onclick="closeFriendsPanel()">✕</button>
-    </div>
-
-    <!-- Tabs -->
-    <div class="friendsTabs">
-      <button class="friendsTab active" id="ftabFriends" onclick="switchFriendsTab('friends')">Friends</button>
-      <button class="friendsTab" id="ftabRequests" onclick="switchFriendsTab('requests')">
-        Requests <span id="friendRequestBadge" class="friendBadge" style="display:none;">0</span>
-      </button>
-      <button class="friendsTab" id="ftabAdd" onclick="switchFriendsTab('add')">Add</button>
-    </div>
-
-    <!-- Friends list tab -->
-    <div id="ftabContentFriends" class="friendsTabContent">
-      <div id="friendsList" class="friendsScrollList">
-        <div class="friendsEmpty">Loading friends…</div>
-      </div>
-    </div>
-
-    <!-- Requests tab -->
-    <div id="ftabContentRequests" class="friendsTabContent" style="display:none;">
-      <div id="requestsList" class="friendsScrollList">
-        <div class="friendsEmpty">No pending requests.</div>
-      </div>
-    </div>
-
-    <!-- Add friend tab -->
-    <div id="ftabContentAdd" class="friendsTabContent" style="display:none;">
-      <div class="friendsAddSection">
-        <p class="friendsAddLabel">Search by player name:</p>
-        <div class="friendsAddRow">
-          <input id="friendSearchInput" class="friendsAddInput" type="text" placeholder="Player name…"
-            onkeydown="if(event.key==='Enter') searchAndAddFriend()" />
-          <button class="friendsAddBtn" onclick="searchAndAddFriend()">Search</button>
-        </div>
-        <div id="friendAddStatus" class="friendAddStatus"></div>
-        <!-- Search results (shown after searching) -->
-        <div id="friendSearchResults" class="friendSearchResults"></div>
-      </div>
-
-      <!-- My like count -->
-      <div class="friendsLikesBox">
-        <span class="friendsLikesIcon">❤️</span>
-        <div>
-          <div class="friendsLikesCount" id="myLikeCount">0</div>
-          <div class="friendsLikesLabel">Total farm likes received</div>
-        </div>
-      </div>
-
-      <!-- Suggested / All players -->
-      <div class="friendsSuggestedHeader">👀 All Players</div>
-      <div id="suggestedPlayersList" class="friendsScrollList" style="max-height:220px;">
-        <div class="friendsEmpty">Loading players…</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ═══════════════════════════════════════════════════
      VISIT MODE OVERLAY

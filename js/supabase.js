@@ -464,18 +464,64 @@ window.addEventListener("DOMContentLoaded", () => {
   let _visitingSaveData  = null;  // snapshot of visited farm
   let _currentFriendsTab = "friends";
 
-  // ── Panel open/close ───────────────────────────────────
+  // ── Panel open/close — uses the game's native modal ───────────────────
   window.openFriendsPanel = async function() {
-    const panel = document.getElementById("friendsPanel");
-    if (panel) panel.style.display = "flex";
-    switchFriendsTab("friends");
-    await loadFriendsList();
-    await loadMyLikeCount();
+    if (typeof showMessage !== "function") return;
+
+    // Render the friends panel HTML inside the game modal
+    showMessage("Friends", `
+      <div class="friendsModalInner">
+        <div class="friendsTabs" style="margin-bottom:10px;">
+          <button class="friendsTab active" id="ftabFriends"   onclick="switchFriendsTab('friends')">Friends</button>
+          <button class="friendsTab"        id="ftabRequests"  onclick="switchFriendsTab('requests')">
+            Requests <span id="friendRequestBadge" class="friendBadge" style="display:none;">0</span>
+          </button>
+          <button class="friendsTab"        id="ftabAdd"       onclick="switchFriendsTab('add')">Add</button>
+        </div>
+
+        <!-- Friends list tab -->
+        <div id="ftabContentFriends" class="friendsTabContent">
+          <div id="friendsList" class="friendsScrollList">
+            <div class="friendsEmpty">Loading friends…</div>
+          </div>
+        </div>
+
+        <!-- Requests tab -->
+        <div id="ftabContentRequests" class="friendsTabContent" style="display:none;">
+          <div id="requestsList" class="friendsScrollList">
+            <div class="friendsEmpty">No pending requests.</div>
+          </div>
+        </div>
+
+        <!-- Add friend tab -->
+        <div id="ftabContentAdd" class="friendsTabContent" style="display:none; overflow-y:auto;">
+          <div class="friendsAddSection">
+            <p class="friendsAddLabel">Search by player name:</p>
+            <div class="friendsAddRow">
+              <input id="friendSearchInput" class="friendsAddInput" type="text" placeholder="Player name…"
+                onkeydown="if(event.key==='Enter') searchAndAddFriend()" />
+              <button class="friendsAddBtn" onclick="searchAndAddFriend()">Search</button>
+            </div>
+            <div id="friendAddStatus" class="friendAddStatus"></div>
+            <div id="friendSearchResults" class="friendSearchResults"></div>
+          </div>
+          <div class="friendsSuggestedHeader">⭐ Recommended Players</div>
+          <div id="suggestedPlayersList" class="friendsScrollList" style="max-height:180px;">
+            <div class="friendsEmpty">Loading players…</div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    // Load initial tab data after modal renders
+    setTimeout(async () => {
+      switchFriendsTab("friends");
+      await loadFriendsList();
+    }, 50);
   };
 
   window.closeFriendsPanel = function() {
-    const panel = document.getElementById("friendsPanel");
-    if (panel) panel.style.display = "none";
+    if (typeof closeModal === "function") closeModal();
   };
 
   window.switchFriendsTab = function(tab) {
@@ -637,7 +683,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return ids;
   }
 
-  // ── Load all other players as suggested list ─────────────────────────
+  // ── Load recommended / all players list ──────────────────────────────
   async function loadSuggestedPlayers() {
     const user = _currentUser;
     if (!user) return;
@@ -646,17 +692,31 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!suggestedEl) return;
     suggestedEl.innerHTML = '<div class="friendsEmpty">Loading players…</div>';
 
-    const [{ data, error }, existingIds] = await Promise.all([
-      supabase.from("players").select("player_id, player_name").neq("player_id", user.id).order("player_name").limit(30),
-      getConnectedPlayerIds(user.id)
-    ]);
+    try {
+      const [playersRes, existingIds] = await Promise.all([
+        supabase.from("players")
+          .select("player_id, player_name")
+          .neq("player_id", user.id)
+          .order("player_name", { ascending: true })
+          .limit(30),
+        getConnectedPlayerIds(user.id)
+      ]);
 
-    if (error || !data || data.length === 0) {
-      suggestedEl.innerHTML = '<div class="friendsEmpty">No other players found.</div>';
-      return;
+      const { data, error } = playersRes;
+      if (error) {
+        console.error("loadSuggestedPlayers error:", error.message);
+        suggestedEl.innerHTML = '<div class="friendsEmpty">Could not load players.</div>';
+        return;
+      }
+      if (!data || data.length === 0) {
+        suggestedEl.innerHTML = '<div class="friendsEmpty">No other players found.</div>';
+        return;
+      }
+      suggestedEl.innerHTML = data.map(p => renderPlayerRow(p, user, existingIds)).join("");
+    } catch(e) {
+      console.error("loadSuggestedPlayers exception:", e);
+      suggestedEl.innerHTML = '<div class="friendsEmpty">Error loading players.</div>';
     }
-
-    suggestedEl.innerHTML = data.map(p => renderPlayerRow(p, user, existingIds)).join("");
   }
 
   // ── Search players by name ───────────────────────────────────────────
@@ -840,14 +900,9 @@ window.addEventListener("DOMContentLoaded", () => {
   // ── Farm likes ─────────────────────────────────────────
   // Show own like count on farm screen when logged in
   async function loadMyLikeCount() {
-    const user = _currentUser;
-    if (!user) return;
-    const { count, error } = await supabase
-      .from("farm_likes")
-      .select("id", { count: "exact", head: true })
-      .eq("owner_id", user.id);
-    const el = document.getElementById("myLikeCount");
-    if (el) el.textContent = error ? "?" : (count || 0);
+    // myLikeCount element was moved to the farm like modal — no panel element to update
+    // Just refresh the like button counter on own farm
+    await updateLikeButton(null);
   }
 
   // Update the like button state for a given farm owner
@@ -885,6 +940,57 @@ window.addEventListener("DOMContentLoaded", () => {
       .select("id", { count: "exact", head: true })
       .eq("owner_id", ownerId);
     countEl.textContent = count || 0;
+  }
+
+  // Click handler for the farm like button
+  // - On own farm: open a modal showing total likes received
+  // - On a friend's farm: like/unlike
+  window.handleFarmLikeClick = async function() {
+    if (!_visitingPlayerId) {
+      // Own farm — show likes modal
+      await showFarmLikesModal();
+    } else {
+      // Visiting — like/unlike
+      await likeFriend();
+    }
+  };
+
+  async function showFarmLikesModal() {
+    const user = _currentUser;
+    if (!user) return;
+
+    // Fetch total like count
+    const { count, error } = await supabase
+      .from("farm_likes")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", user.id);
+
+    const total = error ? 0 : (count || 0);
+
+    // Update the counter on the button too
+    const countEl = document.getElementById("farmLikeCount");
+    if (countEl) countEl.textContent = total;
+
+    // Use the game's existing showMessage/openModal function
+    if (typeof showMessage === "function") {
+      showMessage("Farm Likes", `
+        <div style="text-align:center; padding: 8px 0 4px;">
+          <div style="font-size: 52px; margin-bottom: 8px;">❤️</div>
+          <div style="font: normal 42px/1 'Bungee', cursive; color:#B8783F; margin-bottom: 6px;">${total}</div>
+          <div style="font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; color:#8A6A6A;">
+            Total likes your farm has received
+          </div>
+          ${total === 0
+            ? `<div style="margin-top:14px; font-family:'Nunito',sans-serif; font-size:12px; color:#b0906a;">
+                Add friends and let them visit your farm to collect likes! 🐾
+               </div>`
+            : `<div style="margin-top:14px; font-family:'Nunito',sans-serif; font-size:12px; color:#3da855; font-weight:700;">
+                Your farm is popular! Keep it up 🌾
+               </div>`
+          }
+        </div>
+      `);
+    }
   }
 
   // Like or unlike the currently visited farm
