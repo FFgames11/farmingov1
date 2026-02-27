@@ -360,6 +360,13 @@
   <div id="farmScreen" class="screen">
      
     <div class="farmcon">
+
+      <!-- Own-farm like counter — hidden during visits, hidden when logged out -->
+      <button id="ownFarmLikeWidget" class="ownFarmLikeWidget" onclick="handleFarmLikeClick()" style="display:none;" title="Your farm likes">
+        <span>❤️</span>
+        <span id="ownFarmLikeCount">0</span>
+      </button>
+
       <div class="townZooCon" >
         <button onclick="openZoo()" class="toZooBtn"><span data-title="Ranch">Ranch</span></button>
         <button onclick="showTown()" class="toTownBtn"><span data-title="Town">Town</span></button>

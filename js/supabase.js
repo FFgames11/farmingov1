@@ -858,13 +858,15 @@ window.addEventListener("DOMContentLoaded", () => {
     // Apply their tiles visually (read-only — never touches localStorage)
     applyVisitState(data.save);
 
-    // Hide game header and bottom nav
+    // Hide game header, bottom nav, and own-farm like widget
     const header    = document.querySelector(".header");
     const bottomBar = document.getElementById("bottomBar");
     const toolStrip = document.getElementById("toolStrip");
+    const ownWidget = document.getElementById("ownFarmLikeWidget");
     if (header)    header.style.display    = "none";
     if (bottomBar) bottomBar.style.display = "none";
     if (toolStrip) toolStrip.style.display = "none";
+    if (ownWidget) ownWidget.style.display = "none";
 
     // Show the visit bar
     const visitBar  = document.getElementById("visitBar");
@@ -904,13 +906,17 @@ window.addEventListener("DOMContentLoaded", () => {
     const visitBar = document.getElementById("visitBar");
     if (visitBar) visitBar.style.display = "none";
 
-    // Restore header and bottom nav
+    // Restore header, bottom nav, and own-farm like widget
     const header    = document.querySelector(".header");
     const bottomBar = document.getElementById("bottomBar");
     const toolStrip = document.getElementById("toolStrip");
+    const ownWidget = document.getElementById("ownFarmLikeWidget");
     if (header)    header.style.display    = "";
     if (bottomBar) bottomBar.style.display = "";
     if (toolStrip) toolStrip.style.display = "";
+    if (ownWidget) ownWidget.style.display = "flex";
+    // Refresh like count on own farm
+    updateLikeButton(null);
 
     // Restore own tiles from localStorage
     if (typeof loadState  === "function") loadState();
@@ -929,22 +935,32 @@ window.addEventListener("DOMContentLoaded", () => {
   // ownerId = null means own farm (can't like own farm)
   async function updateLikeButton(ownerId) {
     const user = _currentUser;
-    const heart = document.getElementById("farmLikeHeart");
-    const countEl = document.getElementById("farmLikeCount");
-    if (!heart || !countEl) return;
 
     if (!ownerId || !user || ownerId === user.id) {
-      // Own farm — show total likes received
-      heart.textContent = "❤️";
+      // Own farm — fetch total and update the own-farm widget
       const { count } = await supabase
         .from("farm_likes")
         .select("id", { count: "exact", head: true })
         .eq("owner_id", user?.id || "");
-      countEl.textContent = count || 0;
+      const total = count || 0;
+
+      const ownWidget = document.getElementById("ownFarmLikeWidget");
+      const ownCount  = document.getElementById("ownFarmLikeCount");
+      if (ownWidget) ownWidget.style.display = "flex";
+      if (ownCount)  ownCount.textContent    = total;
+
+      // Keep visit bar in sync too
+      const heart   = document.getElementById("farmLikeHeart");
+      const countEl = document.getElementById("farmLikeCount");
+      if (heart)   heart.textContent   = "❤️";
+      if (countEl) countEl.textContent = total;
       return;
     }
 
-    // Visiting — check if we already liked this farm
+    // Visiting a friend — update visit bar like button
+    const heart   = document.getElementById("farmLikeHeart");
+    const countEl = document.getElementById("farmLikeCount");
+
     const { data: existing } = await supabase
       .from("farm_likes")
       .select("id")
@@ -953,13 +969,13 @@ window.addEventListener("DOMContentLoaded", () => {
       .limit(1);
 
     const liked = existing && existing.length > 0;
-    heart.textContent = liked ? "❤️" : "🤍";
+    if (heart)   heart.textContent = liked ? "❤️" : "🤍";
 
     const { count } = await supabase
       .from("farm_likes")
       .select("id", { count: "exact", head: true })
       .eq("owner_id", ownerId);
-    countEl.textContent = count || 0;
+    if (countEl) countEl.textContent = count || 0;
   }
 
   // Click handler for the farm like button
