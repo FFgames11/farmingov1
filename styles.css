@@ -334,6 +334,29 @@ body{
   align-items:center;
   gap: 10px;
 }
+
+
+.menusCon {
+    position: absolute;
+    right: 17px;
+    top: 100px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-evenly;
+    padding: 0;
+    margin: 0;
+    gap: 11px;
+    align-items: center;
+}
+
+
+.menusCon img {width: 50px;}
+.menusCon button {padding: 0; background:transparent; border: 0;}
+.menusCon button:hover {background: transparent;}
+
+
 .townBtn{
   width: 44px;
   height: 38px;
@@ -766,6 +789,7 @@ body{
   cursor: pointer;
   width: 200px;
   height: 111px;
+  top: 22px;
 }
 
 .toZooBtn:hover:before{
