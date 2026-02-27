@@ -852,21 +852,29 @@ window.addEventListener("DOMContentLoaded", () => {
     _visitingSaveData  = data.save;
     window.visitMode   = true;  // blocks clickTile in tools.js
 
+    // Snapshot OUR OWN tile data before overwriting in-memory arrays
+    // The game loop calls saveState() every 250ms, which would corrupt
+    // localStorage with the friend's data if we didn't save ours first.
+    window._ownTileStatesSnapshot    = JSON.parse(JSON.stringify(tileStates));
+    window._ownUnlockedTilesSnapshot = JSON.parse(JSON.stringify(unlockedTiles));
+
     // Go to farm screen first
     if (typeof showFarm === "function") showFarm();
 
     // Apply their tiles visually (read-only — never touches localStorage)
     applyVisitState(data.save);
 
-    // Hide game header, bottom nav, and own-farm like widget
-    const header    = document.querySelector(".header");
-    const bottomBar = document.getElementById("bottomBar");
-    const toolStrip = document.getElementById("toolStrip");
-    const ownWidget = document.getElementById("ownFarmLikeWidget");
-    if (header)    header.style.display    = "none";
-    if (bottomBar) bottomBar.style.display = "none";
-    if (toolStrip) toolStrip.style.display = "none";
-    if (ownWidget) ownWidget.style.display = "none";
+    // Hide game header, bottom nav, tool strip, Ranch/Town nav, own-farm like widget
+    const header      = document.querySelector(".header");
+    const bottomBar   = document.getElementById("bottomBar");
+    const toolStrip   = document.getElementById("toolStrip");
+    const ownWidget   = document.getElementById("ownFarmLikeWidget");
+    const townZooCon  = document.querySelector(".townZooCon");
+    if (header)     header.style.display     = "none";
+    if (bottomBar)  bottomBar.style.display  = "none";
+    if (toolStrip)  toolStrip.style.display  = "none";
+    if (ownWidget)  ownWidget.style.display  = "none";
+    if (townZooCon) townZooCon.style.display = "none";
 
     // Show the visit bar
     const visitBar  = document.getElementById("visitBar");
@@ -906,20 +914,32 @@ window.addEventListener("DOMContentLoaded", () => {
     const visitBar = document.getElementById("visitBar");
     if (visitBar) visitBar.style.display = "none";
 
-    // Restore header, bottom nav, and own-farm like widget
-    const header    = document.querySelector(".header");
-    const bottomBar = document.getElementById("bottomBar");
-    const toolStrip = document.getElementById("toolStrip");
+    // Restore header, bottom nav, tool strip, Ranch/Town nav, own-farm like widget
+    const header     = document.querySelector(".header");
+    const bottomBar  = document.getElementById("bottomBar");
+    const toolStrip  = document.getElementById("toolStrip");
+    const townZooCon = document.querySelector(".townZooCon");
+    if (header)     header.style.display     = "";
+    if (bottomBar)  bottomBar.style.display  = "";
+    if (toolStrip)  toolStrip.style.display  = "";
+    if (townZooCon) townZooCon.style.display = "";
+    // Only show own-farm like widget if logged in
     const ownWidget = document.getElementById("ownFarmLikeWidget");
-    if (header)    header.style.display    = "";
-    if (bottomBar) bottomBar.style.display = "";
-    if (toolStrip) toolStrip.style.display = "";
-    if (ownWidget) ownWidget.style.display = "flex";
+    if (ownWidget) ownWidget.style.display = _currentUser ? "flex" : "none";
     // Refresh like count on own farm
-    updateLikeButton(null);
+    if (_currentUser) updateLikeButton(null);
 
-    // Restore own tiles from localStorage
-    if (typeof loadState  === "function") loadState();
+    // Restore own tiles from in-memory snapshot (not localStorage —
+    // the game loop's saveState() may have written friend data there)
+    if (window._ownTileStatesSnapshot && typeof tileStates !== "undefined") {
+      tileStates    = window._ownTileStatesSnapshot;
+      unlockedTiles = window._ownUnlockedTilesSnapshot;
+      window._ownTileStatesSnapshot    = null;
+      window._ownUnlockedTilesSnapshot = null;
+    } else {
+      // Fallback: load from localStorage
+      if (typeof loadState === "function") loadState();
+    }
     if (typeof renderFarm === "function") renderFarm();
   };
 
@@ -944,9 +964,10 @@ window.addEventListener("DOMContentLoaded", () => {
         .eq("owner_id", user?.id || "");
       const total = count || 0;
 
+      // Only show widget if we're NOT in visit mode
       const ownWidget = document.getElementById("ownFarmLikeWidget");
       const ownCount  = document.getElementById("ownFarmLikeCount");
-      if (ownWidget) ownWidget.style.display = "flex";
+      if (ownWidget) ownWidget.style.display = window.visitMode ? "none" : "flex";
       if (ownCount)  ownCount.textContent    = total;
 
       // Keep visit bar in sync too

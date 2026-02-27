@@ -18,6 +18,7 @@ function tileCenterInWrap(tileIndex){
 
 function trySpawnWildPet(){
   if(tutorialIsActive()) return;
+  if(window.visitMode) return; // read-only during farm visit
   if(bossBattle && bossBattle.active) return;
   if(activeWildPet) return;
   const now = Date.now();

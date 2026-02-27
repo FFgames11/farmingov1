@@ -36,6 +36,9 @@ let nextPetSpawnAt = 0;
 let nextBossSpawnAt = 0;
 
 function saveState(){
+  // Never write to localStorage while visiting a friend's farm —
+  // tileStates/unlockedTiles are temporarily overwritten with their data.
+  if (window.visitMode) return;
   try{
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,

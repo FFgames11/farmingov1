@@ -16,6 +16,7 @@ function scheduleNextBossSpawn(){
 
 function trySpawnBoss(){
   if(tutorialIsActive()) return;
+  if(window.visitMode) return; // read-only during farm visit
   if(bossBattle && bossBattle.active) return;
   if(activeWildPet) return;
   if(modal.style.display === "flex") return;
@@ -410,4 +411,3 @@ function endBossBattle(result){
     return;
   }
 }
-
