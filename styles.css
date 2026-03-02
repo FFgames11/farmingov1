@@ -3080,4 +3080,5 @@ hr.sep{
   letter-spacing: 0.3px;
   z-index: 20;
   box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  display: none;
 }
