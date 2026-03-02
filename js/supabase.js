@@ -462,6 +462,8 @@ window.addEventListener("DOMContentLoaded", () => {
   // ── State ──────────────────────────────────────────────
   let _visitingPlayerId = null;   // null = own farm, string = visiting someone
   let _visitingSaveData  = null;  // snapshot of visited farm
+  let _visitingZooPets   = [];    // friend's zooPets shown in Ranch during visit
+  let _ownZooPetsSnapshot = null; // our zooPets saved before overwriting
   let _currentFriendsTab = "friends";
 
   // ── Panel open/close — uses the game's native modal ───────────────────
@@ -852,35 +854,40 @@ window.addEventListener("DOMContentLoaded", () => {
     _visitingSaveData  = data.save;
     window.visitMode   = true;  // blocks clickTile in tools.js
 
-    // Snapshot OUR OWN tile data before overwriting in-memory arrays
-    // The game loop calls saveState() every 250ms, which would corrupt
-    // localStorage with the friend's data if we didn't save ours first.
-    window._ownTileStatesSnapshot    = JSON.parse(JSON.stringify(tileStates));
-    window._ownUnlockedTilesSnapshot = JSON.parse(JSON.stringify(unlockedTiles));
-
     // Go to farm screen first
     if (typeof showFarm === "function") showFarm();
 
     // Apply their tiles visually (read-only — never touches localStorage)
     applyVisitState(data.save);
 
-    // Hide game header, bottom nav, tool strip, Ranch/Town nav, own-farm like widget
-    const header      = document.querySelector(".header");
-    const bottomBar   = document.getElementById("bottomBar");
-    const toolStrip   = document.getElementById("toolStrip");
-    const ownWidget   = document.getElementById("ownFarmLikeWidget");
-    const townZooCon  = document.querySelector(".townZooCon");
-    if (header)     header.style.display     = "none";
-    if (bottomBar)  bottomBar.style.display  = "none";
-    if (toolStrip)  toolStrip.style.display  = "none";
-    if (ownWidget)  ownWidget.style.display  = "none";
-    if (townZooCon) townZooCon.style.display = "none";
+    // Hide game header, bottom nav, tool strip, own-farm like widget
+    // Ranch + Town buttons stay visible (visitor can view friend's Ranch, or leave via Town)
+    const header    = document.querySelector(".header");
+    const bottomBar = document.getElementById("bottomBar");
+    const toolStrip = document.getElementById("toolStrip");
+    const ownWidget = document.getElementById("ownFarmLikeWidget");
+    if (header)    header.style.display    = "none";
+    if (bottomBar) bottomBar.style.display = "none";
+    if (toolStrip) toolStrip.style.display = "none";
+    if (ownWidget) ownWidget.style.display = "none";
 
-    // Show the visit bar
+    // Hide any poop already on the eventLayer — visitors can't clean poop
+    const eventLayerEl = document.getElementById("eventLayer");
+    if (eventLayerEl) {
+      eventLayerEl.querySelectorAll(".poop").forEach(p => p.style.display = "none");
+    }
+
+    // Show the visit bar on farm screen
     const visitBar  = document.getElementById("visitBar");
     const visitName = document.getElementById("visitBarName");
     if (visitBar)  visitBar.style.display  = "flex";
     if (visitName) visitName.textContent   = `${friendName}'s Farm`;
+
+    // Show visit notice on Zoo screen
+    const zooNotice  = document.getElementById("zooVisitNotice");
+    const zooVName   = document.getElementById("zooVisitName");
+    if (zooNotice) zooNotice.style.display = "block";
+    if (zooVName)  zooVName.textContent    = friendName;
 
     // Set up like button state
     await updateLikeButton(friendId);
@@ -898,8 +905,16 @@ window.addEventListener("DOMContentLoaded", () => {
         st = bundle; // legacy flat save
       }
       if (!st) return;
+
+      // Snapshot own zooPets before overwriting
+      _ownZooPetsSnapshot = JSON.parse(JSON.stringify(zooPets));
+
       if (Array.isArray(st.tileStates))    tileStates    = st.tileStates;
       if (Array.isArray(st.unlockedTiles)) unlockedTiles = st.unlockedTiles;
+      // Load friend's pets so Ranch shows their animals
+      _visitingZooPets = Array.isArray(st.zooPets) ? st.zooPets : [];
+      zooPets = _visitingZooPets;
+
       if (typeof renderFarm === "function") renderFarm();
     } catch(e) { console.error("applyVisitState error:", e); }
   }
@@ -908,36 +923,54 @@ window.addEventListener("DOMContentLoaded", () => {
   window.leaveVisit = function() {
     _visitingPlayerId = null;
     _visitingSaveData  = null;
+    _visitingZooPets   = [];
     window.visitMode   = false;
 
     // Hide visit bar
     const visitBar = document.getElementById("visitBar");
     if (visitBar) visitBar.style.display = "none";
 
-    // Restore header, bottom nav, tool strip, Ranch/Town nav, own-farm like widget
-    const header     = document.querySelector(".header");
-    const bottomBar  = document.getElementById("bottomBar");
-    const toolStrip  = document.getElementById("toolStrip");
-    const townZooCon = document.querySelector(".townZooCon");
-    if (header)     header.style.display     = "";
-    if (bottomBar)  bottomBar.style.display  = "";
-    if (toolStrip)  toolStrip.style.display  = "";
-    if (townZooCon) townZooCon.style.display = "";
+    // Restore header, bottom nav, tool strip
+    const header    = document.querySelector(".header");
+    const bottomBar = document.getElementById("bottomBar");
+    const toolStrip = document.getElementById("toolStrip");
+    if (header)    header.style.display    = "";
+    if (bottomBar) bottomBar.style.display = "";
+    if (toolStrip) toolStrip.style.display = "";
+
     // Only show own-farm like widget if logged in
     const ownWidget = document.getElementById("ownFarmLikeWidget");
     if (ownWidget) ownWidget.style.display = _currentUser ? "flex" : "none";
+
+    // Restore own zooPets from snapshot
+    if (_ownZooPetsSnapshot !== null) {
+      zooPets = _ownZooPetsSnapshot;
+      _ownZooPetsSnapshot = null;
+    }
+
+    // Hide zoo visit notice
+    const zooNotice = document.getElementById("zooVisitNotice");
+    if (zooNotice) zooNotice.style.display = "none";
+
+    // Restore poop visibility on eventLayer
+    const eventLayerEl = document.getElementById("eventLayer");
+    if (eventLayerEl) {
+      eventLayerEl.querySelectorAll(".poop").forEach(p => p.style.display = "");
+    }
+
+    // Go back to farm screen
+    if (typeof showFarm === "function") showFarm();
+
     // Refresh like count on own farm
     if (_currentUser) updateLikeButton(null);
 
-    // Restore own tiles from in-memory snapshot (not localStorage —
-    // the game loop's saveState() may have written friend data there)
-    if (window._ownTileStatesSnapshot && typeof tileStates !== "undefined") {
+    // Restore own tiles from in-memory snapshot
+    if (window._ownTileStatesSnapshot) {
       tileStates    = window._ownTileStatesSnapshot;
       unlockedTiles = window._ownUnlockedTilesSnapshot;
       window._ownTileStatesSnapshot    = null;
       window._ownUnlockedTilesSnapshot = null;
     } else {
-      // Fallback: load from localStorage
       if (typeof loadState === "function") loadState();
     }
     if (typeof renderFarm === "function") renderFarm();
@@ -964,10 +997,9 @@ window.addEventListener("DOMContentLoaded", () => {
         .eq("owner_id", user?.id || "");
       const total = count || 0;
 
-      // Only show widget if we're NOT in visit mode
       const ownWidget = document.getElementById("ownFarmLikeWidget");
       const ownCount  = document.getElementById("ownFarmLikeCount");
-      if (ownWidget) ownWidget.style.display = window.visitMode ? "none" : "flex";
+      if (ownWidget) ownWidget.style.display = "flex";
       if (ownCount)  ownCount.textContent    = total;
 
       // Keep visit bar in sync too

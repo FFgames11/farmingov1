@@ -376,6 +376,21 @@ function showFarm(){
   if(zooScreen) zooScreen.style.display = "none";
 }
 function showTown(which){
+  // While visiting a friend's farm, ask before leaving visit mode
+  if(window.visitMode){
+    openModal("Leave Visit?", `
+      <div class="resLine">You'll be leaving your visit if you go to Town.</div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button style="flex:1;" onclick="closeModal()">Cancel</button>
+        <button style="flex:1;" onclick="leaveVisit(); closeModal(); _doShowTown();">Go to Town</button>
+      </div>
+    `);
+    return;
+  }
+  _doShowTown(which);
+}
+
+function _doShowTown(which){
   activeScreen = "town";
   farmScreen.style.display  = "none";
   townScreen.style.display  = "flex";
@@ -387,6 +402,7 @@ function showZoo(){
   farmScreen.style.display  = "none";
   townScreen.style.display  = "none";
   if(zooScreen) zooScreen.style.display = "flex";
+  // While visiting, show friend's pets; otherwise show own pets
   requestAnimationFrame(()=>renderZooRoamingPets());
 }
 
@@ -394,6 +410,16 @@ function toggleTown(){
   if(activeScreen === "farm") showTown();
   else if(activeScreen === "town") showFarm();
   else showFarm(); // from Zoo -> Farm
+}
+
+// Farm button inside Zoo screen — during a visit, returns to friend's farm view
+// Outside of visit, goes back to own farm
+function handleZooFarmBtn(){
+  if(window.visitMode){
+    showFarm();
+    return;
+  }
+  showFarm();
 }
 
 function resetTutorial(){

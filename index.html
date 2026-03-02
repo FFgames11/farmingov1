@@ -436,10 +436,15 @@
     <!-- <div class="zooTitle">Zoo</div>
     <div class="zooSub">Your captured pets can roam freely here.</div> -->
     
+    <!-- Visit notice: shown when viewing a friend's Ranch -->
+    <div id="zooVisitNotice" style="display:none;" class="zooVisitNotice">
+      👀 Viewing <span id="zooVisitName">Friend</span>'s Ranch
+    </div>
+
     <div id="zooYard" title="Tap a pet to view details">
 
       <div class="townZooCon2" >
-        <button onclick="toggleTown()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
+        <button onclick="handleZooFarmBtn()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
         <button onclick="showTown()" class="toTownBtn2"><span data-title="Town">Town</span></button>
       </div>
 

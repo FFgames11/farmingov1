@@ -18,7 +18,6 @@ function tileCenterInWrap(tileIndex){
 
 function trySpawnWildPet(){
   if(tutorialIsActive()) return;
-  if(window.visitMode) return; // read-only during farm visit
   if(bossBattle && bossBattle.active) return;
   if(activeWildPet) return;
   const now = Date.now();
@@ -158,6 +157,7 @@ function dropPoopAtEntity(){
 }
 
 function cleanPoop(poopEl){
+  if(window.visitMode) return; // can't clean poop on a friend's farm
   try{ poopEl.remove(); }catch(e){}
   coins += 2;
   gainXP(2);

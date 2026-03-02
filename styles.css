@@ -3061,3 +3061,19 @@ hr.sep{
 }
 .ownFarmLikeWidget:hover  { background: rgba(255,240,240,0.95); }
 .ownFarmLikeWidget:active { transform: scale(0.93); }
+/* =========================================================
+   ZOO VISIT NOTICE
+   Shown at top of Ranch screen when viewing a friend's pets
+========================================================= */
+.zooVisitNotice {
+  width: 100%;
+  background: linear-gradient(135deg, #3d2a0a 0%, #7a4a10 100%);
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  text-align: center;
+  padding: 8px 16px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
