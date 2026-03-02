@@ -2,8 +2,8 @@
    WILD PET SPAWN INTERVAL (SLOWER)
 ========================================================= */
 function scheduleNextPetSpawn(){
-  let min = 10_000;
-  let max = 15_000;
+  let min = 20_000;
+  let max = 25_000;
   if(petSpawnsBlocked()){
     min += 40_000;
     max += 80_000;
