@@ -23,7 +23,7 @@ function renderQuestionUI(qObj, containerId, onAnswered){
   };
 
   if(qObj.type === "fill"){
-    const prompt = qObj.prompt || "";
+    const prompt = qObj.prompt || qObj.q || "";
     root.innerHTML = `
       <div class="questionItem">${escapeHtml(prompt)}</div>
       ${qObj.hint ? `<div class="smallNote" style="text-align:left;margin-top:6px;">Hint: ${escapeHtml(qObj.hint)}</div>` : ""}
@@ -53,4 +53,3 @@ function renderQuestionUI(qObj, containerId, onAnswered){
     list.appendChild(btn);
   });
 }
-
