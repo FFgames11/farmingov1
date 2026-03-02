@@ -43,7 +43,7 @@ function selectSeed(emoji){
   const mc = document.getElementById("modalContent");
   const scrollY = mc ? mc.scrollTop : 0;
   openCrops();
-  if(mc) mc.scrollTop = scrollY;
+  requestAnimationFrame(()=>{ if(mc) mc.scrollTop = scrollY; });
 }
 function buySeed(emoji){
   const c = cropByEmoji(emoji);
@@ -64,7 +64,7 @@ function buySeed(emoji){
   const mc = document.getElementById("modalContent");
   const scrollY = mc ? mc.scrollTop : 0;
   openCrops();
-  if(mc) mc.scrollTop = scrollY;
+  requestAnimationFrame(()=>{ if(mc) mc.scrollTop = scrollY; });
 }
 
 function openSupermarket(){
