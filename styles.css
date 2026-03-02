@@ -1527,9 +1527,9 @@ content: '';
     font-size: 1em;
 }
 
-#modalContent{ 
-  padding: 12px; 
-  background: #FCF6EA; 
+#modalContent{
+  padding: 12px;
+  background: #FCF6EA;
   border-radius: 0 0 10px 10px;
   overflow-y: auto;
   flex: 1;
@@ -1705,11 +1705,10 @@ content: '';
 
 
 .cropModalContent{
-  height: 46vh;
-  overflow-y: scroll; 
-  overflow-x: hidden;
-  padding-right: 11px;
-  
+  /* height: 46vh; */
+  /* overflow-y: scroll; */
+  /* overflow-x: hidden; */
+  /* padding-right: 11px; */
 }
 
 .cropModalContent .modalGrid{
@@ -1721,7 +1720,7 @@ content: '';
   position: fixed;
   z-index: 30;
   border-radius: 0;
-  width: 19%;
+  width: 20%;
   background: rgba(255, 255, 255, 1);
 }
 
