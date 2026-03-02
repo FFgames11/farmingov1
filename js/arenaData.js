@@ -317,7 +317,7 @@ const BATTLE_ANIMALS = {
 // Stat scaling (Lv2 = Lv1 +1/1/1, etc.)
 function battleStats(animalId, level=1){
   const meta = BATTLE_ANIMALS[animalId];
-  const lv = clamp(parseInt(level||1,10) || 1, 1, 5);
+  const lv = clamp(parseInt(level||1,10) || 1, 1, 10);
   if(!meta) return { atk:1, def:1, spd:1 };
   const add = lv - 1;
   return { atk: meta.base.atk + add, def: meta.base.def + add, spd: meta.base.spd + add };
@@ -325,7 +325,7 @@ function battleStats(animalId, level=1){
 
 // Optional HP extension (makes healing meaningful)
 function battleHpMax(level){
-  const lv = clamp(parseInt(level||1,10) || 1, 1, 5);
+  const lv = clamp(parseInt(level||1,10) || 1, 1, 10);
   return 30 + (lv-1)*5;
 }
 
@@ -334,10 +334,10 @@ function combinePet(uidToUpgrade){
   if(idxA < 0) return;
   const a = zooPets[idxA];
   if(!a.animalId){ showToast("This pet can't be combined.", 1200); return; }
-  const lv = clamp(parseInt(a.level||1,10) || 1, 1, 5);
-  if(lv >= 5){ showToast("Already max level.", 1200); return; }
+  const lv = clamp(parseInt(a.level||1,10) || 1, 1, 10);
+  if(lv >= 10){ showToast("Already max level.", 1200); return; }
 
-  const idxB = zooPets.findIndex((p,i)=>i!==idxA && p.animalId===a.animalId && clamp(parseInt(p.level||1,10)||1,1,5)===lv);
+  const idxB = zooPets.findIndex((p,i)=>i!==idxA && p.animalId===a.animalId && clamp(parseInt(p.level||1,10)||1,1,10)===lv);
   if(idxB < 0){
     showToast("Need a duplicate of the same level.", 1400);
     return;
@@ -348,7 +348,7 @@ function combinePet(uidToUpgrade){
   for(const r of rem) zooPets.splice(r,1);
 
   const meta = BATTLE_ANIMALS[a.animalId];
-  const nextLv = Math.min(5, lv + 1);
+  const nextLv = Math.min(10, lv + 1);
   const upgraded = {
     uid: uid(),
     typeId: a.animalId,
@@ -368,5 +368,3 @@ function combinePet(uidToUpgrade){
   showToast(`${meta.name} upgraded to Lv${nextLv}!`, 1400);
   openPetDetails(upgraded.uid);
 }
-
-

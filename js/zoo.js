@@ -19,7 +19,7 @@ function openPetDetails(uid){
 
   let combineBtn = "";
   let combineNote = "";
-  if(meta && lvl < 5){
+  if(meta && lvl < 10){
     const dupCount = zooPets.filter(p=>p.uid!==uid && p.animalId===pet.animalId && (p.level||1)===lvl).length;
     combineBtn = `<button ${dupCount ? "" : "disabled"} onclick="combinePet('${pet.uid}')"><span><small data-title="Combine">Combine</small></span></button>`;
     combineNote = `<div class="smallNote" style="text-align:left;">Combine needs 2 copies of the same animal and the same level. (${dupCount ? "Ready" : "Need 1 more"})</div>`;
@@ -47,10 +47,16 @@ function openPetDetails(uid){
   `);
 }
 
+function isPetCombinable(pet){
+  const lv = clamp(parseInt(pet.level||1,10)||1,1,10);
+  if(lv >= 10) return false;
+  return zooPets.filter(p=>p.uid!==pet.uid && p.animalId===pet.animalId && clamp(parseInt(p.level||1,10)||1,1,10)===lv).length > 0;
+}
+
 function spawnZooPetElement(pet){
   if(!zooRoamLayer) return;
   const el = document.createElement("div");
-  el.className = "zooPet";
+  el.className = "zooPet" + (isPetCombinable(pet) ? " canCombine" : "");
   el.innerHTML = pet.imagepath;
   el.style.left = "18px";
   el.style.top = "18px";
@@ -109,6 +115,20 @@ function renderZooRoamingPets(){
   if(zooStats){
     zooStats.innerHTML = `Pets: <b>${zooPets.length}</b>`;
   }
+
+  // Refresh glow on all roaming pet elements
+  for(const [uid, el] of zooRoamEls.entries()){
+    const pet = zooPets.find(p=>p.uid===uid);
+    if(!pet) continue;
+    if(isPetCombinable(pet)){
+      el.classList.add("canCombine");
+    } else {
+      el.classList.remove("canCombine");
+    }
+  }
+
+  // Refresh species panel if visible
+  renderSpeciesPanel();
 }
 
 setInterval(()=>{
@@ -135,5 +155,122 @@ function capturePet(type){
   // If the Zoo screen is open, show the new pet immediately.
   if(activeScreen === "zoo"){
     requestAnimationFrame(()=>renderZooRoamingPets());
+  }
+}
+
+
+
+/* =========================================================
+   SPECIES BREAKDOWN PANEL
+========================================================= */
+function renderSpeciesPanel(){
+  const panel = document.getElementById("speciesPanel");
+  if(!panel) return;
+
+  // Count pets per animalId
+  const counts = {};
+  for(const pet of zooPets){
+    if(!pet.animalId) continue;
+    counts[pet.animalId] = (counts[pet.animalId] || 0) + 1;
+  }
+
+  const ids = Object.keys(counts);
+  if(ids.length === 0){
+    panel.innerHTML = "";
+    return;
+  }
+
+  panel.innerHTML = ids.map(id => {
+    const meta = BATTLE_ANIMALS[id];
+    if(!meta) return "";
+    const count = counts[id];
+    // Check if any of this species is combinable
+    const hasCombinable = zooPets.some(p => p.animalId === id && isPetCombinable(p));
+    return `<button class="speciesChip${hasCombinable ? " speciesChipGlow" : ""}" onclick="openSpeciesModal('${id}')">
+      <span class="speciesChipImg">${meta.imagepath}</span>
+      <span class="speciesChipCount">${count}</span>
+      ${hasCombinable ? '<span class="speciesChipBadge">✨</span>' : ""}
+    </button>`;
+  }).join("");
+}
+
+function openSpeciesModal(animalId){
+  const meta = BATTLE_ANIMALS[animalId];
+  if(!meta) return;
+
+  const pets = zooPets.filter(p => p.animalId === animalId);
+
+  // Check if any pair is combinable (same level, 2+ copies)
+  const levelGroups = {};
+  for(const p of pets){
+    const lv = clamp(parseInt(p.level||1,10)||1,1,10);
+    levelGroups[lv] = (levelGroups[lv]||[]);
+    levelGroups[lv].push(p);
+  }
+  const combinablePair = Object.values(levelGroups).find(group => group.length >= 2 && clamp(parseInt(group[0].level||1,10)||1,1,10) < 10);
+
+  const petCards = pets.map(p => {
+    const lv = clamp(parseInt(p.level||1,10)||1,1,10);
+    const stats = battleStats(p.animalId, lv);
+    const combinable = isPetCombinable(p);
+    return `<div class="speciesPetRow${combinable ? " speciesPetRowGlow" : ""}">
+      <div class="speciesPetImg">${meta.imagepath}</div>
+      <div class="speciesPetInfo">
+        <b>${escapeHtml(meta.name)}</b> <span style="opacity:.6;">Lv${lv}</span>
+        <div class="smallNote" style="margin:2px 0 0;">ATK ${stats.atk} • DEF ${stats.def} • SPD ${stats.spd}</div>
+      </div>
+      ${combinable ? '<span class="speciesCombineReady">✨ Ready</span>' : ""}
+    </div>`;
+  }).join("");
+
+  const autoCombineBtn = combinablePair
+    ? `<button onclick="autoCombineSpecies('${animalId}')" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#f4a427,#e8851a);color:#fff;border:none;border-radius:12px;padding:10px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;">⚡ Auto Combine</button>`
+    : `<button disabled style="width:100%;margin-top:12px;border-radius:12px;padding:10px;font-size:14px;">No pairs ready</button>`;
+
+  openModal(escapeHtml(meta.name) + " — Ranch", `
+    <div class="resLine">${meta.imagepath} ${escapeHtml(meta.name)} • ${pets.length} in Ranch</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
+      ${petCards}
+    </div>
+    ${autoCombineBtn}
+  `);
+}
+
+function autoCombineSpecies(animalId){
+  // Find all same-level pairs and combine them all in one pass
+  let combinedCount = 0;
+
+  let keepGoing = true;
+  while(keepGoing){
+    keepGoing = false;
+    // Group by level
+    const byLevel = {};
+    for(let i=0; i<zooPets.length; i++){
+      const p = zooPets[i];
+      if(p.animalId !== animalId) continue;
+      const lv = clamp(parseInt(p.level||1,10)||1,1,10);
+      if(lv >= 10) continue;
+      if(!byLevel[lv]) byLevel[lv] = [];
+      byLevel[lv].push({ pet: p, idx: i });
+    }
+    // Find a combinable level
+    for(const [lv, entries] of Object.entries(byLevel)){
+      if(entries.length >= 2){
+        // combine first two
+        combinePet(entries[0].pet.uid);
+        combinedCount++;
+        keepGoing = true;
+        break;
+      }
+    }
+  }
+
+  if(combinedCount > 0){
+    const meta = BATTLE_ANIMALS[animalId];
+    showToast(`Auto-combined ${combinedCount}x ${meta?.name || animalId}!`, 1600);
+    // Reopen the species modal with fresh state
+    openSpeciesModal(animalId);
+  } else {
+    showToast("No pairs to combine.", 1200);
   }
 }
