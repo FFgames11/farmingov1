@@ -883,11 +883,13 @@ window.addEventListener("DOMContentLoaded", () => {
     if (visitBar)  visitBar.style.display  = "flex";
     if (visitName) visitName.textContent   = `${friendName}'s Farm`;
 
-    // Show visit notice on Zoo screen
+    // Show visit notice on Zoo screen + hide bottom nav
     const zooNotice  = document.getElementById("zooVisitNotice");
     const zooVName   = document.getElementById("zooVisitName");
+    const zooNav     = document.querySelector(".zooNav");
     if (zooNotice) zooNotice.style.display = "block";
     if (zooVName)  zooVName.textContent    = friendName;
+    if (zooNav)    zooNav.style.display    = "none";
 
     // Set up like button state
     await updateLikeButton(friendId);
@@ -948,9 +950,11 @@ window.addEventListener("DOMContentLoaded", () => {
       _ownZooPetsSnapshot = null;
     }
 
-    // Hide zoo visit notice
+    // Hide zoo visit notice + restore bottom nav
     const zooNotice = document.getElementById("zooVisitNotice");
+    const zooNav    = document.querySelector(".zooNav");
     if (zooNotice) zooNotice.style.display = "none";
+    if (zooNav)    zooNav.style.display    = "";
 
     // Restore poop visibility on eventLayer
     const eventLayerEl = document.getElementById("eventLayer");

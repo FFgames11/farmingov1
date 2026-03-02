@@ -56,7 +56,7 @@ function spawnZooPetElement(pet){
   el.style.top = "18px";
   el.dataset.uid = pet.uid;
   el.title = `${pet.name} • ${pet.rarity}`;
-  el.onclick = (e)=>{ e.stopPropagation(); openPetDetails(pet.uid); };
+  el.onclick = (e)=>{ e.stopPropagation(); if(window.visitMode) return; openPetDetails(pet.uid); };
   zooRoamLayer.appendChild(el);
   zooRoamEls.set(pet.uid, el);
   randomMoveZooPet(pet.uid, true);
@@ -137,5 +137,3 @@ function capturePet(type){
     requestAnimationFrame(()=>renderZooRoamingPets());
   }
 }
-
-
