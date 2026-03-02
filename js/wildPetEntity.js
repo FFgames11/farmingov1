@@ -37,7 +37,7 @@ function trySpawnWildPet(){
   const pool = (grown.length && Math.random()<0.6) ? grown : cropTiles;
   const targetTileIndex = pool[Math.floor(Math.random()*pool.length)];
 
-  const type = weightedPick(PET_TYPES);
+  const type = pickWildPetType();
   spawnWildPetEntity(type, targetTileIndex);
 }
 
@@ -157,7 +157,6 @@ function dropPoopAtEntity(){
 }
 
 function cleanPoop(poopEl){
-  if(window.visitMode) return; // can't clean poop on a friend's farm
   try{ poopEl.remove(); }catch(e){}
   coins += 2;
   gainXP(2);
