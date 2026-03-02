@@ -7,8 +7,8 @@ let _spawnsSinceRarePlus = 0;
 const STREAK_THRESHOLD = 10; // trigger boost after this many non-Rare+ spawns
 
 function scheduleNextPetSpawn(){
-  let min = 10_000;
-  let max = 15_000;
+  let min = 20_000;
+  let max = 25_000;
   if(petSpawnsBlocked()){
     min += 40_000;
     max += 80_000;
