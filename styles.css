@@ -1719,6 +1719,10 @@ content: '';
 
 .cropModalContent .resLine{
   position: fixed;
+  z-index: 30;
+  border-radius: 0;
+  width: 19%;
+  background: rgba(255, 255, 255, 1);
 }
 
 .modalGrid{ display:grid; grid-template-columns: 1fr; gap: 10px; }
@@ -3080,5 +3084,5 @@ hr.sep{
   letter-spacing: 0.3px;
   z-index: 20;
   box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-  display: none;
+  display: none!important;
 }

@@ -40,7 +40,10 @@ function openCrops(){
 function selectSeed(emoji){
   selectedSeed = emoji;
   saveState();
+  const mc = document.getElementById("modalContent");
+  const scrollY = mc ? mc.scrollTop : 0;
   openCrops();
+  if(mc) mc.scrollTop = scrollY;
 }
 function buySeed(emoji){
   const c = cropByEmoji(emoji);
@@ -58,7 +61,10 @@ function buySeed(emoji){
   selectedSeed = emoji;
   saveState();
   updateUI();
+  const mc = document.getElementById("modalContent");
+  const scrollY = mc ? mc.scrollTop : 0;
   openCrops();
+  if(mc) mc.scrollTop = scrollY;
 }
 
 function openSupermarket(){
@@ -234,4 +240,3 @@ function openQuestBoard(){
     <div class="smallNote">Claim all quests to increase your streak.</div>
   `);
 }
-
