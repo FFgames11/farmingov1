@@ -272,14 +272,12 @@ window.addEventListener("DOMContentLoaded", () => {
     // than window.playerName which is a plain `let` and not on window.
     const name = getPlayerName();
 
-    const rowData = { player_id: userId, user_id: userId, player_name: name };
-    // Also persist avatar_url if one has been set
-    const avatarUrl = (typeof playerAvatarUrl !== "undefined" && playerAvatarUrl) ? playerAvatarUrl : null;
-    if (avatarUrl) rowData.avatar_url = avatarUrl;
-
     const { error } = await supabase
       .from("players")
-      .upsert(rowData, { onConflict: "player_id" });
+      .upsert(
+        { player_id: userId, user_id: userId, player_name: name },
+        { onConflict: "player_id" }
+      );
 
     if (error) console.error("syncPlayerName error:", error.message);
   }
@@ -324,25 +322,19 @@ window.addEventListener("DOMContentLoaded", () => {
     const user = _currentUser;
     if (!user) return null;
 
-    // Fetch game save AND avatar_url in parallel
-    const [saveRes, playerRes] = await Promise.all([
-      supabase.from("game_saves").select("save").eq("player_id", user.id).single(),
-      supabase.from("players").select("avatar_url").eq("player_id", user.id).single()
-    ]);
+    const { data, error } = await supabase
+      .from("game_saves")
+      .select("save")
+      .eq("player_id", user.id)
+      .single();
 
-    // Apply avatar from players table if present
-    if (!playerRes.error && playerRes.data?.avatar_url) {
-      playerAvatarUrl = playerRes.data.avatar_url;
-      if (typeof restoreAvatar === "function") restoreAvatar();
-    }
-
-    if (saveRes.error) {
-      if (saveRes.error.code === "PGRST116") return null; // no row yet — fine
-      console.error("loadFromCloud error:", saveRes.error.message);
+    if (error) {
+      if (error.code === "PGRST116") return null; // no row yet — fine
+      console.error("loadFromCloud error:", error.message);
       return null;
     }
 
-    return saveRes.data?.save ?? null;
+    return data?.save ?? null;
   }
 
   /* ── Auth helpers ────────────────────────────────────── */
@@ -448,7 +440,7 @@ window.addEventListener("DOMContentLoaded", () => {
   /* ── Auth state listener ─────────────────────────────── */
   // onAuthStateChange is the single source of truth for _currentUser.
   // It fires on login, logout, and token refresh — no lock contention.
-  supabase.auth.onAuthStateChange((event, session) => {
+  supabase.auth.onAuthStateChange((_event, session) => {
     _currentUser = session?.user ?? null;
 
     if (_currentUser) {
@@ -456,22 +448,6 @@ window.addEventListener("DOMContentLoaded", () => {
       updateHeaderButtons(true);
       // Wait for loadState() to restore window.playerName before syncing
       setTimeout(() => syncPlayerName(_currentUser.id), 600);
-
-      // On page refresh (INITIAL_SESSION), fetch avatar_url from DB and apply it.
-      // On login the avatar is already handled by the login flow's loadFromCloud().
-      if (event === "INITIAL_SESSION") {
-        supabase
-          .from("players")
-          .select("avatar_url")
-          .eq("player_id", _currentUser.id)
-          .single()
-          .then(({ data, error }) => {
-            if (!error && data?.avatar_url) {
-              playerAvatarUrl = data.avatar_url;
-              if (typeof restoreAvatar === "function") restoreAvatar();
-            }
-          });
-      }
     } else {
       setAuthStatus("Not signed in.");
       updateHeaderButtons(false);
@@ -875,6 +851,7 @@ window.addEventListener("DOMContentLoaded", () => {
     _visitingPlayerId = friendId;
     _visitingSaveData  = data.save;
     window.visitMode   = true;  // blocks clickTile in tools.js
+    window._visitingFriendName = friendName;
 
     // Go to farm screen first
     if (typeof showFarm === "function") showFarm();
@@ -904,6 +881,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Apply a friend's save snapshot to the farm visually
   // Never writes to localStorage — only updates in-memory tile arrays
+  let _ownZooPetsSnapshot = null;
+
   function applyVisitState(bundle) {
     try {
       let st = null;
@@ -917,6 +896,25 @@ window.addEventListener("DOMContentLoaded", () => {
       if (Array.isArray(st.tileStates))    tileStates    = st.tileStates;
       if (Array.isArray(st.unlockedTiles)) unlockedTiles = st.unlockedTiles;
       if (typeof renderFarm === "function") renderFarm();
+
+      // Snapshot own pets, then replace with friend's pets for Ranch view
+      _ownZooPetsSnapshot = JSON.parse(JSON.stringify(typeof zooPets !== "undefined" ? zooPets : []));
+      zooPets = Array.isArray(st.zooPets) ? JSON.parse(JSON.stringify(st.zooPets)) : [];
+
+      // Re-render Ranch if it's open, and refresh species panel
+      if (typeof renderZooRoamingPets === "function") renderZooRoamingPets();
+
+      // Show visit notice banner in Ranch
+      const notice  = document.getElementById("zooVisitNotice");
+      const nameEl  = document.getElementById("zooVisitName");
+      const zooNav  = document.querySelector(".zooNav");
+      if (notice) notice.style.display = "block";
+      if (nameEl) nameEl.textContent   = window._visitingFriendName || "Friend";
+      if (zooNav) zooNav.style.display = "none";
+
+      // Hide all poop during visit
+      document.querySelectorAll(".poop").forEach(p => p.style.display = "none");
+
     } catch(e) { console.error("applyVisitState error:", e); }
   }
 
@@ -925,6 +923,7 @@ window.addEventListener("DOMContentLoaded", () => {
     _visitingPlayerId = null;
     _visitingSaveData  = null;
     window.visitMode   = false;
+    window._visitingFriendName = null;
 
     // Hide visit bar
     const visitBar = document.getElementById("visitBar");
@@ -941,6 +940,22 @@ window.addEventListener("DOMContentLoaded", () => {
     if (ownWidget) ownWidget.style.display = "flex";
     // Refresh like count on own farm
     updateLikeButton(null);
+
+    // Restore own zooPets from snapshot
+    if (_ownZooPetsSnapshot !== null) {
+      zooPets = _ownZooPetsSnapshot;
+      _ownZooPetsSnapshot = null;
+    }
+
+    // Hide Ranch visit notice, restore zooNav, restore poop visibility
+    const notice = document.getElementById("zooVisitNotice");
+    const zooNav = document.querySelector(".zooNav");
+    if (notice) notice.style.display = "none";
+    if (zooNav) zooNav.style.display = "";
+    document.querySelectorAll(".poop").forEach(p => p.style.display = "");
+
+    // Re-render Ranch with own pets
+    if (typeof renderZooRoamingPets === "function") renderZooRoamingPets();
 
     // Restore own tiles from localStorage
     if (typeof loadState  === "function") loadState();
