@@ -1642,8 +1642,8 @@ content: '';
 }
 
 
-.animalInfoCon {
-  
+.animalInfoCon img{
+  width: 50px;
 }
 
 /*Player Profile Modal Styles*/
@@ -3348,20 +3348,19 @@ hr.sep{
 /* Species modal pet rows */
 .speciesPetRow {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
-  background: #fdf6e8;
-  border: 2px solid #f0d89a;
-  border-radius: 12px;
-  padding: 8px 10px;
+  flex-shrink: 0;
+  flex-basis: auto;
 }
 .speciesPetRowGlow {
   border-color: rgba(255,190,30,0.9);
   background: rgba(255,252,210,0.95);
   box-shadow: 0 0 8px rgba(255,190,30,0.5);
 }
-.speciesPetImg { width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.speciesPetImg img { width:34px; height:34px; object-fit:contain; }
+.speciesPetImg {width: 100%;height: 173px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: #fdf6e8;border: 6px solid #f0d89a;border-radius: 12px;padding: 0;flex-direction: column;}
+.speciesPetImg img {width: 100%;height: 100%;object-fit:contain;border-radius: 12px;}
 .speciesPetInfo { flex:1; font-family:'Nunito',sans-serif; font-size:13px; color:#3d2a0a; }
 .speciesCombineReady { font-size:12px; font-weight:800; color:#c07800; white-space:nowrap; }
 

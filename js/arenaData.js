@@ -74,6 +74,7 @@ const BATTLE_ANIMALS = {
       "name": "Pig", 
       "emoji": "🐷", 
       "imagepath": '<img src="images/pig.png" alt="pig">',
+      "headimage": '<img src="images/pighead.png" alt="pig">',
       "rarity": "Starter", 
       "base": { 
         "atk": 5, 
@@ -100,6 +101,7 @@ const BATTLE_ANIMALS = {
     "name": "Rabbit",
     "emoji": "🐰",
     "imagepath": '<img src="images/rabbit.png" alt="rabbit">',
+    "headimage": '<img src="images/rabbithead.png" alt="rabbit">',
     "rarity": "Common",
     "base": {
       "atk": 5,
@@ -127,6 +129,7 @@ const BATTLE_ANIMALS = {
     "name": "Dog",
     "emoji": "🐶",
     "imagepath": '<img src="images/dog.png" alt="dog">',
+    "headimage": '<img src="images/doghead.png" alt="dog">',
     "rarity": "Common",
     "base": {
       "atk": 6,
@@ -154,6 +157,7 @@ const BATTLE_ANIMALS = {
     "name": "Deer",
     "emoji": "🦌",
     "imagepath": '<img src="images/deer.png" alt="deer">',
+    "headimage": '<img src="images/deerhead.png" alt="deer">',
     "rarity": "Uncommon",
     "base": {
       "atk": 4,
@@ -181,6 +185,7 @@ const BATTLE_ANIMALS = {
     "name": "Cat",
     "emoji": "🐱",
     "imagepath": '<img src="images/cat.png" alt="cat">',
+    "headimage": '<img src="images/cathead.png" alt="cat">',
     "rarity": "Uncommon",
     "base": {
       "atk": 7,
@@ -208,6 +213,7 @@ const BATTLE_ANIMALS = {
     "name": "Lion",
     "emoji": "🦁",
     "imagepath": '<img src="images/lion.png" alt="lion">',
+    "headimage": '<img src="images/lionhead.png" alt="lion">',
     "rarity": "Epic",
     "base": {
       "atk": 9,
@@ -235,6 +241,7 @@ const BATTLE_ANIMALS = {
     "name": "Panda",
     "emoji": "🐼",
     "imagepath": '<img src="images/panda.png" alt="panda">',
+    "headimage": '<img src="images/pandahead.png" alt="panda">',
     "rarity": "Rare",
     "base": {
       "atk": 5,
@@ -262,6 +269,7 @@ const BATTLE_ANIMALS = {
     "name": "Fox",
     "emoji": "🦊",
     "imagepath": '<img src="images/fox.png" alt="fox">',
+    "headimage": '<img src="images/foxhead.png" alt="fox">',
     "rarity": "Rare",
     "base": {
       "atk": 6,
@@ -289,6 +297,7 @@ const BATTLE_ANIMALS = {
     "name": "Alligator",
     "emoji": "🐊",
     "imagepath": '<img src="images/alligator.png" alt="alligator">',
+    "headimage": '<img src="images/alligatorhead.png" alt="alligator">',
     "rarity": "Epic",
     "base": {
       "atk": 8,
@@ -307,6 +316,62 @@ const BATTLE_ANIMALS = {
       },
       "ultimate": {
         "name": "Death Roll",
+        "power": 9,
+        "desc": "Enemy DEF -4 for 2 turns. If enemy already has a debuff, stun for 1 turn."
+      }
+    }
+  },
+  "dragon": {
+    "name": "Dragon",
+    "emoji": "🐉",
+    "imagepath": '<img src="images/dragon.png" alt="dragon">',
+    "headimage": '<img src="images/dragonhead.png" alt="dragon">',
+    "rarity": "Epic",
+    "base": {
+      "atk": 8,
+      "def": 6,
+      "spd": 5
+    },
+    "skills": {
+      "attack": {
+        "name": "Gushing Teeth",
+        "power": 6,
+        "desc": "If enemy DEF ≥ 6, deal +2 extra damage."
+      },
+      "buff": {
+        "name": "Dragon Scale",
+        "desc": "+4 DEF for 2 turns. SPEED -1 for 2 turns."
+      },
+      "ultimate": {
+        "name": "Ancient Breath",
+        "power": 9,
+        "desc": "Enemy DEF -4 for 2 turns. If enemy already has a debuff, stun for 1 turn."
+      }
+    }
+  },
+  "wolf": {
+    "name": "Wolf",
+    "emoji": "🐉",
+    "imagepath": '<img src="images/wolf.png" alt="wolf">',
+    "headimage": '<img src="images/wolfhead.png" alt="wolf">',
+    "rarity": "Epic",
+    "base": {
+      "atk": 8,
+      "def": 6,
+      "spd": 5
+    },
+    "skills": {
+      "attack": {
+        "name": "Berserker Bite",
+        "power": 6,
+        "desc": "If enemy DEF ≥ 6, deal +2 extra damage."
+      },
+      "buff": {
+        "name": "Pack's Howl",
+        "desc": "+4 DEF for 2 turns. SPEED -1 for 2 turns."
+      },
+      "ultimate": {
+        "name": "Wild Hunt",
         "power": 9,
         "desc": "Enemy DEF -4 for 2 turns. If enemy already has a debuff, stun for 1 turn."
       }
