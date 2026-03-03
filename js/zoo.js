@@ -143,6 +143,7 @@ function capturePet(type){
     level: 1,
     emoji: type.emoji,
     imagepath: type.imagepath,
+    headimage: type.headimage,
     name: type.name,
     rarity: type.rarity
   };
