@@ -1291,7 +1291,7 @@ content: '';
   background: linear-gradient(90deg, #ffe07a, #6fe18c);
 }
 .readyTag{
-    content: url('images/readyspark.mp4');
+    content: url('images/readyspark.gif');
     position: absolute;
     right: -6px;
     top: 6px;
