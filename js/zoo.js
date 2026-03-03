@@ -205,7 +205,7 @@ function openSpeciesModal(animalId){
     const stats = battleStats(p.animalId, lv);
     const combinable = isPetCombinable(p);
     return `<div class="speciesPetRow${combinable ? " speciesPetRowGlow" : ""}">
-      <div class="speciesPetImg">${meta.imagepath}</div>
+      <div class="speciesPetImg">${meta.headimage}</div>
       <div class="speciesPetInfo">
         <b>${escapeHtml(meta.name)}</b> <span style="opacity:.6;">Lv${lv}</span>
         <div class="smallNote" style="margin:2px 0 0;">ATK ${stats.atk} • DEF ${stats.def} • SPD ${stats.spd}</div>
@@ -219,7 +219,7 @@ function openSpeciesModal(animalId){
     : `<button disabled style="width:100%;margin-top:12px;border-radius:12px;padding:10px;font-size:14px;opacity:0.5;">No pairs ready</button>`;
 
   openModal(escapeHtml(meta.name) + " — Ranch", `
-    <div class="resLine">${meta.imagepath} ${escapeHtml(meta.name)} • ${pets.length} in Ranch</div>
+    <div class="animalInfoCon">${meta.imagepath} ${escapeHtml(meta.name)} • ${pets.length} in Ranch</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
       ${petCards}
     </div>
