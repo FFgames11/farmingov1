@@ -272,10 +272,9 @@ window.addEventListener("DOMContentLoaded", () => {
     // than window.playerName which is a plain `let` and not on window.
     const name = getPlayerName();
 
-    // Also sync avatar_url if one has been set
-    const avatarUrl = (typeof playerAvatarUrl !== "undefined" && playerAvatarUrl) ? playerAvatarUrl : null;
-
     const rowData = { player_id: userId, user_id: userId, player_name: name };
+    // Also persist avatar_url if one has been set
+    const avatarUrl = (typeof playerAvatarUrl !== "undefined" && playerAvatarUrl) ? playerAvatarUrl : null;
     if (avatarUrl) rowData.avatar_url = avatarUrl;
 
     const { error } = await supabase
@@ -325,21 +324,13 @@ window.addEventListener("DOMContentLoaded", () => {
     const user = _currentUser;
     if (!user) return null;
 
-    // Load game save and avatar_url in parallel
+    // Fetch game save AND avatar_url in parallel
     const [saveRes, playerRes] = await Promise.all([
-      supabase
-        .from("game_saves")
-        .select("save")
-        .eq("player_id", user.id)
-        .single(),
-      supabase
-        .from("players")
-        .select("avatar_url")
-        .eq("player_id", user.id)
-        .single()
+      supabase.from("game_saves").select("save").eq("player_id", user.id).single(),
+      supabase.from("players").select("avatar_url").eq("player_id", user.id).single()
     ]);
 
-    // Apply avatar_url from players table if present
+    // Apply avatar from players table if present
     if (!playerRes.error && playerRes.data?.avatar_url) {
       playerAvatarUrl = playerRes.data.avatar_url;
       if (typeof restoreAvatar === "function") restoreAvatar();
@@ -457,7 +448,7 @@ window.addEventListener("DOMContentLoaded", () => {
   /* ── Auth state listener ─────────────────────────────── */
   // onAuthStateChange is the single source of truth for _currentUser.
   // It fires on login, logout, and token refresh — no lock contention.
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.auth.onAuthStateChange((event, session) => {
     _currentUser = session?.user ?? null;
 
     if (_currentUser) {
@@ -465,6 +456,22 @@ window.addEventListener("DOMContentLoaded", () => {
       updateHeaderButtons(true);
       // Wait for loadState() to restore window.playerName before syncing
       setTimeout(() => syncPlayerName(_currentUser.id), 600);
+
+      // On page refresh (INITIAL_SESSION), fetch avatar_url from DB and apply it.
+      // On login the avatar is already handled by the login flow's loadFromCloud().
+      if (event === "INITIAL_SESSION") {
+        supabase
+          .from("players")
+          .select("avatar_url")
+          .eq("player_id", _currentUser.id)
+          .single()
+          .then(({ data, error }) => {
+            if (!error && data?.avatar_url) {
+              playerAvatarUrl = data.avatar_url;
+              if (typeof restoreAvatar === "function") restoreAvatar();
+            }
+          });
+      }
     } else {
       setAuthStatus("Not signed in.");
       updateHeaderButtons(false);
