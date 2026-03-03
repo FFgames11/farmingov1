@@ -58,6 +58,7 @@
   updateToolUI();
 
   // Signal the loading screen that the game is ready
+  if (typeof restoreAvatar === "function") restoreAvatar();
   if (typeof window.finishLoading === "function") window.finishLoading();
 })();
 
@@ -129,8 +130,9 @@ function openProfile(){
   openModal("Profile", `
     <div class="playerProfileContent">
       <div class="playerheadercon">
-          <div class="playerdp">
-            <img src="images/profile.png" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2NjYyIvPjwvc3ZnPg=='">
+          <div class="playerdp" onclick="openAvatarCropModal()" title="Change profile photo" style="cursor:pointer;position:relative;">
+            <img id="profileModalAvatar" src="${playerAvatarUrl || 'images/profile.png'}" onerror="this.src='images/profile.png'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            <div class="playerdpCameraOverlay"><span>📷</span></div>
           </div>
           <h3 class="modalPlayerName">
             ${escapeHtml(playerName)} 

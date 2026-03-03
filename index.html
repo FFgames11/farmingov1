@@ -322,9 +322,10 @@
   <div class="header">
     <div class="profileArea">
       <div class="dpandlevelcon">
-        <div class="profilecon" id="profileBtn" onclick="openProfile()" onerror="this.style.display='none'">
-        <img src="images/profile.png" alt="profile"/>
-      </div>
+        <div class="profilecon" id="profileBtn" onclick="openProfile()">
+          <img id="headerAvatar" src="images/profile.png" alt="profile"/>
+          <div class="avatarCameraHover" onclick="event.stopPropagation(); openAvatarCropModal();">📷</div>
+        </div>
       <div id="LevelTxtCon"><h3 id="LevelTxt"></h3></div>
       </div>
       <div class="nameStack">
@@ -435,18 +436,11 @@
   <div id="zooScreen" class="screen">
     <!-- <div class="zooTitle">Zoo</div>
     <div class="zooSub">Your captured pets can roam freely here.</div> -->
-
-    <!-- Visit notice: shown when viewing a friend's Ranch -->
-    <div id="zooVisitNotice" style="display:none;" class="zooVisitNotice">
-      👀 Visiting <span id="zooVisitName">Friend</span>'s Ranch
-    </div>
-
     
-
     <div id="zooYard" title="Tap a pet to view details">
 
       <div class="townZooCon2" >
-        <button onclick="handleZooFarmBtn()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
+        <button onclick="toggleTown()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
         <button onclick="showTown()" class="toTownBtn2"><span data-title="Town">Town</span></button>
       </div>
 
@@ -459,9 +453,6 @@
     </div>
     
 
-    
-    <!-- Species breakdown chips -->
-    <div id="speciesPanel" class="speciesPanel"></div>
     <div id="zooStats" class="zooStats">Pets: <b>0</b></div>
     <div class="zooHint" data-title="Tip: Open Town 🏘️ to visit the Library and Quest Board.">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
 
@@ -648,6 +639,9 @@
 <!-- 9. Auth — load last (depends on game being ready) -->
 <script src="js/supabase.js"></script>
 
+<!-- 10. Avatar upload & crop -->
+<script src="js/avatar.js"></script>
+
 
 
 
@@ -668,6 +662,50 @@
   </div>
 </div>
 
+
+  <!-- Hidden file input for avatar upload -->
+  <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="onAvatarFileSelected(event)">
+
+  <!-- Avatar cropper modal -->
+  <div id="avatarCropModal" style="display:none;">
+    <div class="avatarCropOverlay" onclick="closeAvatarCropModal()"></div>
+    <div class="avatarCropCard">
+      <div class="avatarCropTitle">Set Profile Photo</div>
+
+      <!-- Choice screen -->
+      <div id="avatarChoiceScreen">
+        <button class="avatarChoiceBtn" onclick="document.getElementById('avatarFileInput').click()">
+          <span class="avatarChoiceIcon">🖼️</span>
+          <span>Upload from Device</span>
+        </button>
+        <button class="avatarChoiceBtn avatarChoiceBtnDisabled" disabled title="Coming soon">
+          <span class="avatarChoiceIcon">📷</span>
+          <span>Take a Photo</span>
+          <span class="avatarComingSoon">Coming soon</span>
+        </button>
+        <button class="avatarCancelBtn" onclick="closeAvatarCropModal()">Cancel</button>
+      </div>
+
+      <!-- Crop screen -->
+      <div id="avatarCropScreen" style="display:none;">
+        <div class="avatarCropWrap">
+          <div class="avatarCropCircle" id="avatarCropCircle">
+            <canvas id="avatarCropCanvas"></canvas>
+          </div>
+        </div>
+        <div class="avatarCropControls">
+          <label class="avatarZoomLabel">Zoom</label>
+          <input type="range" id="avatarZoomSlider" min="1" max="3" step="0.01" value="1" oninput="onAvatarZoom(this.value)">
+        </div>
+        <div class="avatarCropHint">Drag to reposition • Pinch or slider to zoom</div>
+        <div class="avatarCropBtns">
+          <button class="avatarCancelBtn" onclick="backToAvatarChoice()">Back</button>
+          <button class="avatarSaveBtn" onclick="saveAvatarCrop()">Save Photo</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
 </body>
 </html>

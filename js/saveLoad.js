@@ -17,6 +17,7 @@ let showcase = [null, null, null, null]; // Profile showcase slots
 
 let playerName = "Player";
 let playerTitle = "Rookie Farmer";
+let playerAvatarUrl = ""; // custom avatar — Supabase Storage URL or empty for default
 
 let selectedSeed = "🥕";
 
@@ -36,13 +37,10 @@ let nextPetSpawnAt = 0;
 let nextBossSpawnAt = 0;
 
 function saveState(){
-  // Never write to localStorage while visiting a friend's farm —
-  // tileStates/unlockedTiles are temporarily overwritten with their data.
-  if (window.visitMode) return;
   try{
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
-      playerName, playerTitle,
+      playerName, playerTitle, playerAvatarUrl,
       playerCountry, inventory, showcase,
       selectedSeed, seeds,
       unlockedTiles, tileStates,
@@ -65,6 +63,7 @@ function resetGameState(){
   level        = 1;
   playerName   = "Player";
   playerTitle  = "Rookie Farmer";
+  playerAvatarUrl = "";
   playerCountry = "Philippines";
   inventory    = {};
   showcase     = [null, null, null, null];
@@ -114,6 +113,7 @@ function loadState(){
 
     playerName = st.playerName || playerName;
     playerTitle = st.playerTitle || playerTitle;
+    playerAvatarUrl = st.playerAvatarUrl || "";
     playerCountry = st.playerCountry || "Philippines";
     inventory = st.inventory || {};
     showcase = st.showcase || [null, null, null, null];
