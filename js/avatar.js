@@ -109,12 +109,13 @@ function _drawCrop(){
 
   ctx.clearRect(0, 0, size, size);
 
-  // Clip to circle
+  // Fill white background first — prevents black on PNG transparency when saving as JPEG
   ctx.save();
   ctx.beginPath();
   ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
   ctx.clip();
-
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, size, size);
   ctx.drawImage(img, x, y, drawW, drawH);
   ctx.restore();
 
