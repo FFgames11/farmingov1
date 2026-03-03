@@ -158,11 +158,6 @@ window.addEventListener("DOMContentLoaded", () => {
   // getUser() acquires a Navigator LockManager lock each time — calling it from
   // a setInterval causes lock contention and the "timed out waiting 10000ms" error.
   let _currentUser = null;
-  window._supabaseClient = supabase;       // exposed for avatar.js
-  Object.defineProperty(window, "_currentUser", {
-    get: () => _currentUser,
-    set: (v) => { _currentUser = v; }
-  });
 
   // Expose a session checker for the loading screen router.
   // Uses getSession() (no network lock) to reliably detect active sessions.
@@ -277,12 +272,15 @@ window.addEventListener("DOMContentLoaded", () => {
     // than window.playerName which is a plain `let` and not on window.
     const name = getPlayerName();
 
+    // Also sync avatar_url if one has been set
+    const avatarUrl = (typeof playerAvatarUrl !== "undefined" && playerAvatarUrl) ? playerAvatarUrl : null;
+
+    const rowData = { player_id: userId, user_id: userId, player_name: name };
+    if (avatarUrl) rowData.avatar_url = avatarUrl;
+
     const { error } = await supabase
       .from("players")
-      .upsert(
-        { player_id: userId, user_id: userId, player_name: name },
-        { onConflict: "player_id" }
-      );
+      .upsert(rowData, { onConflict: "player_id" });
 
     if (error) console.error("syncPlayerName error:", error.message);
   }
@@ -327,19 +325,33 @@ window.addEventListener("DOMContentLoaded", () => {
     const user = _currentUser;
     if (!user) return null;
 
-    const { data, error } = await supabase
-      .from("game_saves")
-      .select("save")
-      .eq("player_id", user.id)
-      .single();
+    // Load game save and avatar_url in parallel
+    const [saveRes, playerRes] = await Promise.all([
+      supabase
+        .from("game_saves")
+        .select("save")
+        .eq("player_id", user.id)
+        .single(),
+      supabase
+        .from("players")
+        .select("avatar_url")
+        .eq("player_id", user.id)
+        .single()
+    ]);
 
-    if (error) {
-      if (error.code === "PGRST116") return null; // no row yet — fine
-      console.error("loadFromCloud error:", error.message);
+    // Apply avatar_url from players table if present
+    if (!playerRes.error && playerRes.data?.avatar_url) {
+      playerAvatarUrl = playerRes.data.avatar_url;
+      if (typeof restoreAvatar === "function") restoreAvatar();
+    }
+
+    if (saveRes.error) {
+      if (saveRes.error.code === "PGRST116") return null; // no row yet — fine
+      console.error("loadFromCloud error:", saveRes.error.message);
       return null;
     }
 
-    return data?.save ?? null;
+    return saveRes.data?.save ?? null;
   }
 
   /* ── Auth helpers ────────────────────────────────────── */

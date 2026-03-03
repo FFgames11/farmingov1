@@ -225,6 +225,9 @@ async function saveAvatarCrop(){
         // Add cache-busting timestamp so the browser loads the new image
         playerAvatarUrl = urlData.publicUrl + "?t=" + Date.now();
 
+        // Write avatar_url into the players table immediately
+        if (typeof window.saveToCloud === "function") await window.saveToCloud();
+
       } catch(err) {
         console.error("Avatar upload failed:", err);
         // Fallback: save as data URL in localStorage
