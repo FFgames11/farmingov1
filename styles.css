@@ -275,7 +275,6 @@ body{
 #profileBtn img{
   width: 100%;
   height: 100%;
-  border-radius: 80px;
 }
 .nameStack{
   display:flex;
@@ -476,7 +475,6 @@ body{
     justify-content: center;
     margin-top: -22px;
     box-shadow: inset 0px 3px 0px rgba(0, 0, 0, 0.1);
-    z-index: 4;
 }
 #LevelTxt {
   position: relative;
@@ -3088,197 +3086,121 @@ hr.sep{
   display: none!important;
 }
 /* =========================================================
-   AVATAR — header camera hover overlay
+   PET GLOW — combinable animals pulse with a gold glow
 ========================================================= */
-#profileBtn {
-  position: relative;
-  overflow: visible;
+.zooPet.canCombine {
+  filter: drop-shadow(0 0 6px rgba(255, 210, 50, 0.95));
+  animation: combinePulse 1.4s ease-in-out infinite;
 }
-#profileBtn .avatarCameraHover {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 2;
-}
-#profileBtn:hover .avatarCameraHover {
-  display: flex;
-}
-
-/* Profile modal DP camera overlay */
-.playerdpCameraOverlay {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  pointer-events: none;
-}
-.playerdp:hover .playerdpCameraOverlay {
-  display: flex;
+@keyframes combinePulse {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(255,210,50,0.8)); }
+  50%       { filter: drop-shadow(0 0 12px rgba(255,170,0,1)); }
 }
 
 /* =========================================================
-   AVATAR CROP MODAL
+   SPECIES PANEL — chips row above the zooYard
 ========================================================= */
-#avatarCropModal {
-  position: fixed;
-  inset: 0;
+.speciesPanel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 12px 0;
+  width: 100%;
+  max-width: 554px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 5;
+}
+
+.speciesChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.82);
+  border: 2px solid rgba(180,130,60,0.35);
+  border-radius: 99px;
+  padding: 4px 10px 4px 6px;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #3d2a0a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.speciesChip:active { transform: scale(0.93); }
+
+.speciesChipGlow {
+  border-color: rgba(255,190,30,0.85);
+  background: rgba(255,252,220,0.95);
+  box-shadow: 0 0 8px rgba(255,190,30,0.7), 0 2px 6px rgba(0,0,0,0.1);
+  animation: chipPulse 1.4s ease-in-out infinite;
+}
+@keyframes chipPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255,190,30,0.6), 0 2px 6px rgba(0,0,0,0.1); }
+  50%       { box-shadow: 0 0 14px rgba(255,160,0,0.9), 0 2px 6px rgba(0,0,0,0.1); }
+}
+
+.speciesChipImg {
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9500;
 }
-.avatarCropOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
+.speciesChipImg img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
-.avatarCropCard {
-  position: relative;
-  background: #fff;
-  border-radius: 24px;
-  padding: 24px 20px 20px;
-  width: 90%;
-  max-width: 320px;
-  box-shadow: 0 8px 0 #e8b84b, 0 16px 40px rgba(0,0,0,0.25);
-  font-family: 'Nunito', sans-serif;
-  z-index: 1;
-}
-.avatarCropTitle {
-  font-family: 'Fredoka One', cursive;
-  font-size: 20px;
+.speciesChipCount {
+  font-size: 13px;
+  font-weight: 900;
   color: #3d2a0a;
-  text-align: center;
-  margin-bottom: 18px;
+}
+.speciesChipBadge {
+  font-size: 11px;
+  margin-left: 1px;
 }
 
-/* Choice screen */
-#avatarChoiceScreen {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.avatarChoiceBtn {
+/* Species modal pet rows */
+.speciesPetRow {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   background: #fdf6e8;
   border: 2px solid #f0d89a;
-  border-radius: 14px;
-  padding: 14px 16px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: #3d2a0a;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-.avatarChoiceBtn:hover:not(:disabled) {
-  background: #fff3cc;
-  border-color: #f4a427;
-}
-.avatarChoiceIcon { font-size: 26px; }
-.avatarChoiceBtnDisabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.avatarComingSoon {
-  margin-left: auto;
-  font-size: 11px;
-  color: #a07840;
-  background: #f5ead5;
-  border-radius: 8px;
-  padding: 2px 8px;
-}
-.avatarCancelBtn {
-  background: transparent;
-  border: 2px solid #e8d08a;
   border-radius: 12px;
-  padding: 10px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #a07840;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 4px;
+  padding: 8px 10px;
 }
-
-/* Crop screen */
-#avatarCropScreen {
+.speciesPetRowGlow {
+  border-color: rgba(255,190,30,0.9);
+  background: rgba(255,252,210,0.95);
+  box-shadow: 0 0 8px rgba(255,190,30,0.5);
+}
+.speciesPetImg {
+  width: 36px;
+  height: 36px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 14px;
-}
-.avatarCropWrap {
-  display: flex;
   justify-content: center;
+  flex-shrink: 0;
 }
-.avatarCropCircle {
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #222;
-  box-shadow: 0 0 0 4px #f4a427, 0 4px 16px rgba(0,0,0,0.25);
-  cursor: grab;
+.speciesPetImg img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
-.avatarCropCircle:active { cursor: grabbing; }
-#avatarCropCanvas {
-  display: block;
-  touch-action: none;
-}
-.avatarCropControls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-.avatarZoomLabel {
+.speciesPetInfo {
+  flex: 1;
+  font-family: 'Nunito', sans-serif;
   font-size: 13px;
-  font-weight: 700;
-  color: #a07840;
+  color: #3d2a0a;
+}
+.speciesCombineReady {
+  font-size: 12px;
+  font-weight: 800;
+  color: #c07800;
   white-space: nowrap;
 }
-#avatarZoomSlider {
-  flex: 1;
-  accent-color: #f4a427;
-}
-.avatarCropHint {
-  font-size: 11px;
-  color: #b09060;
-  text-align: center;
-}
-.avatarCropBtns {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-}
-.avatarCropBtns .avatarCancelBtn {
-  flex: 1;
-  margin-top: 0;
-}
-.avatarSaveBtn {
-  flex: 1;
-  background: linear-gradient(135deg, #f4a427, #e8851a);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 10px;
-  font-family: 'Fredoka One', cursive;
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 3px 0 #c06a10;
-  transition: transform 0.1s;
-}
-.avatarSaveBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #c06a10; }
