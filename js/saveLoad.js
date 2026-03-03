@@ -17,7 +17,7 @@ let showcase = [null, null, null, null]; // Profile showcase slots
 
 let playerName = "Player";
 let playerTitle = "Rookie Farmer";
-let playerAvatarUrl = ""; // custom avatar — Supabase Storage URL or empty for default
+let playerAvatarUrl = "";
 
 let selectedSeed = "🥕";
 

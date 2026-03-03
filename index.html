@@ -436,11 +436,19 @@
   <div id="zooScreen" class="screen">
     <!-- <div class="zooTitle">Zoo</div>
     <div class="zooSub">Your captured pets can roam freely here.</div> -->
-    
+
+    <!-- Visit notice: shown when viewing a friend's Ranch -->
+    <div id="zooVisitNotice" style="display:none;" class="zooVisitNotice">
+      👀 Visiting <span id="zooVisitName">Friend</span>'s Ranch
+    </div>
+
+    <!-- Species breakdown chips -->
+    <div id="speciesPanel" class="speciesPanel"></div>
+
     <div id="zooYard" title="Tap a pet to view details">
 
       <div class="townZooCon2" >
-        <button onclick="toggleTown()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
+        <button onclick="handleZooFarmBtn()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
         <button onclick="showTown()" class="toTownBtn2"><span data-title="Town">Town</span></button>
       </div>
 
@@ -638,8 +646,6 @@
 
 <!-- 9. Auth — load last (depends on game being ready) -->
 <script src="js/supabase.js"></script>
-
-<!-- 10. Avatar upload & crop -->
 <script src="js/avatar.js"></script>
 
 
@@ -673,7 +679,7 @@
       <div class="avatarCropTitle">Set Profile Photo</div>
 
       <!-- Choice screen -->
-      <div id="avatarChoiceScreen">
+      <div id="avatarChoiceScreen" style="display:flex;flex-direction:column;gap:12px;">
         <button class="avatarChoiceBtn" onclick="document.getElementById('avatarFileInput').click()">
           <span class="avatarChoiceIcon">🖼️</span>
           <span>Upload from Device</span>

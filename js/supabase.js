@@ -158,7 +158,11 @@ window.addEventListener("DOMContentLoaded", () => {
   // getUser() acquires a Navigator LockManager lock each time — calling it from
   // a setInterval causes lock contention and the "timed out waiting 10000ms" error.
   let _currentUser = null;
-  window._supabaseClient = supabase; // exposed for avatar.js
+  window._supabaseClient = supabase;       // exposed for avatar.js
+  Object.defineProperty(window, "_currentUser", {
+    get: () => _currentUser,
+    set: (v) => { _currentUser = v; }
+  });
 
   // Expose a session checker for the loading screen router.
   // Uses getSession() (no network lock) to reliably detect active sessions.

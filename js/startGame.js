@@ -376,7 +376,7 @@ function showFarm(){
   if(zooScreen) zooScreen.style.display = "none";
 }
 function showTown(which){
-  // While visiting a friend's farm, ask before leaving visit mode
+  // During a friend visit, confirm before leaving
   if(window.visitMode){
     openModal("Leave Visit?", `
       <div class="resLine">You'll be leaving your visit if you go to Town.</div>
@@ -402,7 +402,6 @@ function showZoo(){
   farmScreen.style.display  = "none";
   townScreen.style.display  = "none";
   if(zooScreen) zooScreen.style.display = "flex";
-  // While visiting, show friend's pets; otherwise show own pets
   requestAnimationFrame(()=>renderZooRoamingPets());
 }
 
@@ -412,13 +411,8 @@ function toggleTown(){
   else showFarm(); // from Zoo -> Farm
 }
 
-// Farm button inside Zoo screen — during a visit, returns to friend's farm view
-// Outside of visit, goes back to own farm
+// Farm button inside Zoo — works correctly in visit mode too
 function handleZooFarmBtn(){
-  if(window.visitMode){
-    showFarm();
-    return;
-  }
   showFarm();
 }
 
