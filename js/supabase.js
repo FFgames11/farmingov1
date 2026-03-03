@@ -851,7 +851,6 @@ window.addEventListener("DOMContentLoaded", () => {
     _visitingPlayerId = friendId;
     _visitingSaveData  = data.save;
     window.visitMode   = true;  // blocks clickTile in tools.js
-    window._visitingFriendName = friendName;
 
     // Go to farm screen first
     if (typeof showFarm === "function") showFarm();
@@ -881,7 +880,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Apply a friend's save snapshot to the farm visually
   // Never writes to localStorage — only updates in-memory tile arrays
-  let _ownZooPetsSnapshot = null;
+  let _ownTileStatesSnapshot    = null;
+  let _ownUnlockedTilesSnapshot = null;
+  let _ownZooPetsSnapshot       = null;
 
   function applyVisitState(bundle) {
     try {
@@ -893,21 +894,25 @@ window.addEventListener("DOMContentLoaded", () => {
         st = bundle; // legacy flat save
       }
       if (!st) return;
-      if (Array.isArray(st.tileStates))    tileStates    = st.tileStates;
-      if (Array.isArray(st.unlockedTiles)) unlockedTiles = st.unlockedTiles;
+
+      // Snapshot ALL own state before overwriting
+      _ownTileStatesSnapshot    = JSON.parse(JSON.stringify(tileStates));
+      _ownUnlockedTilesSnapshot = JSON.parse(JSON.stringify(unlockedTiles));
+      _ownZooPetsSnapshot       = JSON.parse(JSON.stringify(typeof zooPets !== "undefined" ? zooPets : []));
+
+      // Apply friend's farm tiles
+      if (Array.isArray(st.tileStates))    tileStates    = JSON.parse(JSON.stringify(st.tileStates));
+      if (Array.isArray(st.unlockedTiles)) unlockedTiles = JSON.parse(JSON.stringify(st.unlockedTiles));
       if (typeof renderFarm === "function") renderFarm();
 
-      // Snapshot own pets, then replace with friend's pets for Ranch view
-      _ownZooPetsSnapshot = JSON.parse(JSON.stringify(typeof zooPets !== "undefined" ? zooPets : []));
+      // Apply friend's Ranch pets
       zooPets = Array.isArray(st.zooPets) ? JSON.parse(JSON.stringify(st.zooPets)) : [];
-
-      // Re-render Ranch if it's open, and refresh species panel
       if (typeof renderZooRoamingPets === "function") renderZooRoamingPets();
 
       // Show visit notice banner in Ranch
-      const notice  = document.getElementById("zooVisitNotice");
-      const nameEl  = document.getElementById("zooVisitName");
-      const zooNav  = document.querySelector(".zooNav");
+      const notice = document.getElementById("zooVisitNotice");
+      const nameEl = document.getElementById("zooVisitName");
+      const zooNav = document.querySelector(".zooNav");
       if (notice) notice.style.display = "block";
       if (nameEl) nameEl.textContent   = window._visitingFriendName || "Friend";
       if (zooNav) zooNav.style.display = "none";
@@ -920,7 +925,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Leave visit — restore own farm and UI
   window.leaveVisit = function() {
-    _visitingPlayerId = null;
+    _visitingPlayerId  = null;
     _visitingSaveData  = null;
     window.visitMode   = false;
     window._visitingFriendName = null;
@@ -938,10 +943,20 @@ window.addEventListener("DOMContentLoaded", () => {
     if (bottomBar) bottomBar.style.display = "";
     if (toolStrip) toolStrip.style.display = "";
     if (ownWidget) ownWidget.style.display = "flex";
-    // Refresh like count on own farm
     updateLikeButton(null);
 
-    // Restore own zooPets from snapshot
+    // Restore own farm tiles from snapshot — reliable, no loadState() timing issues
+    if (_ownTileStatesSnapshot !== null) {
+      tileStates    = _ownTileStatesSnapshot;
+      _ownTileStatesSnapshot = null;
+    }
+    if (_ownUnlockedTilesSnapshot !== null) {
+      unlockedTiles = _ownUnlockedTilesSnapshot;
+      _ownUnlockedTilesSnapshot = null;
+    }
+    if (typeof renderFarm === "function") renderFarm();
+
+    // Restore own Ranch pets from snapshot
     if (_ownZooPetsSnapshot !== null) {
       zooPets = _ownZooPetsSnapshot;
       _ownZooPetsSnapshot = null;
@@ -956,10 +971,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Re-render Ranch with own pets
     if (typeof renderZooRoamingPets === "function") renderZooRoamingPets();
-
-    // Restore own tiles from localStorage
-    if (typeof loadState  === "function") loadState();
-    if (typeof renderFarm === "function") renderFarm();
   };
 
   // ── Farm likes ─────────────────────────────────────────

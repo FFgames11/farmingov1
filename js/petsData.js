@@ -22,7 +22,10 @@ const PET_TYPES = [
 
   // --- Epic (appear from level 10) ---
   { id:"lion",      name:"Lion",      emoji:"🦁", rarity:"Epic",      minLevel:10, weight:4,  eatMs:12000, poopMin:2, poopMax:3, isImage:true, imagepath:'<img src="images/lion.png" alt="lion">' },
+  { id:"tiger",      name:"Tiger",      emoji:"🐯", rarity:"Epic",      minLevel:10, weight:4,  eatMs:12000, poopMin:2, poopMax:3, isImage:true, imagepath:'<img src="images/tiger.png" alt="tiger">' },
 
   // --- Legendary (appear from level 15) ---
   { id:"alligator", name:"Alligator", emoji:"🐊", rarity:"Legendary", minLevel:15, weight:2,  eatMs:12000, poopMin:2, poopMax:3, isImage:true, imagepath:'<img src="images/alligator.png" alt="alligator">' },
+  { id:"dragon", name:"Dragon", emoji:"🐉", rarity:"Legendary", minLevel:15, weight:2,  eatMs:12000, poopMin:2, poopMax:3, isImage:true, imagepath:'<img src="images/dragon.png" alt="dragon">' },
+  { id:"wolf", name:"Wolf", emoji:"🐺", rarity:"Legendary", minLevel:15, weight:2,  eatMs:12000, poopMin:2, poopMax:3, isImage:true, imagepath:'<img src="images/wolf.png" alt="wolf">' },
 ];
