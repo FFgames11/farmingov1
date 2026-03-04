@@ -22,6 +22,11 @@ This document outlines the established patterns and architectural decisions for 
 - **Interactive Feedback**: Use `showToast` for minor notifications and `showMessage`/`openModal` for critical gameplay events.
 - **Pointer Events**: Ensure interactive layers (like `.zooPet`) have `pointer-events: auto;` and are not accidentally blocked by invisible overlays.
 
+## 6. Dynamic Status Bars (UI)
+- **Implementation**: Replace static `statbar.png` with HTML structures (`.statBarContainer` > `.statBarFill`).
+- **Animation**: All new status bars must use the `.statBarGrow` class to trigger the `statBarGrow` keyframe animation on open.
+- **Scaling**: Standardize stat bars to scale up to a max value of 20 (represented as 100% width).
+
 ## 5. Development Workflow
 - **State Persistence**: Always call `saveState()` after modifying `coins`, `xp`, `inventory`, or `zooPets`.
 - **State Synchronization**: Ensure `updateUI()` and `renderFarm()` are called after state changes to keep the visual representation in sync.

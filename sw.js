@@ -1,4 +1,4 @@
-const CACHE_NAME = 'farmingo-v1';
+const CACHE_NAME = 'farmingo-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -53,7 +53,6 @@ const ASSETS_TO_CACHE = [
     './images/townmarket.png',
     './images/townlibrary.png',
     './images/townarena.png',
-    './images/statbar.png',
     './images/upgrade-arrow.png',
     './images/readyspark.png'
 ];

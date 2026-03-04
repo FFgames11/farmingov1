@@ -82,9 +82,9 @@ function startBossBattle() {
         </div>
       </div>
       <div class="speciesPetInfo">
-        <div class="statInfo"><span data-title="ATK ${st.atk}">ATK ${st.atk}</span> <img src="images/statbar.png" alt="stat bar"></div>
-        <div class="statInfo"><span data-title="DEF ${st.def}">DEF ${st.def}</span> <img src="images/statbar.png" alt="stat bar"></div>
-        <div class="statInfo"><span data-title="SPD ${st.spd}">SPD ${st.spd}</span> <img src="images/statbar.png" alt="stat bar"></div>
+        <div class="statInfo"><span data-title="ATK ${st.atk}">ATK ${st.atk}</span> <div class="statBarContainer"><div class="statBarFill atkBar statBarGrow" style="--target-width: ${Math.min(100, (st.atk / 20) * 100)}%"></div></div></div>
+        <div class="statInfo"><span data-title="DEF ${st.def}">DEF ${st.def}</span> <div class="statBarContainer"><div class="statBarFill defBar statBarGrow" style="--target-width: ${Math.min(100, (st.def / 20) * 100)}%"></div></div></div>
+        <div class="statInfo"><span data-title="SPD ${st.spd}">SPD ${st.spd}</span> <div class="statBarContainer"><div class="statBarFill spdBar statBarGrow" style="--target-width: ${Math.min(100, (st.spd / 20) * 100)}%"></div></div></div>
       </div>
     </div>`;
   }).join("");
