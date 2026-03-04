@@ -1909,7 +1909,34 @@ content: '';
   overflow-y: scroll;
 }
 
-.smallNote{ font-size: 12px; opacity: 0.8; margin-top: 8px; text-align:center; }
+
+.smallNote{font-size: 12px;opacity: 0.8;text-align:left; height: auto; }
+
+.statInfo{font-size: 12px;opacity: 0.8;text-align:left; height: auto; }
+
+.statInfo span {
+  font: normal 17px / 100% 'Bungee';
+  color: #fff;
+  position: relative;
+  z-index: 0;
+  filter: drop-shadow(0px 0px 0px #000);
+  margin-right: 9px;
+  width: 70px;
+  display: inline-block;
+}
+.statInfo span:before{
+  -webkit-text-stroke: 3px #091C17;
+  -webkit-text-fill-color: white;
+  paint-order: fill stroke;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  content: attr(data-title);
+  height: 100%;
+  bottom: 0px;
+}
+.statInfo img {width: 81px;}
 .sectionTitle{ margin-top: 12px; font-weight: 900; color:#3b2716; font-size: 13px; }
 
 /* boss fight ui */
@@ -3353,16 +3380,142 @@ hr.sep{
   align-items: center;
   flex-shrink: 0;
   flex-basis: auto;
+  position: relative;
 }
 .speciesPetRowGlow {
-  border-color: rgba(255,190,30,0.9);
-  background: rgba(255,252,210,0.95);
-  box-shadow: 0 0 8px rgba(255,190,30,0.5);
+
 }
-.speciesPetImg {width: 100%;height: 173px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: #fdf6e8;border: 6px solid #f0d89a;border-radius: 12px;padding: 0;flex-direction: column;}
-.speciesPetImg img {width: 100%;height: 100%;object-fit:contain;border-radius: 12px;}
-.speciesPetInfo { flex:1; font-family:'Nunito',sans-serif; font-size:13px; color:#3d2a0a; }
-.speciesCombineReady { font-size:12px; font-weight:800; color:#c07800; white-space:nowrap; }
+
+.animalInfoCon{
+  display: none;
+}
+
+
+.speciesPetImg {
+  width: 100%;
+  height: 242px;
+  display: flex;
+  flex-shrink: 0;
+  background: #6B99EF;
+  border-radius: 32px;
+  padding: 0;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border-left: 6px solid #A1681C;
+  border-right: 6px solid #A1681C;
+  border-top: 6px solid #A1681C;
+  border-bottom: 10px solid #A1681C;
+  filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.2));
+}
+.speciesPetImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  border: 2px solid #7b4e13;
+  border-radius: 26px;
+}
+.speciesPetImg:before {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  content: '';
+  width: 100%;
+  height: 32%;
+  z-index: 3;
+  background: #000000;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+}
+.speciesPetInfo {
+  flex:1;
+  font-family:'Nunito',sans-serif;
+  font-size:13px;
+  color:#3d2a0a;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 0;
+}
+.speciesCombineReady { 
+  font-size:12px; 
+  font-weight:800; 
+  color:#c07800; 
+  white-space:nowrap; 
+  position: absolute;
+  top: 3px;
+  right: -10px;
+  animation: upAndDownArrow 2s ease-in-out infinite;
+}
+
+
+.petNameandLevel {
+  position: relative;
+  bottom: 37px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 7px;
+  z-index: 9;
+}
+
+.petNameandLevel .petLabel{
+  font: normal 17px/100% 'Bungee';
+  color: #fff;
+  position: relative;
+  z-index: 0;
+  filter: drop-shadow(0px 0px 0px #000);
+}
+.petNameandLevel .petLabel:before{
+    -webkit-text-stroke: 3px #091C17;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
+    bottom: -2px;
+}
+
+.petNameandLevel .petLvl{
+    display: inline-block;
+    font: normal 24px / 100% 'Bungee';
+    color: #fff;
+    position: relative;
+    z-index: 0;
+    filter: drop-shadow(0px 2px 0px #000);
+    top: 1px;
+}
+
+.petNameandLevel .petLvl:before{
+    -webkit-text-stroke: 3px #091C17;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
+}
+
+@keyframes upAndDownArrow {
+  0% {
+    transform: translateY(0); /* Start at original vertical position */
+  }
+  50% {
+    transform: translateY(-20px); /* Move up by 20 pixels (negative value) */
+  }
+  100% {
+    transform: translateY(0); /* Return to original position */
+  }
+}
+
 
 /* profileBtn needs position:relative for camera overlay */
 #profileBtn { position: relative; overflow: visible; }

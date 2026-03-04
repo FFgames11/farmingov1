@@ -26,22 +26,24 @@ function openPetDetails(uid){
   }
 
   openModal("Pet", `
-    <div class="itemCard">
-      <div class="itemLeft">
-        <div class="itemIcon">${pet.imagepath}</div>
-        <div class="itemMeta">
-          <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span style="opacity:.65;">Lv${lvl}</span>` : ""}</div>
-          <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
-          <div class="badgeRow">
-            <div class="badge">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
-            ${meta ? `<div class="badge">ATK ${stats.atk} • DEF ${stats.def} • SPD ${stats.spd}</div>` : `<div class="badge">Captured</div>`}
+    <div class="petItem">
+        <div class="itemCard">
+        <div class="itemLeft">
+          <div class="itemIcon">${pet.imagepath}</div>
+          <div class="itemMeta">
+            <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span style="opacity:.65;">Lv${lvl}</span>` : ""}</div>
+            <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
+            <div class="badgeRow">
+              <div class="badge">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
+              ${meta ? `<div class="badge">ATK ${stats.atk} • DEF ${stats.def} • SPD ${stats.spd}</div>` : `<div class="badge">Captured</div>`}
+            </div>
           </div>
         </div>
-      </div>
-      ${combineNote}
-      <div class="rowBtns">
-        ${combineBtn}
-        <button onclick="closeModal()"><span><small data-title="Close">Close</small></span></button>
+        ${combineNote}
+        <div class="rowBtns">
+          ${combineBtn}
+          <button onclick="closeModal()"><span><small data-title="Close">Close</small></span></button>
+        </div>
       </div>
     </div>
   `);
@@ -201,17 +203,20 @@ function openSpeciesModal(animalId){
   }
   const hasCombinablePair = Object.values(levelGroups).some(g => g.length >= 2 && clamp(parseInt(g[0].level||1,10)||1,1,10) < 10);
 
+  
+
   const petCards = pets.map(p => {
     const lv = clamp(parseInt(p.level||1,10)||1,1,10);
     const stats = battleStats(p.animalId, lv);
     const combinable = isPetCombinable(p);
     return `<div class="speciesPetRow${combinable ? " speciesPetRowGlow" : ""}">
-      <div class="speciesPetImg">${meta.headimage}<div class="petNameandLevel"><b>${escapeHtml(meta.name)}</b> <span style="opacity:.6;">Lv${lv}</span></div></div>
+      <div class="speciesPetImg">${meta.headimage}<div class="petNameandLevel"><span class="petLabel" data-title="${escapeHtml(meta.name)}">${escapeHtml(meta.name)} </span><span class="petLvl" data-title="Lv ${lv}">Lv ${lv}</span></div></div>
       <div class="speciesPetInfo">
-        
-        <div class="smallNote" style="margin:2px 0 0;">ATK ${stats.atk} • DEF ${stats.def} • SPD ${stats.spd}</div>
+        <div class="statInfo"><span data-title="ATK ${stats.atk}">ATK ${stats.atk}</span> <img src="images/statbar.png" alt="stat bar"></div>
+        <div class="statInfo"><span data-title="DEF ${stats.def}">DEF ${stats.def}</span> <img src="images/statbar.png" alt="stat bar"></div>
+        <div class="statInfo"><span data-title="SPD ${stats.spd}">SPD ${stats.spd}</span> <img src="images/statbar.png" alt="stat bar"></div>
       </div>
-      ${combinable ? '<span class="speciesCombineReady">✨ Ready</span>' : ""}
+      ${combinable ? '<span class="speciesCombineReady"><img src="images/upgrade-arrow.png" alt="upgrade arrow"></span>' : ""}
     </div>`;
   }).join("");
 
@@ -220,11 +225,12 @@ function openSpeciesModal(animalId){
     : `<button disabled style="width:100%;margin-top:12px;border-radius:12px;padding:10px;font-size:14px;opacity:0.5;">No pairs ready</button>`;
 
   openModal(escapeHtml(meta.name) + " — Ranch", `
+    ${autoCombineBtn}
     <div class="animalInfoCon">${meta.imagepath} ${escapeHtml(meta.name)} • ${pets.length} in Ranch</div>
-    <div style="display:flex;flex-direction: row;gap: 6px;margin-top:10px;flex-wrap: wrap;justify-content: center;">
+    <div style="display:flex;flex-direction: row;gap: 6px;margin-top:30px;flex-wrap: wrap;justify-content: center;">
       ${petCards}
     </div>
-    ${autoCombineBtn}
+    
   `);
 }
 
