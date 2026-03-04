@@ -1,10 +1,12 @@
 /* =========================================================
    CROPS / SHOP / INVENTORY / ZOO / QUESTS
 ========================================================= */
-function openCrops(){
-  const lines = CROPS.map(c=>{
-    const locked = level < c.unlockLevel;
-    const owned = seeds[c.emoji] || 0;
+function openCrops() {
+  console.log("openCrops called");
+  if (typeof CROPS === "undefined") { console.error("CROPS not defined"); return; }
+  const lines = CROPS.map(c => {
+    const locked = (typeof level !== "undefined" ? level : 1) < (c.unlockLevel || 1);
+    const owned = (typeof seeds !== "undefined" && seeds[c.emoji]) || 0;
     return `
       <div class="itemCard">
         <div class="itemLeft">
@@ -20,63 +22,88 @@ function openCrops(){
           </div>
         </div>
         <div class="rowBtns">
-          <button ${locked || coins<c.seedCost ? "disabled":""} onclick="buySeed('${c.emoji}')">
+          <button ${locked || coins < c.seedCost ? "disabled" : ""} onclick="buySeed('${c.emoji}')">
             <span><small data-title='${locked ? "Locked" : "Buy"}'>${locked ? "Locked" : "Buy"}</small></span>
           </button>
-          <button ${locked || coins<c.seedCost ? "disabled":""} onclick="selectSeed('${c.emoji}')"><span><small data-title="Select">Select</small></span></button>
+          <button ${locked || coins < c.seedCost ? "disabled" : ""} onclick="selectSeed('${c.emoji}')"><span><small data-title="Select">Select</small></span></button>
         </div>
       </div>
     `;
   }).join("");
 
+  let limitedLines = "";
+  if (typeof LIMITED_SEEDS !== "undefined" && typeof seeds !== "undefined") {
+    limitedLines = LIMITED_SEEDS.filter(ls => (seeds[ls.emoji] || 0) > 0).map(ls => {
+      const owned = seeds[ls.emoji] || 0;
+      return `
+        <div class="itemCard" style="border: 2px solid #FFD700; background: #FFF9E6;">
+          <div class="itemLeft">
+            <div class="itemIcon">${escapeHtml(ls.emoji)}</div>
+            <div class="itemMeta">
+              <div class="itemName">${escapeHtml(ls.name)} <span style="font-size:10px; color:#A07840;">(Limited)</span></div>
+              <div class="itemSub">Owned: <b>${owned}</b></div>
+              <div class="badgeRow">
+                <div class="badge">${tileLevelLabel(ls.level)}</div>
+                <div class="badge">Harvest +${ls.harvestCoins} coins</div>
+              </div>
+            </div>
+          </div>
+          <div class="rowBtns">
+            <button onclick="selectSeed('${ls.emoji}')"><span><small data-title="Select">Select</small></span></button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
   openModal("Crops", `
     <div class="cropModalContent">
-      <div class="resLine">Coins: <b>${coins}</b> • Selected seed: <b>${escapeHtml(selectedSeed)}</b></div>
-      <div class="modalGrid">${lines}</div>
+      <div class="resLine">Coins: <b>${typeof coins !== "undefined" ? coins : 0}</b> • Selected seed: <b>${escapeHtml(typeof selectedSeed !== "undefined" ? selectedSeed : "")}</b></div>
+      <div class="modalGrid">${lines}${limitedLines}</div>
       <div class="smallNote">Tip: Harvest tiles show READY when finished.</div>
     </div>
   `);
 }
-function selectSeed(emoji){
+function selectSeed(emoji) {
   selectedSeed = emoji;
   saveState();
   const mc = document.getElementById("modalContent");
   const scrollY = mc ? mc.scrollTop : 0;
   openCrops();
-  requestAnimationFrame(()=>{ if(mc) mc.scrollTop = scrollY; });
+  requestAnimationFrame(() => { if (mc) mc.scrollTop = scrollY; });
 }
-function buySeed(emoji){
+function buySeed(emoji) {
   const c = cropByEmoji(emoji);
-  if(!c) return;
-  if(level < (c.unlockLevel||1)){
+  if (!c) return;
+  if (level < (c.unlockLevel || 1)) {
     showMessage("Locked", `<div class="smallNote">Unlock at Level ${c.unlockLevel}.</div>`);
     return;
   }
-  if(coins < c.seedCost){
+  if (coins < c.seedCost) {
     showMessage("Not enough coins", `<div class="smallNote">You need ${c.seedCost} coins.</div>`);
     return;
   }
   coins -= c.seedCost;
-  seeds[emoji] = (seeds[emoji]||0) + 1;
+  seeds[emoji] = (seeds[emoji] || 0) + 1;
   selectedSeed = emoji;
   saveState();
   updateUI();
   const mc = document.getElementById("modalContent");
   const scrollY = mc ? mc.scrollTop : 0;
   openCrops();
-  requestAnimationFrame(()=>{ if(mc) mc.scrollTop = scrollY; });
+  requestAnimationFrame(() => { if (mc) mc.scrollTop = scrollY; });
 }
 
-function openSupermarket(){
+function openSupermarket() {
   const now = Date.now();
   const scareLeft = Math.max(0, boosts.scarecrowUntil - now);
 
-  const boostsHtml = BOOST_ITEMS.map(b=>{
+  const boostsHtml = BOOST_ITEMS.map(b => {
     let ownedText = "";
-    if(b.key === "scarecrow"){
-      ownedText = scareLeft > 0 ? `Active: <b>${Math.ceil(scareLeft/1000)}s</b>` : "Inactive";
-    }else{
-      ownedText = `Owned: <b>${boosts[b.key]||0}</b>`;
+    if (b.key === "scarecrow") {
+      ownedText = scareLeft > 0 ? `Active: <b>${Math.ceil(scareLeft / 1000)}s</b>` : "Inactive";
+    } else {
+      ownedText = `Owned: <b>${boosts[b.key] || 0}</b>`;
     }
 
     return `
@@ -90,7 +117,7 @@ function openSupermarket(){
           </div>
         </div>
         <div class="rowBtns">
-          <button ${coins<b.cost?"disabled":""} onclick="buyBoost('${b.key}', ${b.cost})"><span><small data-title="Buy">Buy</small></span></button>
+          <button ${coins < b.cost ? "disabled" : ""} onclick="buyBoost('${b.key}', ${b.cost})"><span><small data-title="Buy">Buy</small></span></button>
         </div>
       </div>
     `;
@@ -112,7 +139,7 @@ function openSupermarket(){
         </div>
       </div>
       <div class="rowBtns">
-        <button ${coins<150?"disabled":""} onclick="rollLimitedSeed()"><span><small data-title="Roll">Roll</small></span></button>
+        <button ${coins < 150 ? "disabled" : ""} onclick="rollLimitedSeed()"><span><small data-title="Roll">Roll</small></span></button>
       </div>
     </div>
 
@@ -122,25 +149,25 @@ function openSupermarket(){
     </div>
   `);
 }
-function buyBoost(key, cost){
-  if(coins < cost) return;
+function buyBoost(key, cost) {
+  if (coins < cost) return;
   coins -= cost;
-  if(key === "scarecrow"){
-    boosts.scarecrowUntil = Math.max(Date.now(), boosts.scarecrowUntil || 0) + (3*60*1000);
+  if (key === "scarecrow") {
+    boosts.scarecrowUntil = Math.max(Date.now(), boosts.scarecrowUntil || 0) + (3 * 60 * 1000);
     scheduleNextPetSpawn();
     scheduleNextBossSpawn();
-  }else{
-    boosts[key] = (boosts[key]||0) + 1;
+  } else {
+    boosts[key] = (boosts[key] || 0) + 1;
   }
   saveState();
   updateUI();
   openSupermarket();
 }
-function rollLimitedSeed(){
-  if(coins < 150) return;
+function rollLimitedSeed() {
+  if (coins < 150) return;
   coins -= 150;
   const pick = weightedPick(LIMITED_SEEDS);
-  seeds[pick.emoji] = (seeds[pick.emoji]||0) + 1;
+  seeds[pick.emoji] = (seeds[pick.emoji] || 0) + 1;
   selectedSeed = pick.emoji;
   saveState();
   updateUI();
@@ -154,26 +181,26 @@ function rollLimitedSeed(){
   `);
 }
 
-function openInventory(){
-  const seedBadges = Object.keys(seeds).sort((a,b)=>a.localeCompare(b)).map(k=>{
+function openInventory() {
+  const seedBadges = Object.keys(seeds).sort((a, b) => a.localeCompare(b)).map(k => {
     const c = cropByEmoji(k);
     const name = c ? c.name : "Seed";
-    return `<div class="badge">${escapeHtml(k)} x${seeds[k]||0} (${escapeHtml(name)})</div>`;
+    return `<div class="badge">${escapeHtml(k)} x${seeds[k] || 0} (${escapeHtml(name)})</div>`;
   }).join("");
 
   const harvestedCrops = CROPS
-      .sort((a, b) => a.emoji.localeCompare(b.emoji))
-      .map(c => {
-        const amount = inventory[c.emoji] ?? 0; // default to 0
-        return `<div class="badge">
+    .sort((a, b) => a.emoji.localeCompare(b.emoji))
+    .map(c => {
+      const amount = inventory[c.emoji] || 0; // default to 0
+      return `<div class="badge">
           ${escapeHtml(c.emoji)} x${amount} (${escapeHtml(c.name)})
         </div>`;
-  }).join("");
-  
+    }).join("");
+
 
   const netOwned = boosts.net || 0;
   const fertOwned = boosts.fertilizer || 0;
-  const scareLeft = Math.max(0, (boosts.scarecrowUntil||0) - Date.now());
+  const scareLeft = Math.max(0, (boosts.scarecrowUntil || 0) - Date.now());
 
   openModal("Bag", `
     <div class="resLine">Coins: <b>${coins}</b> • Selected: <b>${escapeHtml(selectedSeed)}</b></div>
@@ -192,7 +219,7 @@ function openInventory(){
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
       <div class="badge">Fertilizer x${fertOwned}</div>
       <div class="badge">Capture Net x${netOwned}</div>
-      <div class="badge">Scarecrow: ${scareLeft>0 ? `${Math.ceil(scareLeft/1000)}s` : "Inactive"}</div>
+      <div class="badge">Scarecrow: ${scareLeft > 0 ? `${Math.ceil(scareLeft / 1000)}s` : "Inactive"}</div>
     </div>
 
     <div class="sectionTitle">Battle</div>
@@ -203,19 +230,19 @@ function openInventory(){
   `);
 }
 
-function openZoo(){
+function openZoo() {
   showZoo();
 }
 
 
-function openQuestBoard(){
-  const cards = dailyQuests.map(q=>{
+function openQuestBoard() {
+  const cards = dailyQuests.map(q => {
     const done = (q.progress >= q.target);
     const pct = Math.floor((q.progress / q.target) * 100);
     return `
       <div class="itemCard">
         <div class="itemLeft">
-          <div class="itemIcon">${done ? "✅" : (q.type==="all" ? "🏁" : "📌")}</div>
+          <div class="itemIcon">${done ? "✅" : (q.type === "all" ? "🏁" : "📌")}</div>
           <div class="itemMeta">
             <div class="itemName">${escapeHtml(q.title)}</div>
             <div class="itemSub">Progress: <b>${q.progress}</b> / ${q.target}</div>

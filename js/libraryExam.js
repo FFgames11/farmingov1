@@ -1,26 +1,26 @@
 /* =========================================================
    LIBRARY EXAM (DAILY)
 ========================================================= */
-function getExamState(){
-  try{
+function getExamState() {
+  try {
     const raw = localStorage.getItem(LIB_EXAM_KEY);
-    if(!raw) return {};
+    if (!raw) return {};
     const st = JSON.parse(raw);
     return st && typeof st === "object" ? st : {};
-  }catch(e){
+  } catch (e) {
     return {};
   }
 }
-function setExamState(st){
-  try{ localStorage.setItem(LIB_EXAM_KEY, JSON.stringify(st||{})); }catch(e){}
+function setExamState(st) {
+  try { localStorage.setItem(LIB_EXAM_KEY, JSON.stringify(st || {})); } catch (e) { }
 }
 
-function openLibrary(){
+function openLibrary() {
   const st = getExamState();
   const tk = todayKey();
-  const bDone = st?.[tk]?.beginner || false;
-  const iDone = st?.[tk]?.intermediate || false;
-  const aDone = st?.[tk]?.advanced || false;
+  const bDone = (st && st[tk] && st[tk].beginner) || false;
+  const iDone = (st && st[tk] && st[tk].intermediate) || false;
+  const aDone = (st && st[tk] && st[tk].advanced) || false;
 
   openModal("Library", `
     <div class="resLine">Library Exam (1 per difficulty / day)</div>
@@ -75,11 +75,11 @@ function openLibrary(){
   `);
 }
 
-function startLibraryExam(diff){
+function startLibraryExam(diff) {
   const st = getExamState();
   const tk = todayKey();
   st[tk] = st[tk] || {};
-  if(st[tk][diff]){ openLibrary(); return; }
+  if (st[tk][diff]) { openLibrary(); return; }
 
   const exam = {
     diff,
@@ -92,59 +92,59 @@ function startLibraryExam(diff){
   renderLibraryExam(exam);
 }
 
-function renderLibraryExam(exam){
-  if(!exam || !exam.active) return;
+function renderLibraryExam(exam) {
+  if (!exam || !exam.active) return;
 
   const q = pickQuestion(exam.diff);
   let resolved = false;
 
   openModal(`Library Exam (${tileLevelLabel(exam.diff)})`, `
-    <div class="resLine">Question ${exam.idx+1} / ${exam.total} • Score: ${exam.correct}</div>
+    <div class="resLine">Question ${exam.idx + 1} / ${exam.total} • Score: ${exam.correct}</div>
     <div id="libQ"></div>
     <div id="libFB" class="quizFeedback"></div>
     <div class="smallNote">Pass = 4/5 correct</div>
   `);
 
-  renderQuestionUI(q, "libQ", (ans)=>{
-    if(resolved) return;
+  renderQuestionUI(q, "libQ", (ans) => {
+    if (resolved) return;
     resolved = true;
 
     questProgress("answer", 1);
 
     const ok = normalizeAnswer(ans) === normalizeAnswer(q.a);
     const fb = $("libFB");
-    if(ok){
+    if (ok) {
       exam.correct++;
       fb.className = "quizFeedback good";
       fb.innerHTML = "Correct!";
-    }else{
+    } else {
       fb.className = "quizFeedback bad";
       fb.innerHTML = `Wrong. Correct: <b>${escapeHtml(q.a)}</b>`;
     }
 
     exam.idx++;
 
-    setTimeout(()=>{
-      if(exam.idx >= exam.total){
+    setTimeout(() => {
+      if (exam.idx >= exam.total) {
         finishLibraryExam(exam);
-      }else{
+      } else {
         renderLibraryExam(exam);
       }
     }, 700);
   });
 }
 
-function finishLibraryExam(exam){
+function finishLibraryExam(exam) {
   const pass = exam.correct >= 4;
 
   let coinReward = 0;
   let xpReward = 0;
 
-  if(exam.diff === "beginner"){ coinReward = 40; xpReward = 20; }
-  if(exam.diff === "intermediate"){ coinReward = 70; xpReward = 35; }
-  if(exam.diff === "advanced"){ coinReward = 110; xpReward = 55; }
+  if (exam.diff === "beginner") { coinReward = 40; xpReward = 20; }
+  if (exam.diff === "intermediate") { coinReward = 70; xpReward = 35; }
+  if (exam.diff === "advanced") { coinReward = 110; xpReward = 55; }
 
-  if(pass){
+  if (pass) {
     coins += coinReward;
     gainXP(xpReward);
   }

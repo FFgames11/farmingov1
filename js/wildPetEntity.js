@@ -37,7 +37,7 @@ function trySpawnWildPet(){
   const pool = (grown.length && Math.random()<0.6) ? grown : cropTiles;
   const targetTileIndex = pool[Math.floor(Math.random()*pool.length)];
 
-  const type = pickWildPetType();
+  const type = weightedPick(PET_TYPES);
   spawnWildPetEntity(type, targetTileIndex);
 }
 
@@ -60,6 +60,8 @@ function spawnWildPetEntity(type, targetTileIndex){
   entityEl.title = `${type.name} (${type.rarity})`;
   entityEl.style.left = `${startX}px`;
   entityEl.style.top = `${startY}px`;
+  // Instantly flip to face direction of travel — no rotation, no transition on transform
+  entityEl.style.transform = startSideLeft ? "scaleX(1)" : "scaleX(-1)";
   entityEl.onclick = (e)=>{
     e.stopPropagation();
     onWildPetClicked();
@@ -75,7 +77,7 @@ function spawnWildPetEntity(type, targetTileIndex){
   entityEl.appendChild(barEl);
   eventLayer.appendChild(entityEl);
 
-  const approachMs = 1400;
+  const approachMs = 3200;
 
   activeWildPet = {
     type,

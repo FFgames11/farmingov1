@@ -14,6 +14,7 @@ let level = 1;
 let playerCountry = "Philippines"; // Default country
 let inventory = {}; // Stores harvested crops
 let showcase = [null, null, null, null]; // Profile showcase slots
+let selectedFence = "classic"; // Custom fence design
 
 let playerName = "Player";
 let playerTitle = "Rookie Farmer";
@@ -28,7 +29,7 @@ let seeds = {}; // emoji -> count
 
 const TILE_COUNT = 18;
 let unlockedTiles = new Array(TILE_COUNT).fill(false);
-let tileStates = new Array(TILE_COUNT).fill(null).map(_=>({ state:"empty", crop:"", plantedAt:0, finishAt:0 }));
+let tileStates = new Array(TILE_COUNT).fill(null).map(_ => ({ state: "empty", crop: "", plantedAt: 0, finishAt: 0 }));
 
 let zooPets = [];
 let roamingPetUids = []; // legacy: roaming-on-farm was removed (kept for old saves)
@@ -36,8 +37,8 @@ let roamingPetUids = []; // legacy: roaming-on-farm was removed (kept for old sa
 let nextPetSpawnAt = 0;
 let nextBossSpawnAt = 0;
 
-function saveState(){
-  try{
+function saveState() {
+  try {
     localStorage.setItem(STATE_KEY, JSON.stringify({
       coins, xp, level,
       playerName, playerTitle, playerAvatarUrl,
@@ -47,9 +48,10 @@ function saveState(){
       zooPets, roamingPetUids: [],
       boosts,
       nextPetSpawnAt,
-      nextBossSpawnAt
+      nextBossSpawnAt,
+      selectedFence
     }));
-  }catch(e){}
+  } catch (e) { }
 }
 
 
@@ -57,21 +59,22 @@ function saveState(){
 // Must be called on logout and before a new account's data is loaded,
 // otherwise the previous account's values linger in memory even after
 // localStorage is cleared.
-function resetGameState(){
-  coins        = 30;
-  xp           = 0;
-  level        = 1;
-  playerName   = "Player";
-  playerTitle  = "Rookie Farmer";
+function resetGameState() {
+  coins = 30;
+  xp = 0;
+  level = 1;
+  playerName = "Player";
+  playerTitle = "Rookie Farmer";
   playerAvatarUrl = "";
   playerCountry = "Philippines";
-  inventory    = {};
-  showcase     = [null, null, null, null];
+  inventory = {};
+  showcase = [null, null, null, null];
+  selectedFence = "classic";
   selectedSeed = "🥕";
   // Give starter seeds — same as initDefaults.js does on first load
-  seeds        = {};
-  if(typeof CROPS !== "undefined"){
-    CROPS.forEach(c => { if(!(c.emoji in seeds)) seeds[c.emoji] = 0; });
+  seeds = {};
+  if (typeof CROPS !== "undefined") {
+    CROPS.forEach(c => { if (!(c.emoji in seeds)) seeds[c.emoji] = 0; });
   }
   seeds["🥕"] = 3;
   seeds["🌽"] = 2;
@@ -79,37 +82,37 @@ function resetGameState(){
   unlockedTiles = new Array(TILE_COUNT).fill(false);
   unlockedTiles[0] = true;
   unlockedTiles[1] = true;
-  tileStates   = new Array(TILE_COUNT).fill(null).map(_=>({ state:"empty", crop:"", plantedAt:0, finishAt:0 }));
-  zooPets      = [];
+  tileStates = new Array(TILE_COUNT).fill(null).map(_ => ({ state: "empty", crop: "", plantedAt: 0, finishAt: 0 }));
+  zooPets = [];
   roamingPetUids = [];
-  nextPetSpawnAt  = 0;
+  nextPetSpawnAt = 0;
   nextBossSpawnAt = 0;
-  if(typeof boosts !== "undefined"){
-    boosts.fertilizer    = 0;
-    boosts.net           = 0;
+  if (typeof boosts !== "undefined") {
+    boosts.fertilizer = 0;
+    boosts.net = 0;
     boosts.scarecrowUntil = 0;
   }
   // Reset tutorial state so it triggers correctly for new accounts
-  if(typeof tutorialState !== "undefined"){
+  if (typeof tutorialState !== "undefined") {
     tutorialState.active = false;
-    tutorialState.step   = 0;
-    tutorialState.steps  = [];
+    tutorialState.step = 0;
+    tutorialState.steps = [];
   }
   // Hide tutorial overlay if it was open
   const tutOverlay = document.getElementById("tutorialOverlay");
-  if(tutOverlay) tutOverlay.style.display = "none";
+  if (tutOverlay) tutOverlay.style.display = "none";
 }
 
-function loadState(){
-  try{
+function loadState() {
+  try {
     const raw = localStorage.getItem(STATE_KEY);
-    if(!raw) return;
+    if (!raw) return;
     const st = JSON.parse(raw);
-    if(!st || typeof st !== "object") return;
+    if (!st || typeof st !== "object") return;
 
-    coins = Number(st.coins ?? coins);
-    xp = Number(st.xp ?? xp);
-    level = Number(st.level ?? level);
+    coins = Number(st.coins || coins);
+    xp = Number(st.xp || xp);
+    level = Number(st.level || level);
 
     playerName = st.playerName || playerName;
     playerTitle = st.playerTitle || playerTitle;
@@ -119,7 +122,8 @@ function loadState(){
     showcase = st.showcase || [null, null, null, null];
 
     selectedSeed = st.selectedSeed || selectedSeed;
-    seeds = st.seeds && typeof st.seeds==="object" ? st.seeds : seeds;
+    selectedFence = st.selectedFence || "classic";
+    seeds = st.seeds && typeof st.seeds === "object" ? st.seeds : seeds;
 
     unlockedTiles = Array.isArray(st.unlockedTiles) ? st.unlockedTiles : unlockedTiles;
     tileStates = Array.isArray(st.tileStates) ? st.tileStates : tileStates;
@@ -136,17 +140,17 @@ function loadState(){
       dragon: "lion",
     };
 
-    zooPets = (zooPets||[]).map(p=>{
-      if(!p || typeof p !== "object") return null;
+    zooPets = (zooPets || []).map(p => {
+      if (!p || typeof p !== "object") return null;
       const pet = { ...p };
       pet.level = clamp(parseInt(pet.level || 1, 10) || 1, 1, 5);
 
-      if(!pet.animalId){
-        if(pet.typeId && LEGACY_PET_TO_ANIMAL[pet.typeId]) pet.animalId = LEGACY_PET_TO_ANIMAL[pet.typeId];
+      if (!pet.animalId) {
+        if (pet.typeId && LEGACY_PET_TO_ANIMAL[pet.typeId]) pet.animalId = LEGACY_PET_TO_ANIMAL[pet.typeId];
       }
 
       const meta = (pet.animalId && BATTLE_ANIMALS[pet.animalId]) ? BATTLE_ANIMALS[pet.animalId] : null;
-      if(meta){
+      if (meta) {
         pet.typeId = pet.typeId || pet.animalId;
         pet.name = meta.name;
         pet.emoji = meta.emoji;
@@ -159,13 +163,13 @@ function loadState(){
     // roaming-on-farm was removed; keep older saves from showing farm roam pets
     roamingPetUids = [];
 
-    if(st.boosts && typeof st.boosts==="object"){
-      boosts.fertilizer = Number(st.boosts.fertilizer||0);
-      boosts.net = Number(st.boosts.net||0);
-      boosts.scarecrowUntil = Number(st.boosts.scarecrowUntil||0);
+    if (st.boosts && typeof st.boosts === "object") {
+      boosts.fertilizer = Number(st.boosts.fertilizer || 0);
+      boosts.net = Number(st.boosts.net || 0);
+      boosts.scarecrowUntil = Number(st.boosts.scarecrowUntil || 0);
     }
 
     nextPetSpawnAt = Number(st.nextPetSpawnAt || 0);
     nextBossSpawnAt = Number(st.nextBossSpawnAt || 0);
-  }catch(e){}
+  } catch (e) { }
 }

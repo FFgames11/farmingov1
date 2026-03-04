@@ -8,7 +8,7 @@
 window.addEventListener("DOMContentLoaded", () => {
 
   /* ── Client ──────────────────────────────────────────── */
-  const SUPABASE_URL      = "https://eqwdjutsmellvbqjvhzx.supabase.co";
+  const SUPABASE_URL = "https://eqwdjutsmellvbqjvhzx.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxd2RqdXRzbWVsbHZicWp2aHp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1NjYzMTcsImV4cCI6MjA4NzE0MjMxN30.0U10MPyhKwchFuTdLEBOvSjx4yD6MhUKU9_lKuMnFb0";
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
@@ -34,7 +34,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Keep these as no-ops for any legacy code that calls them
-  function openAuthModal()  { openAuthScreen(); }
+  function openAuthModal() { openAuthScreen(); }
   function closeAuthModal() { closeAuthScreen(); }
 
   document.getElementById("openAuth").addEventListener("click", openAuthScreen);
@@ -46,19 +46,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Show/hide the logout + cloud buttons based on session state
   function updateHeaderButtons(loggedIn) {
-    const logoutBtn   = document.getElementById("logoutBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
     const cloudSaveBtn = document.getElementById("cloudSaveBtn");
-    if (logoutBtn)    logoutBtn.style.display    = loggedIn ? "flex"   : "none";
-    if (cloudSaveBtn) cloudSaveBtn.style.display = loggedIn ? "none"   : "flex";
+    if (logoutBtn) logoutBtn.style.display = loggedIn ? "flex" : "none";
+    if (cloudSaveBtn) cloudSaveBtn.style.display = loggedIn ? "none" : "flex";
   }
 
   // Tab switcher (login / signup)
-  window.switchAuthTab = function(tab) {
+  window.switchAuthTab = function (tab) {
     const isLogin = tab === "login";
     document.getElementById("tabLogin").classList.toggle("active", isLogin);
     document.getElementById("tabSignup").classList.toggle("active", !isLogin);
-    document.getElementById("btnLogin").style.display  = isLogin ? "block" : "none";
-    document.getElementById("btnSignup").style.display = isLogin ? "none"  : "block";
+    document.getElementById("btnLogin").style.display = isLogin ? "block" : "none";
+    document.getElementById("btnSignup").style.display = isLogin ? "none" : "block";
   };
 
   // ── Clean up the game UI on logout ───────────────────────
@@ -76,9 +76,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Close tools panel if open
     const toolsPanel = document.getElementById("toolsPanel");
-    const toolsArrow  = document.getElementById("toolsArrow");
+    const toolsArrow = document.getElementById("toolsArrow");
     if (toolsPanel) toolsPanel.classList.remove("open");
-    if (toolsArrow)  toolsArrow.classList.remove("open");
+    if (toolsArrow) toolsArrow.classList.remove("open");
 
     // Close any open modal
     const modal = document.getElementById("modal");
@@ -91,11 +91,11 @@ window.addEventListener("DOMContentLoaded", () => {
     // Reset all sub-screens back to farm so next login starts clean
     const farmScreen = document.getElementById("farmScreen");
     const townScreen = document.getElementById("townScreen");
-    const zooScreen  = document.getElementById("zooScreen");
+    const zooScreen = document.getElementById("zooScreen");
     const arenaScreen = document.getElementById("arenaScreen");
-    if (farmScreen)  farmScreen.style.display  = "flex";
-    if (townScreen)  townScreen.style.display  = "none";
-    if (zooScreen)   zooScreen.style.display   = "none";
+    if (farmScreen) farmScreen.style.display = "flex";
+    if (townScreen) townScreen.style.display = "none";
+    if (zooScreen) zooScreen.style.display = "none";
     if (arenaScreen) arenaScreen.style.display = "none";
 
     // Note: clearAllGameStorage() is called explicitly BEFORE cleanGameUI()
@@ -103,11 +103,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Logout modal — wire buttons directly, we're already inside DOMContentLoaded
-  const _logoutModal  = document.getElementById("logoutModal");
+  const _logoutModal = document.getElementById("logoutModal");
   const _logoutYesBtn = document.getElementById("logoutConfirmYes");
-  const _logoutNoBtn  = document.getElementById("logoutConfirmNo");
+  const _logoutNoBtn = document.getElementById("logoutConfirmNo");
 
-  window.handleLogout = function() {
+  window.handleLogout = function () {
     if (_logoutModal) _logoutModal.style.display = "flex";
   };
 
@@ -161,15 +161,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Expose a session checker for the loading screen router.
   // Uses getSession() (no network lock) to reliably detect active sessions.
-  window._supabaseCheckSession = function(callback) {
-    supabase.auth.getSession().then(function(res) {
+  window._supabaseCheckSession = function (callback) {
+    supabase.auth.getSession().then(function (res) {
       callback(!!(res.data && res.data.session && res.data.session.user));
-    }).catch(function() { callback(false); });
+    }).catch(function () { callback(false); });
   };
 
   // Seed the cache once on load from the existing session (no network lock needed)
   supabase.auth.getSession().then(({ data }) => {
-    _currentUser = data?.session?.user ?? null;
+    _currentUser = (data && data.session && data.session.user) || null;
   });
 
   /* ── Game state collector ────────────────────────────── */
@@ -239,10 +239,10 @@ window.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("catfarm_state_v5", JSON.stringify(bundle));
       }
 
-      if (typeof loadState        === "function") loadState();
-      if (typeof loadDailyQuests  === "function") loadDailyQuests();
-      if (typeof updateUI         === "function") updateUI();
-      if (typeof renderFarm       === "function") renderFarm();
+      if (typeof loadState === "function") loadState();
+      if (typeof loadDailyQuests === "function") loadDailyQuests();
+      if (typeof updateUI === "function") updateUI();
+      if (typeof renderFarm === "function") renderFarm();
     } catch (e) {
       console.error("applyGameState error:", e);
     }
@@ -262,7 +262,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const st = JSON.parse(raw);
         if (st && st.playerName && st.playerName !== "Player") return st.playerName;
       }
-    } catch (e) {}
+    } catch (e) { }
     return "Player";
   }
 
@@ -334,7 +334,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
-    return data?.save ?? null;
+    return (data && data.save) || null;
   }
 
   /* ── Auth helpers ────────────────────────────────────── */
@@ -366,7 +366,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   /* ── Button handlers ─────────────────────────────────── */
   document.getElementById("btnSignup").addEventListener("click", async () => {
-    const email    = document.getElementById("authEmail").value.trim();
+    const email = document.getElementById("authEmail").value.trim();
     const password = document.getElementById("authPassword").value;
     try {
       setAuthStatus("Signing up…");
@@ -378,7 +378,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btnLogin").addEventListener("click", async () => {
-    const email    = document.getElementById("authEmail").value.trim();
+    const email = document.getElementById("authEmail").value.trim();
     const password = document.getElementById("authPassword").value;
     try {
       setAuthStatus("Logging in…");
@@ -404,8 +404,8 @@ window.addEventListener("DOMContentLoaded", () => {
         // previous account leaks in. Do NOT push local state to cloud.
         if (typeof resetGameState === "function") resetGameState();
         clearAllGameStorage();
-        if (typeof initTiles  === "function") initTiles();
-        if (typeof updateUI   === "function") updateUI();
+        if (typeof initTiles === "function") initTiles();
+        if (typeof updateUI === "function") updateUI();
         if (typeof renderFarm === "function") renderFarm();
         await syncPlayerName(user.id);
         setAuthStatus("New account — starting fresh!");
@@ -441,7 +441,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // onAuthStateChange is the single source of truth for _currentUser.
   // It fires on login, logout, and token refresh — no lock contention.
   supabase.auth.onAuthStateChange((_event, session) => {
-    _currentUser = session?.user ?? null;
+    _currentUser = (session && session.user) || null;
 
     if (_currentUser) {
       setAuthStatus(`Signed in: ${_currentUser.email}`);
@@ -461,11 +461,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // ── State ──────────────────────────────────────────────
   let _visitingPlayerId = null;   // null = own farm, string = visiting someone
-  let _visitingSaveData  = null;  // snapshot of visited farm
+  let _visitingSaveData = null;  // snapshot of visited farm
   let _currentFriendsTab = "friends";
 
   // ── Panel open/close — uses the game's native modal ───────────────────
-  window.openFriendsPanel = async function() {
+  window.openFriendsPanel = async function () {
     if (typeof showMessage !== "function") return;
 
     // Render the friends panel HTML inside the game modal
@@ -520,21 +520,21 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 50);
   };
 
-  window.closeFriendsPanel = function() {
+  window.closeFriendsPanel = function () {
     if (typeof closeModal === "function") closeModal();
   };
 
-  window.switchFriendsTab = function(tab) {
+  window.switchFriendsTab = function (tab) {
     _currentFriendsTab = tab;
-    ["friends","requests","add"].forEach(t => {
-      const btn     = document.getElementById("ftab" + t.charAt(0).toUpperCase() + t.slice(1));
+    ["friends", "requests", "add"].forEach(t => {
+      const btn = document.getElementById("ftab" + t.charAt(0).toUpperCase() + t.slice(1));
       const content = document.getElementById("ftabContent" + t.charAt(0).toUpperCase() + t.slice(1));
-      if (btn)     btn.classList.toggle("active", t === tab);
+      if (btn) btn.classList.toggle("active", t === tab);
       if (content) content.style.display = t === tab ? "flex" : "none";
     });
     if (tab === "requests") loadFriendRequests();
-    if (tab === "friends")  loadFriendsList();
-    if (tab === "add")      { loadMyLikeCount(); loadSuggestedPlayers(); }
+    if (tab === "friends") loadFriendsList();
+    if (tab === "add") { loadMyLikeCount(); loadSuggestedPlayers(); }
   };
 
   // ── Helpers ────────────────────────────────────────────
@@ -587,10 +587,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const rows = data.map(f => {
       const iAmRequester = f.requester_id === user.id;
-      const friendId   = iAmRequester ? f.receiver_id : f.requester_id;
+      const friendId = iAmRequester ? f.receiver_id : f.requester_id;
       const friendName = iAmRequester
-        ? (f.players_receiver?.player_name || "Unknown")
-        : (f.players_requester?.player_name || "Unknown");
+        ? ((f.players_receiver && f.players_receiver.player_name) || "Unknown")
+        : ((f.players_requester && f.players_requester.player_name) || "Unknown");
       return `
         <div class="friendRow">
           <div class="friendAvatar">${friendInitial(friendName)}</div>
@@ -623,7 +623,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (error) { setFriendsListHTML("requestsList", '<div class="friendsEmpty">Error loading requests.</div>'); return; }
 
-    updateFriendRequestBadge(data?.length || 0);
+    updateFriendRequestBadge((data && data.length) || 0);
 
     if (!data || data.length === 0) {
       setFriendsListHTML("requestsList", '<div class="friendsEmpty">No pending requests.</div>');
@@ -631,7 +631,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     const rows = data.map(f => {
-      const name = f.players_requester?.player_name || "Unknown";
+      const name = (f.players_requester && f.players_requester.player_name) || "Unknown";
       return `
         <div class="friendRow">
           <div class="friendAvatar">${friendInitial(name)}</div>
@@ -660,9 +660,9 @@ window.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="friendActions">
           ${alreadyLinked
-            ? `<span class="friendActBtn" style="background:#f5ead5;color:#a07840;cursor:default;">Added</span>`
-            : `<button class="friendActBtn friendActAccept" onclick="sendFriendRequest('${p.player_id}','${escapeHtml(p.player_name)}')">＋ Send</button>`
-          }
+        ? `<span class="friendActBtn" style="background:#f5ead5;color:#a07840;cursor:default;">Added</span>`
+        : `<button class="friendActBtn friendActAccept" onclick="sendFriendRequest('${p.player_id}','${escapeHtml(p.player_name)}')">＋ Send</button>`
+      }
           <button class="friendActBtn friendActRemove" title="Block (coming soon)" onclick="showToast('Block feature coming soon 🚧')" style="opacity:0.6;">🚫</button>
         </div>
       </div>`;
@@ -713,18 +713,18 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
       suggestedEl.innerHTML = data.map(p => renderPlayerRow(p, user, existingIds)).join("");
-    } catch(e) {
+    } catch (e) {
       console.error("loadSuggestedPlayers exception:", e);
       suggestedEl.innerHTML = '<div class="friendsEmpty">Error loading players.</div>';
     }
   }
 
   // ── Search players by name ───────────────────────────────────────────
-  window.searchAndAddFriend = async function() {
+  window.searchAndAddFriend = async function () {
     const user = _currentUser;
     if (!user) { setFriendAddStatus("Sign in first."); return; }
 
-    const query = (document.getElementById("friendSearchInput")?.value || "").trim();
+    const query = ((document.getElementById("friendSearchInput") && document.getElementById("friendSearchInput").value) || "").trim();
     if (!query) {
       // Empty query — just reload the suggested list
       setFriendAddStatus("");
@@ -757,7 +757,7 @@ window.addEventListener("DOMContentLoaded", () => {
       data.map(p => renderPlayerRow(p, user, existingIds)).join("");
   };
 
-  window.sendFriendRequest = async function(receiverId, receiverName) {
+  window.sendFriendRequest = async function (receiverId, receiverName) {
     const user = _currentUser;
     if (!user) return;
 
@@ -801,7 +801,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // ── Accept / decline / remove ──────────────────────────
-  window.acceptFriend = async function(friendshipId) {
+  window.acceptFriend = async function (friendshipId) {
     const { error } = await supabase
       .from("friendships")
       .update({ status: "accepted" })
@@ -809,7 +809,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!error) { loadFriendRequests(); loadFriendsList(); }
   };
 
-  window.declineFriend = async function(friendshipId) {
+  window.declineFriend = async function (friendshipId) {
     const { error } = await supabase
       .from("friendships")
       .delete()
@@ -817,7 +817,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!error) loadFriendRequests();
   };
 
-  window.removeFriend = async function(friendshipId) {
+  window.removeFriend = async function (friendshipId) {
     const { error } = await supabase
       .from("friendships")
       .delete()
@@ -826,7 +826,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   // ── Visit a friend's farm ──────────────────────────────
-  window.visitFriend = async function(friendId, friendName) {
+  window.visitFriend = async function (friendId, friendName) {
     const user = _currentUser;
     if (!user) return;
     if (friendId === user.id) return; // can't visit own farm
@@ -841,7 +841,7 @@ window.addEventListener("DOMContentLoaded", () => {
       .eq("player_id", friendId)
       .single();
 
-    if (error || !data?.save) {
+    if (error || !(data && data.save)) {
       if (typeof showMessage === "function")
         showMessage("Empty Farm", `<div class="smallNote">${escapeHtml(friendName)} hasn't started farming yet 🌱</div>`);
       return;
@@ -849,8 +849,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Remember we're visiting and who
     _visitingPlayerId = friendId;
-    _visitingSaveData  = data.save;
-    window.visitMode   = true;  // blocks clickTile in tools.js
+    _visitingSaveData = data.save;
+    window.visitMode = true;  // blocks clickTile in tools.js
 
     // Go to farm screen first
     if (typeof showFarm === "function") showFarm();
@@ -859,20 +859,20 @@ window.addEventListener("DOMContentLoaded", () => {
     applyVisitState(data.save);
 
     // Hide game header, bottom nav, and own-farm like widget
-    const header    = document.querySelector(".header");
+    const header = document.querySelector(".header");
     const bottomBar = document.getElementById("bottomBar");
     const toolStrip = document.getElementById("toolStrip");
     const ownWidget = document.getElementById("ownFarmLikeWidget");
-    if (header)    header.style.display    = "none";
+    if (header) header.style.display = "none";
     if (bottomBar) bottomBar.style.display = "none";
     if (toolStrip) toolStrip.style.display = "none";
     if (ownWidget) ownWidget.style.display = "none";
 
     // Show the visit bar
-    const visitBar  = document.getElementById("visitBar");
+    const visitBar = document.getElementById("visitBar");
     const visitName = document.getElementById("visitBarName");
-    if (visitBar)  visitBar.style.display  = "flex";
-    if (visitName) visitName.textContent   = `${friendName}'s Farm`;
+    if (visitBar) visitBar.style.display = "flex";
+    if (visitName) visitName.textContent = `${friendName}'s Farm`;
 
     // Set up like button state
     await updateLikeButton(friendId);
@@ -880,9 +880,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Apply a friend's save snapshot to the farm visually
   // Never writes to localStorage — only updates in-memory tile arrays
-  let _ownTileStatesSnapshot    = null;
+  let _ownTileStatesSnapshot = null;
   let _ownUnlockedTilesSnapshot = null;
-  let _ownZooPetsSnapshot       = null;
+  let _ownZooPetsSnapshot = null;
 
   function applyVisitState(bundle) {
     try {
@@ -896,12 +896,12 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!st) return;
 
       // Snapshot ALL own state before overwriting
-      _ownTileStatesSnapshot    = JSON.parse(JSON.stringify(tileStates));
+      _ownTileStatesSnapshot = JSON.parse(JSON.stringify(tileStates));
       _ownUnlockedTilesSnapshot = JSON.parse(JSON.stringify(unlockedTiles));
-      _ownZooPetsSnapshot       = JSON.parse(JSON.stringify(typeof zooPets !== "undefined" ? zooPets : []));
+      _ownZooPetsSnapshot = JSON.parse(JSON.stringify(typeof zooPets !== "undefined" ? zooPets : []));
 
       // Apply friend's farm tiles
-      if (Array.isArray(st.tileStates))    tileStates    = JSON.parse(JSON.stringify(st.tileStates));
+      if (Array.isArray(st.tileStates)) tileStates = JSON.parse(JSON.stringify(st.tileStates));
       if (Array.isArray(st.unlockedTiles)) unlockedTiles = JSON.parse(JSON.stringify(st.unlockedTiles));
       if (typeof renderFarm === "function") renderFarm();
 
@@ -914,20 +914,20 @@ window.addEventListener("DOMContentLoaded", () => {
       const nameEl = document.getElementById("zooVisitName");
       const zooNav = document.querySelector(".zooNav");
       if (notice) notice.style.display = "block";
-      if (nameEl) nameEl.textContent   = window._visitingFriendName || "Friend";
+      if (nameEl) nameEl.textContent = window._visitingFriendName || "Friend";
       if (zooNav) zooNav.style.display = "none";
 
       // Hide all poop during visit
       document.querySelectorAll(".poop").forEach(p => p.style.display = "none");
 
-    } catch(e) { console.error("applyVisitState error:", e); }
+    } catch (e) { console.error("applyVisitState error:", e); }
   }
 
   // Leave visit — restore own farm and UI
-  window.leaveVisit = function() {
-    _visitingPlayerId  = null;
-    _visitingSaveData  = null;
-    window.visitMode   = false;
+  window.leaveVisit = function () {
+    _visitingPlayerId = null;
+    _visitingSaveData = null;
+    window.visitMode = false;
     window._visitingFriendName = null;
 
     // Hide visit bar
@@ -935,11 +935,11 @@ window.addEventListener("DOMContentLoaded", () => {
     if (visitBar) visitBar.style.display = "none";
 
     // Restore header, bottom nav, and own-farm like widget
-    const header    = document.querySelector(".header");
+    const header = document.querySelector(".header");
     const bottomBar = document.getElementById("bottomBar");
     const toolStrip = document.getElementById("toolStrip");
     const ownWidget = document.getElementById("ownFarmLikeWidget");
-    if (header)    header.style.display    = "";
+    if (header) header.style.display = "";
     if (bottomBar) bottomBar.style.display = "";
     if (toolStrip) toolStrip.style.display = "";
     if (ownWidget) ownWidget.style.display = "flex";
@@ -947,7 +947,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Restore own farm tiles from snapshot — reliable, no loadState() timing issues
     if (_ownTileStatesSnapshot !== null) {
-      tileStates    = _ownTileStatesSnapshot;
+      tileStates = _ownTileStatesSnapshot;
       _ownTileStatesSnapshot = null;
     }
     if (_ownUnlockedTilesSnapshot !== null) {
@@ -991,24 +991,24 @@ window.addEventListener("DOMContentLoaded", () => {
       const { count } = await supabase
         .from("farm_likes")
         .select("id", { count: "exact", head: true })
-        .eq("owner_id", user?.id || "");
+        .eq("owner_id", (user && user.id) || "");
       const total = count || 0;
 
       const ownWidget = document.getElementById("ownFarmLikeWidget");
-      const ownCount  = document.getElementById("ownFarmLikeCount");
+      const ownCount = document.getElementById("ownFarmLikeCount");
       if (ownWidget) ownWidget.style.display = "flex";
-      if (ownCount)  ownCount.textContent    = total;
+      if (ownCount) ownCount.textContent = total;
 
       // Keep visit bar in sync too
-      const heart   = document.getElementById("farmLikeHeart");
+      const heart = document.getElementById("farmLikeHeart");
       const countEl = document.getElementById("farmLikeCount");
-      if (heart)   heart.textContent   = "❤️";
+      if (heart) heart.textContent = "❤️";
       if (countEl) countEl.textContent = total;
       return;
     }
 
     // Visiting a friend — update visit bar like button
-    const heart   = document.getElementById("farmLikeHeart");
+    const heart = document.getElementById("farmLikeHeart");
     const countEl = document.getElementById("farmLikeCount");
 
     const { data: existing } = await supabase
@@ -1019,7 +1019,7 @@ window.addEventListener("DOMContentLoaded", () => {
       .limit(1);
 
     const liked = existing && existing.length > 0;
-    if (heart)   heart.textContent = liked ? "❤️" : "🤍";
+    if (heart) heart.textContent = liked ? "❤️" : "🤍";
 
     const { count } = await supabase
       .from("farm_likes")
@@ -1031,7 +1031,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Click handler for the farm like button
   // - On own farm: open a modal showing total likes received
   // - On a friend's farm: like/unlike
-  window.handleFarmLikeClick = async function() {
+  window.handleFarmLikeClick = async function () {
     if (!_visitingPlayerId) {
       // Own farm — show likes modal
       await showFarmLikesModal();
@@ -1067,20 +1067,20 @@ window.addEventListener("DOMContentLoaded", () => {
             Total likes your farm has received
           </div>
           ${total === 0
-            ? `<div style="margin-top:14px; font-family:'Nunito',sans-serif; font-size:12px; color:#b0906a;">
+          ? `<div style="margin-top:14px; font-family:'Nunito',sans-serif; font-size:12px; color:#b0906a;">
                 Add friends and let them visit your farm to collect likes! 🐾
                </div>`
-            : `<div style="margin-top:14px; font-family:'Nunito',sans-serif; font-size:12px; color:#3da855; font-weight:700;">
+          : `<div style="margin-top:14px; font-family:'Nunito',sans-serif; font-size:12px; color:#3da855; font-weight:700;">
                 Your farm is popular! Keep it up 🌾
                </div>`
-          }
+        }
         </div>
       `);
     }
   }
 
   // Like or unlike the currently visited farm
-  window.likeFriend = async function() {
+  window.likeFriend = async function () {
     const user = _currentUser;
     if (!user || !_visitingPlayerId) return;  // can't like own farm
 
@@ -1117,7 +1117,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // ── Expose updateHeaderButtons to also toggle friends btn ──
   const _origUpdateHeaderButtons = updateHeaderButtons;
-  updateHeaderButtons = function(loggedIn) {
+  updateHeaderButtons = function (loggedIn) {
     _origUpdateHeaderButtons(loggedIn);
     const friendsBtn = document.getElementById("friendsBtn");
     if (friendsBtn) friendsBtn.style.display = loggedIn ? "flex" : "none";

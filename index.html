@@ -554,6 +554,79 @@
 
   </div>
 
+  <!-- BOSS BATTLE SCREEN -->
+  <div id="bossScreen" class="screen" style="display:none;">
+
+    <!-- TOP HALF: battle field (mirrors arenaScreen layout) -->
+    <div id="bossBattleField">
+
+      <!-- Player side -->
+      <div id="bossPlayerSide" class="arenaSide arenaPlayerSide">
+        <div class="arenaAnimalName" id="bossP1Name"></div>
+        <div class="arenaHpBar"><div class="arenaHpFill" id="bossP1HpFill"></div></div>
+        <div class="arenaHpLabel" id="bossP1HpLabel"></div>
+        <div class="arenaAnimalSprite" id="bossP1Sprite"></div>
+        <div class="arenaStatusRow" id="bossP1Status"></div>
+        <div class="arenaPlatform" id="bossP1Platform"></div>
+      </div>
+
+      <!-- Boss side -->
+      <div id="bossEnemySide" class="arenaSide arenaEnemySide">
+        <div class="arenaAnimalName" id="bossP2Name">Scarecrow</div>
+        <div class="arenaHpBar"><div class="arenaHpFill" id="bossP2HpFill"></div></div>
+        <div class="arenaHpLabel" id="bossP2HpLabel"></div>
+        <div class="arenaAnimalSprite" id="bossP2Sprite">🪵</div>
+        <div class="arenaStatusRow" id="bossP2Status"></div>
+        <div class="arenaPlatform" id="bossP2Platform"></div>
+      </div>
+
+      <div id="bossBattleLog"></div>
+    </div>
+
+    <!-- BOTTOM HALF: action panel -->
+    <div id="bossActionPanel">
+
+      <div id="bossSkillButtons">
+        <div class="arenaRoundLabel" id="bossRoundLabel">Round 1</div>
+        <div class="arenaSkillRow">
+          <button class="arenaSkillBtn arenaSkillNormal" id="btnBossAttack" onclick="bossScreenUseSkill('normal')">
+            <span class="arenaBtnTitle">Normal</span>
+            <span class="arenaBtnSub">Beginner word</span>
+          </button>
+          <button class="arenaSkillBtn arenaSkillHeavy" id="btnBossHeavy" onclick="bossScreenUseSkill('heavy')">
+            <span class="arenaBtnTitle">Heavy</span>
+            <span class="arenaBtnSub">Hard word</span>
+          </button>
+        </div>
+        <button class="arenaExitBtn" onclick="exitBossScreen()">✕ Forfeit</button>
+      </div>
+
+      <!-- Word-connect challenge -->
+      <div id="bossWordChallenge" style="display:none;">
+        <div class="arenaWordPrompt">Connect the letters to spell:</div>
+        <div class="arenaWordTarget" id="bossWordTarget"></div>
+        <div class="arenaWordCanvas">
+          <canvas id="bossWordBgCanvas"></canvas>
+          <canvas id="bossWordCanvas"></canvas>
+        </div>
+        <div class="arenaWordProgress" id="bossWordProgress"></div>
+        <button class="arenaWordResetBtn" onclick="bossWordReset()">↺ Reset</button>
+      </div>
+
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="bossLoadingOverlay">
+      <div class="arenaLoadingBox">
+        <div class="arenaLoadingIcon">🐷</div>
+        <div class="arenaLoadingTitle">Boss Approaching…</div>
+        <div class="arenaLoadingBarWrap"><div class="arenaLoadingBarFill" id="bossLoadingBarFill"></div></div>
+        <div class="arenaLoadingHint" id="bossLoadingHint">Preparing battle…</div>
+      </div>
+    </div>
+
+  </div>
+
   <!-- Bottom nav -->
   <div class="bottomNav">
     <div id="bottomBar">
