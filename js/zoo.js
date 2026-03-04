@@ -35,9 +35,9 @@ function openPetDetails(uid){
               <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span data-title="Lv${lvl}">Lv${lvl}</span>` : ""}</div>
               <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
               <div class="badgeRow">
-                ${meta ? `<div class="badge">ATK ${stats.atk}</div>` : `<div class="badge">Captured</div>`}
-                ${meta ? `<div class="badge">DEF ${stats.def}</div>` : `<div class="badge">Captured</div>`}
-                ${meta ? `<div class="badge">SPD ${stats.spd}</div>` : `<div class="badge">Captured</div>`}
+                ${meta ? `<div class="badge"><span class="badgeStat" data-title="ATK ${stats.atk}">ATK ${stats.atk}</span><img src="images/statbar.png" alt="statbar"></div>` : `<div class="badge">Captured</div>`}
+                ${meta ? `<div class="badge"><span class="badgeStat" data-title="DEF ${stats.def}">DEF ${stats.def}</span><img src="images/statbar.png" alt="statbar"></div>` : `<div class="badge">Captured</div>`}
+                ${meta ? `<div class="badge"><span class="badgeStat" data-title="SPD ${stats.spd}">SPD ${stats.spd}</span><img src="images/statbar.png" alt="statbar"></div>` : `<div class="badge">Captured</div>`}
               </div>
             </div>
             <div class="buttonCon">${combineBtn}</div>
