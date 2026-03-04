@@ -130,7 +130,7 @@ function openProfile(){
   openModal("Profile", `
     <div class="playerProfileContent">
       <div class="playerheadercon">
-          <div class="playerdp" onclick="openAvatarCropModal()" title="Change profile photo" style="cursor:pointer;position:relative;">
+          <div class="playerdp" onclick="closeModal(); openAvatarCropModal();" title="Change profile photo" style="cursor:pointer;position:relative;">
             <img id="profileModalAvatar" src="${playerAvatarUrl || 'images/profile.png'}" onerror="this.src='images/profile.png'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
             <div class="playerdpCameraOverlay"><span>📷</span></div>
           </div>

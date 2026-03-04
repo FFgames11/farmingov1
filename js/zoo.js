@@ -32,7 +32,7 @@ function openPetDetails(uid){
           <div class="itemIcon">${pet.imagepath}</div>
           <div class="itemMeta">
             <div class="itemInfoGroup">
-              <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span style="opacity:.65;">Lv${lvl}</span>` : ""}</div>
+              <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span data-title="Lv${lvl}">Lv${lvl}</span>` : ""}</div>
               <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
               <div class="badgeRow">
                 ${meta ? `<div class="badge">ATK ${stats.atk}</div>` : `<div class="badge">Captured</div>`}

@@ -247,10 +247,8 @@ async function saveAvatarCrop(){
     closeAvatarCropModal();
     showToast("Profile photo updated! 🐾", 1400);
 
-    // Refresh profile modal if open
-    if(document.getElementById("modal").style.display === "flex"){
-      openProfile();
-    }
+    // Reopen profile modal so user lands back on their profile
+    if(typeof openProfile === "function") openProfile();
 
   }, "image/jpeg", 0.88);
 }
@@ -270,4 +268,38 @@ function _applyAvatarEverywhere(url){
 // Call this on game load to restore saved avatar
 function restoreAvatar(){
   if(playerAvatarUrl) _applyAvatarEverywhere(playerAvatarUrl);
+}
+
+// ── View current avatar fullscreen ───────────────────────
+function viewCurrentAvatar(){
+  const src = (typeof playerAvatarUrl !== "undefined" && playerAvatarUrl)
+    ? playerAvatarUrl
+    : "images/profile.png";
+
+  closeAvatarCropModal();
+
+  openModal("Profile Photo", `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+      <div style="
+        width: 220px; height: 220px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid #f4a427;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        flex-shrink: 0;
+      ">
+        <img src="${src}" alt="Profile photo"
+          style="width:100%;height:100%;object-fit:cover;"
+          onerror="this.src='images/profile.png'">
+      </div>
+      <button onclick="closeModal(); openAvatarCropModal();"
+        style="width:100%;background:linear-gradient(135deg,#f4a427,#e8851a);color:#fff;border:none;border-radius:12px;padding:10px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #c06a10;">
+        Change Photo
+      </button>
+      <button onclick="closeModal(); if(typeof openProfile === 'function') openProfile();"
+        style="width:100%;border-radius:12px;padding:10px;font-size:14px;">
+        Back to Profile
+      </button>
+    </div>
+  `);
 }
