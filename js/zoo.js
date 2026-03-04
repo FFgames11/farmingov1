@@ -21,7 +21,7 @@ function openPetDetails(uid){
   let combineNote = "";
   if(meta && lvl < 10){
     const dupCount = zooPets.filter(p=>p.uid!==uid && p.animalId===pet.animalId && (p.level||1)===lvl).length;
-    combineBtn = `<button ${dupCount ? "" : "disabled"} onclick="combinePet('${pet.uid}')"><span><small data-title="Combine">Combine</small></span></button>`;
+    combineBtn = `<button class="combineBtn" ${dupCount ? "" : "disabled"} onclick="combinePet('${pet.uid}')"><span><small data-title="Combine">Combine</small></span></button>`;
     combineNote = `<div class="smallNote" style="text-align:left;">Combine needs 2 copies of the same animal and the same level. (${dupCount ? "Ready" : "Need 1 more"})</div>`;
   }
 
@@ -31,19 +31,19 @@ function openPetDetails(uid){
         <div class="itemLeft">
           <div class="itemIcon">${pet.imagepath}</div>
           <div class="itemMeta">
-            <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span style="opacity:.65;">Lv${lvl}</span>` : ""}</div>
-            <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
-            <div class="badgeRow">
-              <div class="badge">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
-              ${meta ? `<div class="badge">ATK ${stats.atk} • DEF ${stats.def} • SPD ${stats.spd}</div>` : `<div class="badge">Captured</div>`}
+            <div class="itemInfoGroup">
+              <div class="itemName">${escapeHtml(pet.name)}${meta ? ` <span style="opacity:.65;">Lv${lvl}</span>` : ""}</div>
+              <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
+              <div class="badgeRow">
+                ${meta ? `<div class="badge">ATK ${stats.atk}</div>` : `<div class="badge">Captured</div>`}
+                ${meta ? `<div class="badge">DEF ${stats.def}</div>` : `<div class="badge">Captured</div>`}
+                ${meta ? `<div class="badge">SPD ${stats.spd}</div>` : `<div class="badge">Captured</div>`}
+              </div>
             </div>
+            <div class="buttonCon">${combineBtn}</div>
           </div>
         </div>
         ${combineNote}
-        <div class="rowBtns">
-          ${combineBtn}
-          <button onclick="closeModal()"><span><small data-title="Close">Close</small></span></button>
-        </div>
       </div>
     </div>
   `);

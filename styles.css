@@ -1762,20 +1762,18 @@ content: '';
 }
 .itemMeta .itemName{ font-weight: 900; color: #3b2716; }
 .itemMeta .itemSub{ font-size: 12px; opacity: 0.85; }
-.badgeRow{ display:flex; gap: 6px; margin-top: 4px; flex-wrap:wrap; }
+.badgeRow{display:flex;gap: 6px;margin-top: 4px;flex-wrap:wrap;flex-direction: column;}
 .badge{
   font: normal 14px / 100% 'ArialRounded';
   display:flex;
-  align-items:center;
-  justify-content:center;
+  align-items: center;
+  justify-content: flex-start;
   gap:10px;
   margin: 0;
-  padding: 6px 8px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.65);
-  border: 1px solid rgba(0,0,0,0.10);
   font-size: 13px;
   color: #2f2116;
+  width: 100%;
 }
 
 .rowBtns{     
@@ -1848,6 +1846,109 @@ content: '';
     content: attr(data-title);
     height: 100%;
 }
+
+.buttonCon {
+  height: 47px;
+}
+
+/*Ranch animal modal styles*/
+
+.petItem .itemInfoGroup .badgeRow{
+
+}
+
+.petItem .itemLeft .itemIcon {
+    width: 70%;
+    background: transparent;
+    border: 0;
+}
+
+.petItem .itemMeta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.petItem .itemIcon img {
+      transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -ms-transform: scaleX(-1);
+}
+
+
+
+.petItem .itemInfoGroup {
+  background-color: #EFD0B0;
+  border:2px solid #C58B49;
+  border-radius: 21px;
+  padding: 12px 12px;
+}
+
+.petItem .combineBtn {
+  padding: 0 !important;
+  position: relative !important;
+  border: 1px solid #071F69 !important;
+  background: #029902 !important;
+  border-radius: 11px !important;
+  padding-bottom: 4px !important;
+}
+
+.petItem .combineBtn:hover{ 
+  transform: translateY(2px)!important; 
+  filter: brightness(1.02)!important;
+  cursor: pointer!important;
+  padding-bottom: 0 !important;
+}
+
+.petItem .combineBtn span {
+  padding: 10px 30px!important;
+  position: relative!important;
+  background: #2DD902!important;
+  border: 1px solid #C4E8AA;
+  border-radius: 11px!important;
+  width: 100%;
+  display: block;
+}
+
+.petItem .combineBtn span:before {
+    background: #ADEC51;
+    border-radius: 8px 8px 3px 3px;
+    content: '';
+    width: 86%;
+    height: 19px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 4px;
+    position: absolute;
+    z-index: 0;
+}
+
+.petItem .combineBtn span small{
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  filter: drop-shadow(0px 3px 0 #152066);
+  font: normal 18px / 100% 'Bungee';
+}
+
+.petItem .combineBtn span small:before{
+    -webkit-text-stroke: 3px #091C17;
+    -webkit-text-fill-color: white;
+    paint-order: fill stroke;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    content: attr(data-title);
+    height: 100%;
+}
+
+
+/*end of Ranch animal modal styles*/
 
 
 .questionItem{
