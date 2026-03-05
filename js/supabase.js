@@ -583,7 +583,13 @@ window.addEventListener("DOMContentLoaded", () => {
     // Get all accepted friendships where this user is either side
     const { data, error } = await supabase
       .from("friendships")
-      .select("id, requester_id, receiver_id, players_requester:players!friendships_requester_id_fkey(player_name), players_receiver:players!friendships_receiver_id_fkey(player_name)")
+      .select(`
+        id, 
+        requester_id, 
+        receiver_id, 
+        players_requester:players!friendships_requester_id_fkey(player_name, avatar_url), 
+        players_receiver:players!friendships_receiver_id_fkey(player_name, avatar_url)
+      `)
       .eq("status", "accepted")
       .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
 
@@ -596,12 +602,18 @@ window.addEventListener("DOMContentLoaded", () => {
     const rows = data.map(f => {
       const iAmRequester = f.requester_id === user.id;
       const friendId = iAmRequester ? f.receiver_id : f.requester_id;
-      const friendName = iAmRequester
-        ? ((f.players_receiver && f.players_receiver.player_name) || "Unknown")
-        : ((f.players_requester && f.players_requester.player_name) || "Unknown");
+      const friendData = iAmRequester ? f.players_receiver : f.players_requester;
+      const friendName = (friendData && friendData.player_name) || "Unknown";
+      const avatarUrl = (friendData && friendData.avatar_url) || "";
+
       return `
         <div class="friendRow">
-          <div class="friendAvatar">${friendInitial(friendName)}</div>
+          <div class="friendAvatar">
+            ${avatarUrl
+          ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='${friendInitial(friendName)}'">`
+          : friendInitial(friendName)
+        }
+          </div>
           <div class="friendInfo">
             <div class="friendName">${escapeHtml(friendName)}</div>
             <div class="friendSub">Friend</div>
@@ -625,7 +637,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const { data, error } = await supabase
       .from("friendships")
-      .select("id, requester_id, players_requester:players!friendships_requester_id_fkey(player_name)")
+      .select(`
+        id, 
+        requester_id, 
+        players_requester:players!friendships_requester_id_fkey(player_name, avatar_url)
+      `)
       .eq("receiver_id", user.id)
       .eq("status", "pending");
 
@@ -639,10 +655,17 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     const rows = data.map(f => {
-      const name = (f.players_requester && f.players_requester.player_name) || "Unknown";
+      const p = f.players_requester;
+      const name = (p && p.player_name) || "Unknown";
+      const avatarUrl = (p && p.avatar_url) || "";
       return `
         <div class="friendRow">
-          <div class="friendAvatar">${friendInitial(name)}</div>
+          <div class="friendAvatar">
+            ${avatarUrl
+          ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='${friendInitial(name)}'">`
+          : friendInitial(name)
+        }
+          </div>
           <div class="friendInfo">
             <div class="friendName">${escapeHtml(name)}</div>
             <div class="friendSub">Wants to be friends</div>
@@ -660,9 +683,15 @@ window.addEventListener("DOMContentLoaded", () => {
   // ── Render a player result row (shared by search + suggested list) ────
   function renderPlayerRow(p, user, existingIds) {
     const alreadyLinked = existingIds.has(p.player_id);
+    const avatarUrl = p.avatar_url || "";
     return `
       <div class="friendRow" id="playerRow_${p.player_id}">
-        <div class="friendAvatar">${friendInitial(p.player_name)}</div>
+        <div class="friendAvatar">
+          ${avatarUrl
+        ? `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='${friendInitial(p.player_name)}'">`
+        : friendInitial(p.player_name)
+      }
+        </div>
         <div class="friendInfo">
           <div class="friendName">${escapeHtml(p.player_name)}</div>
         </div>
@@ -703,7 +732,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       const [playersRes, existingIds] = await Promise.all([
         supabase.from("players")
-          .select("player_id, player_name")
+          .select("player_id, player_name, avatar_url")
           .neq("player_id", user.id)
           .order("player_name", { ascending: true })
           .limit(30),
@@ -745,7 +774,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Use %query% wildcards for partial name match
     const [{ data, error }, existingIds] = await Promise.all([
-      supabase.from("players").select("player_id, player_name")
+      supabase.from("players").select("player_id, player_name, avatar_url")
         .ilike("player_name", `%${query}%`)
         .neq("player_id", user.id)
         .limit(10),
