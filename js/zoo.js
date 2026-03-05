@@ -215,9 +215,9 @@ function openSpeciesModal(animalId) {
     return `<div class="speciesPetRow${combinable ? " speciesPetRowGlow" : ""}">
       <div class="speciesPetImg">${meta.headimage}<div class="petNameandLevel"><span class="petLabel" data-title="${escapeHtml(meta.name)}">${escapeHtml(meta.name)} </span><span class="petLvl" data-title="Lv ${lv}">Lv ${lv}</span></div></div>
       <div class="speciesPetInfo">
-        <div class="statInfo"><span data-title="ATK ${stats.atk}">ATK ${stats.atk}</span> <img src="images/statbar.png" alt="stat bar"></div>
-        <div class="statInfo"><span data-title="DEF ${stats.def}">DEF ${stats.def}</span> <img src="images/statbar.png" alt="stat bar"></div>
-        <div class="statInfo"><span data-title="SPD ${stats.spd}">SPD ${stats.spd}</span> <img src="images/statbar.png" alt="stat bar"></div>
+        <div class="statInfo"><span data-title="ATK ${stats.atk}">ATK ${stats.atk}</span> <div class="statBarContainer"><div class="statBarFill atkBar statBarGrow" style="--target-width: ${Math.min(100, (stats.atk / 20) * 100)}%"></div></div></div>
+        <div class="statInfo"><span data-title="DEF ${stats.def}">DEF ${stats.def}</span> <div class="statBarContainer"><div class="statBarFill defBar statBarGrow" style="--target-width: ${Math.min(100, (stats.def / 20) * 100)}%"></div></div></div>
+        <div class="statInfo"><span data-title="SPD ${stats.spd}">SPD ${stats.spd}</span> <div class="statBarContainer"><div class="statBarFill spdBar statBarGrow" style="--target-width: ${Math.min(100, (stats.spd / 20) * 100)}%"></div></div></div>
       </div>
       ${combinable ? '<span class="speciesCombineReady"><img src="images/upgrade-arrow.png" alt="upgrade arrow"></span>' : ""}
     </div>`;

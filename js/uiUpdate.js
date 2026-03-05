@@ -41,5 +41,6 @@ function updateUI() {
   $("playerTitleDisplay").textContent = playerTitle;
   updateXPUI();
   updateFenceUI();
+  if (typeof restoreAvatar === "function") restoreAvatar();
 }
 

@@ -1,744 +1,775 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Cat Farm (Coins + Battle Pets + Boss)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Cat Farm (Coins + Battle Pets + Boss)</title>
 
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- Mobile scaling: keeps the 552×911 canvas pixel-perfect on any phone -->
-<script>
-(function(){
-  var DESIGN_W = 552;
-  var DESIGN_H = 911;
+  <!-- Mobile scaling: keeps the 552×911 canvas pixel-perfect on any phone -->
+  <script>
+    (function () {
+      var DESIGN_W = 552;
+      var DESIGN_H = 911;
 
-  function applyScale(){
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var isLandscape = vw > vh;
-    var scale, originX, originY;
+      function applyScale() {
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var isLandscape = vw > vh;
+        var scale, originX, originY;
 
-    if(isLandscape && vw < 1024){
-      // Landscape mobile: fit height
-      scale = Math.min(vh / DESIGN_H, vw / DESIGN_W);
-      originX = 0; originY = 0;
-    } else if(vw < DESIGN_W){
-      // Portrait mobile: fit width
-      scale = vw / DESIGN_W;
-      originX = 0; originY = 0;
-    } else {
-      // Desktop / tablet: no scaling needed
-      scale = 1;
-      originX = null; originY = null;
-    }
+        if (isLandscape && vw < 1024) {
+          // Landscape mobile: fit height
+          scale = Math.min(vh / DESIGN_H, vw / DESIGN_W);
+          originX = 0; originY = 0;
+        } else if (vw < DESIGN_W) {
+          // Portrait mobile: fit width
+          scale = vw / DESIGN_W;
+          originX = 0; originY = 0;
+        } else {
+          // Desktop / tablet: no scaling needed
+          scale = 1;
+          originX = null; originY = null;
+        }
 
-    ['menu','game'].forEach(function(id){
-      var el = document.getElementById(id);
-      if(!el) return;
-      if(scale !== 1){
-        el.style.transform = 'scale(' + scale + ')';
-        el.style.transformOrigin = (originX !== null ? originX+'px '+originY+'px' : 'top center');
-      } else {
-        el.style.transform = '';
-        el.style.transformOrigin = '';
+        ['menu', 'game'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          if (scale !== 1) {
+            el.style.transform = 'scale(' + scale + ')';
+            el.style.transformOrigin = (originX !== null ? originX + 'px ' + originY + 'px' : 'top center');
+          } else {
+            el.style.transform = '';
+            el.style.transformOrigin = '';
+          }
+        });
+
+        // Shrink body to match scaled canvas so page doesn't scroll
+        if (scale !== 1) {
+          document.body.style.height = Math.ceil(DESIGN_H * scale) + 'px';
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.height = '';
+          document.body.style.overflow = '';
+        }
       }
-    });
 
-    // Shrink body to match scaled canvas so page doesn't scroll
-    if(scale !== 1){
-      document.body.style.height = Math.ceil(DESIGN_H * scale) + 'px';
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.height = '';
-      document.body.style.overflow = '';
-    }
-  }
+      // Run on load and whenever the viewport changes
+      window.addEventListener('resize', applyScale);
+      window.addEventListener('orientationchange', function () {
+        setTimeout(applyScale, 120); // slight delay for orientation to settle
+      });
 
-  // Run on load and whenever the viewport changes
-  window.addEventListener('resize', applyScale);
-  window.addEventListener('orientationchange', function(){
-    setTimeout(applyScale, 120); // slight delay for orientation to settle
-  });
-
-  // Run immediately (DOM is partially parsed at this point) and after load
-  applyScale();
-  window.addEventListener('DOMContentLoaded', applyScale);
-})();
-</script>
+      // Run immediately (DOM is partially parsed at this point) and after load
+      applyScale();
+      window.addEventListener('DOMContentLoaded', applyScale);
+    })();
+  </script>
 
 </head>
 
 <body>
 
-<!-- LOADING SCREEN -->
-<div id="loadingScreen">
-  <div class="loadingContent">
-    <div class="loadingLogo">
-      <img src="images/title.png" alt="Cat Farm" class="loadingTitle" onerror="this.style.display='none'">
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen">
+    <div class="loadingContent">
+      <div class="loadingLogo">
+        <img src="images/title.png" alt="Cat Farm" class="loadingTitle" onerror="this.style.display='none'">
+      </div>
+      <div class="loadingBarOuter">
+        <div class="loadingBarInner" id="loadingBarInner"></div>
+      </div>
+      <div class="loadingTip" id="loadingTip">Growing crops…</div>
+      <div class="loadingPaws">🐾</div>
     </div>
-    <div class="loadingBarOuter">
-      <div class="loadingBarInner" id="loadingBarInner"></div>
-    </div>
-    <div class="loadingTip" id="loadingTip">Growing crops…</div>
-    <div class="loadingPaws">🐾</div>
   </div>
-</div>
 
 
-<!-- Loading + Auth screen logic — must run BEFORE game scripts -->
-<script>
-(function(){
-  // ── Bar animation ──────────────────────────────────────
-  var tips = [
-    "Watering crops… 🌱",
-    "Feeding wild cats… 🐱",
-    "Sharpening harvest tools… 🔨",
-    "Counting coins… 🪙",
-    "Waking up pets… 🐾",
-    "Preparing the farm… 🌾",
-    "Loading quiz questions… 📚",
-    "Building the town… 🏘️",
-  ];
-  var tipIdx = 0;
-  var progress = 0;
-  var finished = false;
+  <!-- Loading + Auth screen logic — must run BEFORE game scripts -->
+  <script>
+    (function () {
+      // ── Bar animation ──────────────────────────────────────
+      var tips = [
+        "Watering crops… 🌱",
+        "Feeding wild cats… 🐱",
+        "Sharpening harvest tools… 🔨",
+        "Counting coins… 🪙",
+        "Waking up pets… 🐾",
+        "Preparing the farm… 🌾",
+        "Loading quiz questions… 📚",
+        "Building the town… 🏘️",
+      ];
+      var tipIdx = 0;
+      var progress = 0;
+      var finished = false;
 
-  var tipInterval = setInterval(function() {
-    tipIdx = (tipIdx + 1) % tips.length;
-    var tip = document.getElementById("loadingTip");
-    if (tip) tip.textContent = tips[tipIdx];
-  }, 700);
+      var tipInterval = setInterval(function () {
+        tipIdx = (tipIdx + 1) % tips.length;
+        var tip = document.getElementById("loadingTip");
+        if (tip) tip.textContent = tips[tipIdx];
+      }, 700);
 
-  var barInterval = setInterval(function() {
-    progress = Math.min(progress + (Math.random() * 12 + 8), 85);
-    var bar = document.getElementById("loadingBarInner");
-    if (bar) bar.style.width = progress + "%";
-    if (progress >= 85) clearInterval(barInterval);
-  }, 150);
+      var barInterval = setInterval(function () {
+        progress = Math.min(progress + (Math.random() * 12 + 8), 85);
+        var bar = document.getElementById("loadingBarInner");
+        if (bar) bar.style.width = progress + "%";
+        if (progress >= 85) clearInterval(barInterval);
+      }, 150);
 
-  // ── Screen router ──────────────────────────────────────
-  // forceLogin=true skips the session check and always shows login
-  function routeAfterLoad(forceLogin) {
-    var as   = document.getElementById("authScreen");
-    var menu = document.getElementById("menu");
-    if (forceLogin) {
-      if (as)   as.style.display   = "flex";
-      if (menu) menu.style.display = "none";
-      return;
-    }
-    // Use getSession from the Supabase client if available,
-    // otherwise fall back to checking localStorage for the token key.
-    if (window._supabaseCheckSession) {
-      window._supabaseCheckSession(function(hasSession) {
-        if (as)   as.style.display   = hasSession ? "none" : "flex";
-        if (menu) menu.style.display = hasSession ? "flex" : "none";
-      });
-    } else {
-      // Fallback before supabase.js loads: check localStorage directly
-      var hasSession = false;
-      for (var k in localStorage) {
-        if (k.indexOf("sb-") === 0 && k.indexOf("-auth-token") !== -1) {
-          try {
-            var v = JSON.parse(localStorage.getItem(k));
-            if (v && v.access_token) { hasSession = true; break; }
-          } catch(e) {}
+      // ── Screen router ──────────────────────────────────────
+      // forceLogin=true skips the session check and always shows login
+      function routeAfterLoad(forceLogin) {
+        var as = document.getElementById("authScreen");
+        var menu = document.getElementById("menu");
+        if (forceLogin) {
+          if (as) as.style.display = "flex";
+          if (menu) menu.style.display = "none";
+          return;
+        }
+        // Use getSession from the Supabase client if available,
+        // otherwise fall back to checking localStorage for the token key.
+        if (window._supabaseCheckSession) {
+          window._supabaseCheckSession(function (hasSession) {
+            if (as) as.style.display = hasSession ? "none" : "flex";
+            if (menu) menu.style.display = hasSession ? "flex" : "none";
+          });
+        } else {
+          // Fallback before supabase.js loads: check localStorage directly
+          var hasSession = false;
+          for (var k in localStorage) {
+            if (k.indexOf("sb-") === 0 && k.indexOf("-auth-token") !== -1) {
+              try {
+                var v = JSON.parse(localStorage.getItem(k));
+                if (v && v.access_token) { hasSession = true; break; }
+              } catch (e) { }
+            }
+          }
+          if (as) as.style.display = hasSession ? "none" : "flex";
+          if (menu) menu.style.display = hasSession ? "flex" : "none";
         }
       }
-      if (as)   as.style.display   = hasSession ? "none" : "flex";
-      if (menu) menu.style.display = hasSession ? "flex" : "none";
-    }
-  }
 
-  // ── Finish loading ─────────────────────────────────────
-  function doFinish() {
-    if (finished) return;
-    finished = true;
-    clearInterval(tipInterval);
-    clearInterval(barInterval);
-    clearTimeout(fallbackTimer);
+      // ── Finish loading ─────────────────────────────────────
+      function doFinish() {
+        if (finished) return;
+        finished = true;
+        clearInterval(tipInterval);
+        clearInterval(barInterval);
+        clearTimeout(fallbackTimer);
 
-    var bar = document.getElementById("loadingBarInner");
-    if (bar) bar.style.width = "100%";
+        var bar = document.getElementById("loadingBarInner");
+        if (bar) bar.style.width = "100%";
 
-    setTimeout(function() {
-      var ls = document.getElementById("loadingScreen");
-      if (ls) {
-        ls.classList.add("fade-out");
-        setTimeout(function() { ls.style.display = "none"; }, 500);
+        setTimeout(function () {
+          var ls = document.getElementById("loadingScreen");
+          if (ls) {
+            ls.classList.add("fade-out");
+            setTimeout(function () { ls.style.display = "none"; }, 500);
+          }
+          routeAfterLoad(false);
+        }, 300);
       }
-      routeAfterLoad(false);
-    }, 300);
-  }
 
-  // ── Logout: show loading briefly then show login screen ──
-  window.showLoadingThenRoute = function() {
-    finished = false;
-    progress = 0;
-    var ls  = document.getElementById("loadingScreen");
-    var bar = document.getElementById("loadingBarInner");
-    if (ls) { ls.classList.remove("fade-out"); ls.style.display = "flex"; }
-    if (bar) bar.style.width = "0%";
+      // ── Logout: show loading briefly then show login screen ──
+      window.showLoadingThenRoute = function () {
+        finished = false;
+        progress = 0;
+        var ls = document.getElementById("loadingScreen");
+        var bar = document.getElementById("loadingBarInner");
+        if (ls) { ls.classList.remove("fade-out"); ls.style.display = "flex"; }
+        if (bar) bar.style.width = "0%";
 
-    var fill = 0;
-    var fillInterval = setInterval(function() {
-      fill = Math.min(fill + 25, 100);
-      if (bar) bar.style.width = fill + "%";
-      if (fill >= 100) {
-        clearInterval(fillInterval);
-        setTimeout(function() {
-          if (ls) ls.classList.add("fade-out");
-          setTimeout(function() {
-            if (ls) { ls.style.display = "none"; ls.classList.remove("fade-out"); }
-            finished = true;
-            // After logout, always show the login screen
-            routeAfterLoad(true);
-          }, 500);
-        }, 200);
-      }
-    }, 60);
-  };
+        var fill = 0;
+        var fillInterval = setInterval(function () {
+          fill = Math.min(fill + 25, 100);
+          if (bar) bar.style.width = fill + "%";
+          if (fill >= 100) {
+            clearInterval(fillInterval);
+            setTimeout(function () {
+              if (ls) ls.classList.add("fade-out");
+              setTimeout(function () {
+                if (ls) { ls.style.display = "none"; ls.classList.remove("fade-out"); }
+                finished = true;
+                // After logout, always show the login screen
+                routeAfterLoad(true);
+              }, 500);
+            }, 200);
+          }
+        }, 60);
+      };
 
-  // ── Public API ─────────────────────────────────────────
-  window.finishLoading = doFinish;
+      // ── Public API ─────────────────────────────────────────
+      window.finishLoading = doFinish;
 
-  window.guestPlay = function() {
-    var as   = document.getElementById("authScreen");
-    var menu = document.getElementById("menu");
-    var game = document.getElementById("game");
-    if (as)   as.style.display   = "none";
-    if (game) game.style.display = "none";
-    if (menu) menu.style.display = "flex";
-  };
+      window.guestPlay = function () {
+        var as = document.getElementById("authScreen");
+        var menu = document.getElementById("menu");
+        var game = document.getElementById("game");
+        if (as) as.style.display = "none";
+        if (game) game.style.display = "none";
+        if (menu) menu.style.display = "flex";
+      };
 
-  // Fallback: if initDefaults.js crashes and never calls finishLoading(),
-  // dismiss after 6s so the player isn't permanently stuck.
-  var fallbackTimer = setTimeout(function() {
-    console.warn("finishLoading() not called — forcing dismiss");
-    doFinish();
-  }, 6000);
+      // Fallback: if initDefaults.js crashes and never calls finishLoading(),
+      // dismiss after 6s so the player isn't permanently stuck.
+      var fallbackTimer = setTimeout(function () {
+        console.warn("finishLoading() not called — forcing dismiss");
+        doFinish();
+      }, 6000);
 
-  // Hide menu on first paint so it doesn't flash before loading finishes
-  document.addEventListener("DOMContentLoaded", function() {
-    var menu = document.getElementById("menu");
-    if (menu) menu.style.display = "none";
-  });
-})();
-</script>
+      // Hide menu on first paint so it doesn't flash before loading finishes
+      document.addEventListener("DOMContentLoaded", function () {
+        var menu = document.getElementById("menu");
+        if (menu) menu.style.display = "none";
+      });
+    })();
+  </script>
 
-<!-- AUTH SCREEN -->
-<div id="authScreen" style="display:none;">
-  <div class="authBg">
-    <div class="authCloud authCloud1"></div>
-    <div class="authCloud authCloud2"></div>
-    <div class="authCloud authCloud3"></div>
-    <div class="authFlower authFlower1">🌸</div>
-    <div class="authFlower authFlower2">🌻</div>
-    <div class="authFlower authFlower3">🍀</div>
-  </div>
-
-  <div class="authCard">
-    <div class="authLogoArea">
-      <img src="images/title.png" alt="Cat Farm" class="authTitleImg" onerror="this.style.display='none'">
-      <p class="authTagline">Farm, Learn &amp; Catch Pets! 🐾</p>
+  <!-- AUTH SCREEN -->
+  <div id="authScreen" style="display:none;">
+    <div class="authBg">
+      <div class="authCloud authCloud1"></div>
+      <div class="authCloud authCloud2"></div>
+      <div class="authCloud authCloud3"></div>
+      <div class="authFlower authFlower1">🌸</div>
+      <div class="authFlower authFlower2">🌻</div>
+      <div class="authFlower authFlower3">🍀</div>
     </div>
 
-    <!-- Tab switcher -->
-    <div class="authTabs">
-      <button class="authTab active" id="tabLogin" onclick="switchAuthTab('login')">Log In</button>
-      <button class="authTab" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-
-    <div class="authForm">
-      <div class="authInputGroup">
-        <span class="authInputIcon">✉️</span>
-        <input id="authEmail" type="email" placeholder="Email address" autocomplete="email">
-      </div>
-      <div class="authInputGroup">
-        <span class="authInputIcon">🔒</span>
-        <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password">
+    <div class="authCard">
+      <div class="authLogoArea">
+        <img src="images/title.png" alt="Cat Farm" class="authTitleImg" onerror="this.style.display='none'">
+        <p class="authTagline">Farm, Learn &amp; Catch Pets! 🐾</p>
       </div>
 
-      <button class="authSubmitBtn" id="btnLogin" onclick="void(0)">Log In</button>
-      <button class="authSubmitBtn authSubmitSecondary" id="btnSignup" onclick="void(0)" style="display:none;">Create Account</button>
-
-      <div class="authDivider"><span>or</span></div>
-      <button class="authGuestBtn" onclick="guestPlay()">▶ Play as Guest</button>
-    </div>
-
-    <div id="authStatus" class="authStatus"></div>
-
-    <!-- Hidden logout (used by supabase.js) -->
-    <button id="btnLogout" style="display:none;"></button>
-    <!-- Hidden close (used by supabase.js) -->
-    <button id="authClose" style="display:none;"></button>
-    <!-- Hidden openAuth (used by supabase.js) -->
-    <button id="openAuth" style="display:none;"></button>
-  </div>
-
-  <div class="authFooter">
-    <span>🌾 Your progress syncs across devices when logged in</span>
-  </div>
-</div>
-
-<!-- MAIN MENU -->
-<div id="menu">
-  <div class="menuCard">
-    <img src="images/title.png" alt="title" class="menuTitle">
-
-    <button onclick="startGame()"><span>Play</span></button>
-    <div class="buttonGroup2">
-      <button onclick="openInfo()" class="button2"><span>What's New</span></button>
-      <button onclick="openLeaderboard()" class="button2"><span>Leaderboard</span></button>
-    </div>
-  </div>
-</div>
-
-<!-- GAME -->
-<div id="game">
-  <div id="toast"><span>⚠️</span><span id="toastText">A wild pet has appeared!</span></div>
-
-  <!-- VISIT MODE BAR — replaces header + bottom nav while visiting a friend -->
-  <div id="visitBar" style="display:none;">
-    <div class="visitBarInner">
-      <button class="visitBackBtn" onclick="leaveVisit()">
-        <img src="images/toolArrow.png" alt="back" style="width:16px;height:16px;transform:rotate(180deg);filter:brightness(10);" onerror="this.style.display='none'">
-        Back
-      </button>
-      <div class="visitBarInfo">
-        <span class="visitBarLabel">Visiting</span>
-        <span class="visitBarName" id="visitBarName">Player's Farm</span>
+      <!-- Tab switcher -->
+      <div class="authTabs">
+        <button class="authTab active" id="tabLogin" onclick="switchAuthTab('login')">Log In</button>
+        <button class="authTab" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
       </div>
-      <button class="visitLikeBtn" id="visitLikeBtn" onclick="handleFarmLikeClick()">
-        <span id="farmLikeHeart">🤍</span>
-        <span id="farmLikeCount">0</span>
-      </button>
-    </div>
-  </div>
 
-  <div class="header">
-    <div class="profileArea">
-      <div class="dpandlevelcon">
-        <div class="profilecon" id="profileBtn" onclick="openProfile()">
-          <img id="headerAvatar" src="images/profile.png" alt="profile"/>
+      <div class="authForm">
+        <div class="authInputGroup">
+          <span class="authInputIcon">✉️</span>
+          <input id="authEmail" type="email" placeholder="Email address" autocomplete="email">
         </div>
-      <div id="LevelTxtCon"><h3 id="LevelTxt"></h3></div>
+        <div class="authInputGroup">
+          <span class="authInputIcon">🔒</span>
+          <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password">
+        </div>
+
+        <button class="authSubmitBtn" id="btnLogin" onclick="void(0)">Log In</button>
+        <button class="authSubmitBtn authSubmitSecondary" id="btnSignup" onclick="void(0)" style="display:none;">Create
+          Account</button>
+
+        <div class="authDivider"><span>or</span></div>
+        <button class="authGuestBtn" onclick="guestPlay()">▶ Play as Guest</button>
       </div>
-      <div class="nameStack">
-        <div id="playerNameDisplay">Player</div>
-        <div id="playerTitleDisplay">Rookie Farmer</div>
+
+      <div id="authStatus" class="authStatus"></div>
+
+      <!-- Hidden logout (used by supabase.js) -->
+      <button id="btnLogout" style="display:none;"></button>
+      <!-- Hidden close (used by supabase.js) -->
+      <button id="authClose" style="display:none;"></button>
+      <!-- Hidden openAuth (used by supabase.js) -->
+      <button id="openAuth" style="display:none;"></button>
+    </div>
+
+    <div class="authFooter">
+      <span>🌾 Your progress syncs across devices when logged in</span>
+    </div>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="menu">
+    <div class="menuCard">
+      <img src="images/title.png" alt="title" class="menuTitle">
+
+      <button onclick="startGame()"><span>Play</span></button>
+      <div class="buttonGroup2">
+        <button onclick="openInfo()" class="button2"><span>What's New</span></button>
+        <button onclick="openLeaderboard()" class="button2"><span>Leaderboard</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game">
+    <div id="toast"><span>⚠️</span><span id="toastText">A wild pet has appeared!</span></div>
+
+    <!-- VISIT MODE BAR — replaces header + bottom nav while visiting a friend -->
+    <div id="visitBar" style="display:none;">
+      <div class="visitBarInner">
+        <button class="visitBackBtn" onclick="leaveVisit()">
+          <img src="images/toolArrow.png" alt="back"
+            style="width:16px;height:16px;transform:rotate(180deg);filter:brightness(10);"
+            onerror="this.style.display='none'">
+          Back
+        </button>
+        <div class="visitBarInfo">
+          <span class="visitBarLabel">Visiting</span>
+          <span class="visitBarName" id="visitBarName">Player's Farm</span>
+        </div>
+        <button class="visitLikeBtn" id="visitLikeBtn" onclick="handleFarmLikeClick()">
+          <span id="farmLikeHeart">🤍</span>
+          <span id="farmLikeCount">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="header">
+      <div class="profileArea">
+        <div class="dpandlevelcon">
+          <div class="profilecon" id="profileBtn" onclick="openProfile()">
+            <img id="headerAvatar" src="images/profile.png" alt="profile" />
+          </div>
+          <div id="LevelTxtCon">
+            <h3 id="LevelTxt"></h3>
+          </div>
+        </div>
+        <div class="nameStack">
+          <div id="playerNameDisplay">Player</div>
+          <div id="playerTitleDisplay">Rookie Farmer</div>
           <div id="xpBarContainer">
-          <div id="xpBar"></div>
-          <div id="xpLevelText">Lvl 1</div>
+            <div id="xpBar"></div>
+            <div id="xpLevelText">Lvl 1</div>
+          </div>
+
         </div>
-        
-      </div>
-    </div>
-
-    <div class="coinCon">
-      <div class="coinbox" id="coinBox">
-        <img src="images/coin-icon.png" alt="coin" onerror="this.style.display='none'"/>
-        <span id="coins">0</span>
       </div>
 
-      <div class="coinbox" id="petBox" title="Captured pets">
-        <img src="images/petcount-icon.png" alt="pet" onerror="this.style.display='none'"/>
-        <span id="petCount">0</span>
-      </div>
-    </div>
-
-    <div class="menusCon">
-      <button id="logoutBtn" class="logoutBtn" onclick="handleLogout()" title="Log out" style="display:none;"><img src="images/logout-icon.png" alt="log out icon"></button>
-      <button id="friendsBtn" class="friendsBtn" onclick="openFriendsPanel()" title="Friends" style="display:none;"><img src="images/friends-icon.png" alt="log out icon"></button>
-      <button id="cloudSaveBtn" class="cloudSaveBtn" onclick="openAuthScreen()" title="Sign in to Cloud Save"><img src="images/cloudsave-icon.png" alt="log out icon"></button>
-    </div>
-    
-  </div>
-
-  <!-- FARM SCREEN -->
-  <div id="farmScreen" class="screen">
-     
-    <div class="farmcon">
-
-      <!-- Own-farm like counter — hidden during visits, hidden when logged out -->
-      <button id="ownFarmLikeWidget" class="ownFarmLikeWidget" onclick="handleFarmLikeClick()" style="display:none;" title="Your farm likes">
-        <span>❤️</span>
-        <span id="ownFarmLikeCount">0</span>
-      </button>
-
-      <div class="townZooCon" >
-        <button onclick="openZoo()" class="toZooBtn"><span data-title="Ranch">Ranch</span></button>
-        <button onclick="showTown()" class="toTownBtn"><span data-title="Town">Town</span></button>
-      </div>
-
-      <div class="toolStrip" id="toolStrip">
-        <!-- Arrow indicator -->
-        <div id="toolsArrow"><img src="images/toolArrow.png" alt="toolArrow"></div>
-        <!-- Expanding list of tools -->
-        <div id="toolsPanel">
-          <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')"><img src="images/harvesttool.png" alt="Harvest"><span data-title="Harvest">Harvest</span></button>
-          <button class="toolBtn active" id="toolPlantBtn"  onclick="setTool('plant')"><img src="images/planttool.png" alt="Plant"><span data-title="Plant">Plant</span></button>
-          <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')"><img src="images/movetool.png" alt="Move"><span data-title="Move">Move</span></button>
-          <button class="toolBtn"  id="toolRemoveBtn" onclick="setTool('remove')"><img src="images/removetool.png" alt="Remove"><span data-title="Remove">Remove</span></button>
+      <div class="coinCon">
+        <div class="coinbox" id="coinBox">
+          <img src="images/coin-icon.png" alt="coin" onerror="this.style.display='none'" />
+          <span id="coins">0</span>
         </div>
-        <!-- Main Button -->
-        <button class="toolBtn" id="toolsToggleBtn" type="button"> <img id="currentToolIcon" src="images/harvesttool.png" alt="Current Tool"><span data-title="Tool">Tool</span></button>
-      </div>
-      <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
-      <div id="farmWrap">
-        <div id="eventLayer"></div>
-        <div id="farm"></div>
-      </div>
-      <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'"/>
-    </div>
-  </div>
 
- 
-
-  <!-- TOWN SCREEN -->
-  <div id="townScreen" class="screen">
-    <!-- Spacer to push townGrid below the shared header -->
-    <div class="townHeaderSpacer"></div>
-
-    <div class="townGrid">
-      <button class="towntoRanchBtn" id="townToggleBtn2" onclick="openZoo()" title="Town / Farm"> <span id="townBtnIcon" data-title="Ranch">Ranch</span></button>
-      <div class="building" id="buildingArena" onclick="openArena()">
-        <div class="name" data-title="Arena">Arena</div>
-        <div class="tag">Battle (PvP)</div>
+        <div class="coinbox" id="petBox" title="Captured pets">
+          <img src="images/petcount-icon.png" alt="pet" onerror="this.style.display='none'" />
+          <span id="petCount">0</span>
+        </div>
       </div>
 
-      <div class="building" id="buildingMarket" onclick="openSupermarket()">
-        <div class="name" data-title="Supermarket">Supermarket</div>
-        <div class="tag">Boosts + Limited Seeds</div>
+      <div class="menusCon">
+        <button id="logoutBtn" class="logoutBtn" onclick="handleLogout()" title="Log out" style="display:none;"><img
+            src="images/logout-icon.png" alt="log out icon"></button>
+        <button id="friendsBtn" class="friendsBtn" onclick="openFriendsPanel()" title="Friends"
+          style="display:none;"><img src="images/friends-icon.png" alt="log out icon"></button>
+        <button id="cloudSaveBtn" class="cloudSaveBtn" onclick="openAuthScreen()" title="Sign in to Cloud Save"><img
+            src="images/cloudsave-icon.png" alt="log out icon"></button>
       </div>
-
-      <div class="building" id="buildingLibrary" onclick="openLibrary()">
-        <div class="name" data-title="Library">Library</div>
-        <div class="tag">Library exam (daily)</div>
-      </div>
-      
-      <div class="building" id="buildingQuestBoard" onclick="openQuestBoard()">
-        <div class="name" data-title="Quest Board">Quest Board</div>
-        <div class="tag">Daily quests + streak</div>
-      </div>
-
-      <button class="towntoFarmBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span id="townBtnIcon" data-title="Farm">Farm</span></button>
 
     </div>
-    <div class="townHint">Wild pets enter from the side. Clean poop for rewards!</div>
-  </div>
 
-  <!-- ZOO SCREEN -->
-  <div id="zooScreen" class="screen">
-    <!-- <div class="zooTitle">Zoo</div>
+    <!-- FARM SCREEN -->
+    <div id="farmScreen" class="screen">
+
+      <div class="farmcon">
+
+        <!-- Own-farm like counter — hidden during visits, hidden when logged out -->
+        <button id="ownFarmLikeWidget" class="ownFarmLikeWidget" onclick="handleFarmLikeClick()" style="display:none;"
+          title="Your farm likes">
+          <span>❤️</span>
+          <span id="ownFarmLikeCount">0</span>
+        </button>
+
+        <div class="townZooCon">
+          <button onclick="openZoo()" class="toZooBtn"><span data-title="Ranch">Ranch</span></button>
+          <button onclick="showTown()" class="toTownBtn"><span data-title="Town">Town</span></button>
+        </div>
+
+        <div class="toolStrip" id="toolStrip">
+          <!-- Arrow indicator -->
+          <div id="toolsArrow"><img src="images/toolArrow.png" alt="toolArrow"></div>
+          <!-- Expanding list of tools -->
+          <div id="toolsPanel">
+            <button class="toolBtn" id="toolHarvestBtn" onclick="setTool('harvest')"><img src="images/harvesttool.png"
+                alt="Harvest"><span data-title="Harvest">Harvest</span></button>
+            <button class="toolBtn active" id="toolPlantBtn" onclick="setTool('plant')"><img src="images/planttool.png"
+                alt="Plant"><span data-title="Plant">Plant</span></button>
+            <button class="toolBtn" id="toolMoveBtn" onclick="setTool('move')"><img src="images/movetool.png"
+                alt="Move"><span data-title="Move">Move</span></button>
+            <button class="toolBtn" id="toolRemoveBtn" onclick="setTool('remove')"><img src="images/removetool.png"
+                alt="Remove"><span data-title="Remove">Remove</span></button>
+          </div>
+          <!-- Main Button -->
+          <button class="toolBtn" id="toolsToggleBtn" type="button"> <img id="currentToolIcon"
+              src="images/harvesttool.png" alt="Current Tool"><span data-title="Tool">Tool</span></button>
+        </div>
+        <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'" />
+        <div id="farmWrap">
+          <div id="eventLayer"></div>
+          <div id="farm"></div>
+        </div>
+        <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'" />
+      </div>
+    </div>
+
+
+
+    <!-- TOWN SCREEN -->
+    <div id="townScreen" class="screen">
+      <!-- Spacer to push townGrid below the shared header -->
+      <div class="townHeaderSpacer"></div>
+
+      <div class="townGrid">
+        <button class="towntoRanchBtn" id="townToggleBtn2" onclick="openZoo()" title="Town / Farm"> <span
+            id="townBtnIcon" data-title="Ranch">Ranch</span></button>
+        <div class="building" id="buildingArena" onclick="openArena()">
+          <div class="name" data-title="Arena">Arena</div>
+          <div class="tag">Battle (PvP)</div>
+        </div>
+
+        <div class="building" id="buildingMarket" onclick="openSupermarket()">
+          <div class="name" data-title="Supermarket">Supermarket</div>
+          <div class="tag">Boosts + Limited Seeds</div>
+        </div>
+
+        <div class="building" id="buildingLibrary" onclick="openLibrary()">
+          <div class="name" data-title="Library">Library</div>
+          <div class="tag">Library exam (daily)</div>
+        </div>
+
+        <div class="building" id="buildingQuestBoard" onclick="openQuestBoard()">
+          <div class="name" data-title="Quest Board">Quest Board</div>
+          <div class="tag">Daily quests + streak</div>
+        </div>
+
+        <button class="towntoFarmBtn" id="townToggleBtn" onclick="toggleTown()" title="Town / Farm"> <span
+            id="townBtnIcon" data-title="Farm">Farm</span></button>
+
+      </div>
+      <div class="townHint">Wild pets enter from the side. Clean poop for rewards!</div>
+    </div>
+
+    <!-- ZOO SCREEN -->
+    <div id="zooScreen" class="screen">
+      <!-- <div class="zooTitle">Zoo</div>
     <div class="zooSub">Your captured pets can roam freely here.</div> -->
 
-    <!-- Visit notice: shown when viewing a friend's Ranch -->
-    <div id="zooVisitNotice" style="display:none;" class="zooVisitNotice">
-      👀 Visiting <span id="zooVisitName">Friend</span>'s Ranch
-    </div>
-
-    
-
-    <div id="zooYard" title="Tap a pet to view details">
-
-      <div class="townZooCon2" >
-        <button onclick="handleZooFarmBtn()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
-        <button onclick="showTown()" class="toTownBtn2"><span data-title="Town">Town</span></button>
+      <!-- Visit notice: shown when viewing a friend's Ranch -->
+      <div id="zooVisitNotice" style="display:none;" class="zooVisitNotice">
+        👀 Visiting <span id="zooVisitName">Friend</span>'s Ranch
       </div>
 
-      <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'"/>
+
+
+      <div id="zooYard" title="Tap a pet to view details">
+
+        <div class="townZooCon2">
+          <button onclick="handleZooFarmBtn()" class="toFarmBtn2"><span data-title="Farm">Farm</span></button>
+          <button onclick="showTown()" class="toTownBtn2"><span data-title="Town">Town</span></button>
+        </div>
+
+        <img src="images/fence.png" alt="fence1" class="fence1" onerror="this.style.display='none'" />
 
         <div id="zooRoamLayer"></div>
         <div id="zooEmpty" class="zooEmpty"><span>No pets yet. Capture wild pets on your farm!</span></div>
 
-      <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'"/>
-    </div>
-    
-    <!-- Species breakdown chips -->
-    <div id="speciesPanel" class="speciesPanel"></div>
-    <div id="zooStats" class="zooStats">Pets: <b>0</b></div>
-    <div class="zooHint" data-title="Tip: Open Town 🏘️ to visit the Library and Quest Board.">Tip: Open Town 🏘️ to visit the Library and Quest Board.</div>
+        <img src="images/fence.png" alt="fence2" class="fence2" onerror="this.style.display='none'" />
+      </div>
 
-    <div class="zooNav">
-      <button class="bottomBtn" id="btnCrops" onclick="openArena()">
-        <img src="images/crops.png" alt="crops" onerror="this.style.display='none'"><span data-title="Arena">Arena</span>
-      </button>
+      <!-- Species breakdown chips -->
+      <div id="speciesPanel" class="speciesPanel"></div>
+      <div id="zooStats" class="zooStats">Pets: <b>0</b></div>
+      <div class="zooHint" data-title="Tip: Open Town 🏘️ to visit the Library and Quest Board.">Tip: Open Town 🏘️ to
+        visit the Library and Quest Board.</div>
+
+      <div class="zooNav">
+        <button class="bottomBtn" id="btnCrops" onclick="openArena()">
+          <img src="images/crops.png" alt="crops" onerror="this.style.display='none'"><span
+            data-title="Arena">Arena</span>
+        </button>
+      </div>
+
     </div>
-    
+
+    <!-- ARENA BATTLE SCREEN -->
+    <div id="arenaScreen" class="screen">
+
+      <!-- TOP HALF: battle field -->
+      <div id="arenaBattleField">
+
+        <!-- Player side (bottom-left) -->
+        <div id="arenaPlayerSide" class="arenaSide arenaPlayerSide">
+          <div class="arenaAnimalName" id="arenaP1Name"></div>
+          <div class="arenaHpBar">
+            <div class="arenaHpFill" id="arenaP1HpFill"></div>
+          </div>
+          <div class="arenaHpLabel" id="arenaP1HpLabel"></div>
+          <div class="arenaAnimalSprite" id="arenaP1Sprite"></div>
+          <div class="arenaStatusRow" id="arenaP1Status"></div>
+          <!-- Platform: swap src to use your own asset -->
+          <div class="arenaPlatform" id="arenaP1Platform"></div>
+        </div>
+
+        <!-- Enemy side (top-right) -->
+        <div id="arenaEnemySide" class="arenaSide arenaEnemySide">
+          <div class="arenaAnimalName" id="arenaP2Name"></div>
+          <div class="arenaHpBar">
+            <div class="arenaHpFill" id="arenaP2HpFill"></div>
+          </div>
+          <div class="arenaHpLabel" id="arenaP2HpLabel"></div>
+          <div class="arenaAnimalSprite" id="arenaP2Sprite"></div>
+          <div class="arenaStatusRow" id="arenaP2Status"></div>
+          <!-- Platform: swap src to use your own asset -->
+          <div class="arenaPlatform" id="arenaP2Platform"></div>
+        </div>
+
+        <!-- Battle log ribbon -->
+        <div id="arenaBattleLog"></div>
+
+      </div>
+
+      <!-- BOTTOM HALF: action panel -->
+      <div id="arenaActionPanel">
+
+        <!-- Default skill buttons -->
+        <div id="arenaSkillButtons">
+          <div class="arenaRoundLabel" id="arenaRoundLabel">Round 1</div>
+          <div class="arenaSkillRow">
+            <button class="arenaSkillBtn arenaSkillNormal" id="btnArenaAttack" onclick="arenaScreenUseSkill('attack')">
+              <span class="arenaBtnTitle">Normal</span>
+              <span class="arenaBtnSub" id="arenaAttackSkillName"></span>
+            </button>
+            <button class="arenaSkillBtn arenaSkillHeavy" id="btnArenaHeavy" onclick="arenaScreenUseSkill('heavy')">
+              <span class="arenaBtnTitle">Heavy</span>
+              <span class="arenaBtnSub" id="arenaHeavySkillName"></span>
+            </button>
+
+          </div>
+          <button class="arenaExitBtn" onclick="exitArenaScreen()">✕ Forfeit</button>
+        </div>
+
+        <!-- Word-connect challenge (shown when skill is pressed) -->
+        <div id="arenaWordChallenge" style="display:none;">
+          <div class="arenaWordPrompt">Connect the letters to spell:</div>
+          <div class="arenaWordTarget" id="arenaWordTarget"></div>
+          <div class="arenaWordCanvas">
+            <canvas id="arenaWordBgCanvas"></canvas>
+            <canvas id="arenaWordCanvas"></canvas>
+          </div>
+          <div class="arenaWordProgress" id="arenaWordProgress"></div>
+          <button class="arenaWordResetBtn" onclick="arenaWordReset()">↺ Reset</button>
+        </div>
+
+      </div>
+
+      <!-- Loading overlay (shown while "loading") -->
+      <div id="arenaLoadingOverlay">
+        <div class="arenaLoadingBox">
+          <div class="arenaLoadingIcon">⚔️</div>
+          <div class="arenaLoadingTitle">Preparing Battle…</div>
+          <div class="arenaLoadingBarWrap">
+            <div class="arenaLoadingBarFill" id="arenaLoadingBarFill"></div>
+          </div>
+          <div class="arenaLoadingHint" id="arenaLoadingHint">Loading assets…</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOSS BATTLE SCREEN -->
+    <div id="bossScreen" class="screen" style="display:none;">
+
+      <!-- TOP HALF: battle field (mirrors arenaScreen layout) -->
+      <div id="bossBattleField">
+
+        <!-- Player side -->
+        <div id="bossPlayerSide" class="arenaSide arenaPlayerSide">
+          <div class="arenaAnimalName" id="bossP1Name"></div>
+          <div class="arenaHpBar">
+            <div class="arenaHpFill" id="bossP1HpFill"></div>
+          </div>
+          <div class="arenaHpLabel" id="bossP1HpLabel"></div>
+          <div class="arenaAnimalSprite" id="bossP1Sprite"></div>
+          <div class="arenaStatusRow" id="bossP1Status"></div>
+          <div class="arenaPlatform" id="bossP1Platform"></div>
+        </div>
+
+        <!-- Boss side -->
+        <div id="bossEnemySide" class="arenaSide arenaEnemySide">
+          <div class="arenaAnimalName" id="bossP2Name">Scarecrow</div>
+          <div class="arenaHpBar">
+            <div class="arenaHpFill" id="bossP2HpFill"></div>
+          </div>
+          <div class="arenaHpLabel" id="bossP2HpLabel"></div>
+          <div class="arenaAnimalSprite" id="bossP2Sprite">🪵</div>
+          <div class="arenaStatusRow" id="bossP2Status"></div>
+          <div class="arenaPlatform" id="bossP2Platform"></div>
+        </div>
+
+        <div id="bossBattleLog"></div>
+      </div>
+
+      <!-- BOTTOM HALF: action panel -->
+      <div id="bossActionPanel">
+
+        <div id="bossSkillButtons">
+          <div class="arenaRoundLabel" id="bossRoundLabel">Round 1</div>
+          <div class="arenaSkillRow">
+            <button class="arenaSkillBtn arenaSkillNormal" id="btnBossAttack" onclick="bossScreenUseSkill('normal')">
+              <span class="arenaBtnTitle">Normal</span>
+              <span class="arenaBtnSub">Beginner word</span>
+            </button>
+            <button class="arenaSkillBtn arenaSkillHeavy" id="btnBossHeavy" onclick="bossScreenUseSkill('heavy')">
+              <span class="arenaBtnTitle">Heavy</span>
+              <span class="arenaBtnSub">Hard word</span>
+            </button>
+          </div>
+          <button class="arenaExitBtn" onclick="exitBossScreen()">✕ Forfeit</button>
+        </div>
+
+        <!-- Word-connect challenge -->
+        <div id="bossWordChallenge" style="display:none;">
+          <div class="arenaWordPrompt">Connect the letters to spell:</div>
+          <div class="arenaWordTarget" id="bossWordTarget"></div>
+          <div class="arenaWordCanvas">
+            <canvas id="bossWordBgCanvas"></canvas>
+            <canvas id="bossWordCanvas"></canvas>
+          </div>
+          <div class="arenaWordProgress" id="bossWordProgress"></div>
+          <button class="arenaWordResetBtn" onclick="bossWordReset()">↺ Reset</button>
+        </div>
+
+      </div>
+
+      <!-- Loading overlay -->
+      <div id="bossLoadingOverlay">
+        <div class="arenaLoadingBox">
+          <div class="arenaLoadingIcon">🐷</div>
+          <div class="arenaLoadingTitle">Boss Approaching…</div>
+          <div class="arenaLoadingBarWrap">
+            <div class="arenaLoadingBarFill" id="bossLoadingBarFill"></div>
+          </div>
+          <div class="arenaLoadingHint" id="bossLoadingHint">Preparing battle…</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom nav -->
+    <div class="bottomNav">
+      <div id="bottomBar">
+        <button class="bottomBtn" id="btnCrops" onclick="openCrops()">
+          <img src="images/crops.png" alt="crops" onerror="this.style.display='none'"><span
+            data-title="Crops">Crops</span>
+        </button>
+        <button class="bottomBtn" onclick="openHarvestShop()">
+          <img src="images/shop.png" alt="market"> <span data-title="Market">Market</span>
+        </button>
+        <button class="bottomBtn" onclick="openInventory()">
+          <img src="images/inventory.png" alt="bag"> <span data-title="Inventory">Inventory</span>
+        </button>
+        <button class="bottomBtn" id="btnZoo" onclick="openZoo()">
+          <img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> <span data-title="Ranch">Ranch</span>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- ARENA BATTLE SCREEN -->
-  <div id="arenaScreen" class="screen">
-
-    <!-- TOP HALF: battle field -->
-    <div id="arenaBattleField">
-
-      <!-- Player side (bottom-left) -->
-      <div id="arenaPlayerSide" class="arenaSide arenaPlayerSide">
-        <div class="arenaAnimalName" id="arenaP1Name"></div>
-        <div class="arenaHpBar">
-          <div class="arenaHpFill" id="arenaP1HpFill"></div>
-        </div>
-        <div class="arenaHpLabel" id="arenaP1HpLabel"></div>
-        <div class="arenaAnimalSprite" id="arenaP1Sprite"></div>
-        <div class="arenaStatusRow" id="arenaP1Status"></div>
-        <!-- Platform: swap src to use your own asset -->
-        <div class="arenaPlatform" id="arenaP1Platform"></div>
-      </div>
-
-      <!-- Enemy side (top-right) -->
-      <div id="arenaEnemySide" class="arenaSide arenaEnemySide">
-        <div class="arenaAnimalName" id="arenaP2Name"></div>
-        <div class="arenaHpBar">
-          <div class="arenaHpFill" id="arenaP2HpFill"></div>
-        </div>
-        <div class="arenaHpLabel" id="arenaP2HpLabel"></div>
-        <div class="arenaAnimalSprite" id="arenaP2Sprite"></div>
-        <div class="arenaStatusRow" id="arenaP2Status"></div>
-        <!-- Platform: swap src to use your own asset -->
-        <div class="arenaPlatform" id="arenaP2Platform"></div>
-      </div>
-
-      <!-- Battle log ribbon -->
-      <div id="arenaBattleLog"></div>
-
-    </div>
-
-    <!-- BOTTOM HALF: action panel -->
-    <div id="arenaActionPanel">
-
-      <!-- Default skill buttons -->
-      <div id="arenaSkillButtons">
-        <div class="arenaRoundLabel" id="arenaRoundLabel">Round 1</div>
-        <div class="arenaSkillRow">
-          <button class="arenaSkillBtn arenaSkillNormal" id="btnArenaAttack" onclick="arenaScreenUseSkill('attack')">
-            <span class="arenaBtnTitle">Normal</span>
-            <span class="arenaBtnSub" id="arenaAttackSkillName"></span>
-          </button>
-          <button class="arenaSkillBtn arenaSkillHeavy" id="btnArenaHeavy" onclick="arenaScreenUseSkill('heavy')">
-            <span class="arenaBtnTitle">Heavy</span>
-            <span class="arenaBtnSub" id="arenaHeavySkillName"></span>
-          </button>
-
-        </div>
-        <button class="arenaExitBtn" onclick="exitArenaScreen()">✕ Forfeit</button>
-      </div>
-
-      <!-- Word-connect challenge (shown when skill is pressed) -->
-      <div id="arenaWordChallenge" style="display:none;">
-        <div class="arenaWordPrompt">Connect the letters to spell:</div>
-        <div class="arenaWordTarget" id="arenaWordTarget"></div>
-        <div class="arenaWordCanvas">
-          <canvas id="arenaWordBgCanvas"></canvas>
-          <canvas id="arenaWordCanvas"></canvas>
-        </div>
-        <div class="arenaWordProgress" id="arenaWordProgress"></div>
-        <button class="arenaWordResetBtn" onclick="arenaWordReset()">↺ Reset</button>
-      </div>
-
-    </div>
-
-    <!-- Loading overlay (shown while "loading") -->
-    <div id="arenaLoadingOverlay">
-      <div class="arenaLoadingBox">
-        <div class="arenaLoadingIcon">⚔️</div>
-        <div class="arenaLoadingTitle">Preparing Battle…</div>
-        <div class="arenaLoadingBarWrap"><div class="arenaLoadingBarFill" id="arenaLoadingBarFill"></div></div>
-        <div class="arenaLoadingHint" id="arenaLoadingHint">Loading assets…</div>
+  <!-- TUTORIAL OVERLAY (Spotlight + Arrow) -->
+  <div id="tutorialOverlay" title="Click anywhere to continue • Double-click to skip">
+    <div class="tutorialBlocker"></div>
+    <div id="tutorialHighlight"></div>
+    <svg id="tutorialArrowSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div id="tutorialBubble">
+      <div id="tutorialMascot">🐱</div>
+      <div id="tutorialRight">
+        <div id="tutorialTitle">Mao the Cat</div>
+        <div id="tutorialText"></div>
+        <div id="tutorialHint">Click anywhere to continue • Double-click anywhere to skip</div>
       </div>
     </div>
-
   </div>
 
-  <!-- BOSS BATTLE SCREEN -->
-  <div id="bossScreen" class="screen" style="display:none;">
-
-    <!-- TOP HALF: battle field (mirrors arenaScreen layout) -->
-    <div id="bossBattleField">
-
-      <!-- Player side -->
-      <div id="bossPlayerSide" class="arenaSide arenaPlayerSide">
-        <div class="arenaAnimalName" id="bossP1Name"></div>
-        <div class="arenaHpBar"><div class="arenaHpFill" id="bossP1HpFill"></div></div>
-        <div class="arenaHpLabel" id="bossP1HpLabel"></div>
-        <div class="arenaAnimalSprite" id="bossP1Sprite"></div>
-        <div class="arenaStatusRow" id="bossP1Status"></div>
-        <div class="arenaPlatform" id="bossP1Platform"></div>
-      </div>
-
-      <!-- Boss side -->
-      <div id="bossEnemySide" class="arenaSide arenaEnemySide">
-        <div class="arenaAnimalName" id="bossP2Name">Scarecrow</div>
-        <div class="arenaHpBar"><div class="arenaHpFill" id="bossP2HpFill"></div></div>
-        <div class="arenaHpLabel" id="bossP2HpLabel"></div>
-        <div class="arenaAnimalSprite" id="bossP2Sprite">🪵</div>
-        <div class="arenaStatusRow" id="bossP2Status"></div>
-        <div class="arenaPlatform" id="bossP2Platform"></div>
-      </div>
-
-      <div id="bossBattleLog"></div>
-    </div>
-
-    <!-- BOTTOM HALF: action panel -->
-    <div id="bossActionPanel">
-
-      <div id="bossSkillButtons">
-        <div class="arenaRoundLabel" id="bossRoundLabel">Round 1</div>
-        <div class="arenaSkillRow">
-          <button class="arenaSkillBtn arenaSkillNormal" id="btnBossAttack" onclick="bossScreenUseSkill('normal')">
-            <span class="arenaBtnTitle">Normal</span>
-            <span class="arenaBtnSub">Beginner word</span>
-          </button>
-          <button class="arenaSkillBtn arenaSkillHeavy" id="btnBossHeavy" onclick="bossScreenUseSkill('heavy')">
-            <span class="arenaBtnTitle">Heavy</span>
-            <span class="arenaBtnSub">Hard word</span>
-          </button>
+  <!-- MODAL -->
+  <div id="modal" class="modal">
+    <div class="modalBox">
+      <div class="modalHeader">
+        <div id="modalTitleCon">
+          <h2 id="modalTitle"></h2>
         </div>
-        <button class="arenaExitBtn" onclick="exitBossScreen()">✕ Forfeit</button>
+        <button class="modalClose" onclick="closeModal()"></button>
       </div>
-
-      <!-- Word-connect challenge -->
-      <div id="bossWordChallenge" style="display:none;">
-        <div class="arenaWordPrompt">Connect the letters to spell:</div>
-        <div class="arenaWordTarget" id="bossWordTarget"></div>
-        <div class="arenaWordCanvas">
-          <canvas id="bossWordBgCanvas"></canvas>
-          <canvas id="bossWordCanvas"></canvas>
-        </div>
-        <div class="arenaWordProgress" id="bossWordProgress"></div>
-        <button class="arenaWordResetBtn" onclick="bossWordReset()">↺ Reset</button>
-      </div>
-
-    </div>
-
-    <!-- Loading overlay -->
-    <div id="bossLoadingOverlay">
-      <div class="arenaLoadingBox">
-        <div class="arenaLoadingIcon">🐷</div>
-        <div class="arenaLoadingTitle">Boss Approaching…</div>
-        <div class="arenaLoadingBarWrap"><div class="arenaLoadingBarFill" id="bossLoadingBarFill"></div></div>
-        <div class="arenaLoadingHint" id="bossLoadingHint">Preparing battle…</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Bottom nav -->
-  <div class="bottomNav">
-    <div id="bottomBar">
-      <button class="bottomBtn" id="btnCrops" onclick="openCrops()">
-        <img src="images/crops.png" alt="crops" onerror="this.style.display='none'"><span data-title="Crops">Crops</span>
-      </button>
-      <button class="bottomBtn" onclick="openHarvestShop()">
-        <img src="images/shop.png" alt="market"> <span data-title="Market">Market</span>
-      </button>
-      <button class="bottomBtn" onclick="openInventory()">
-        <img src="images/inventory.png" alt="bag"> <span data-title="Inventory">Inventory</span>
-      </button>
-      <button class="bottomBtn" id="btnZoo" onclick="openZoo()">
-        <img src="images/zoo.png" alt="zoo" onerror="this.style.display='none'"> <span data-title="Ranch">Ranch</span>
-      </button>
+      <div id="modalContent"></div>
     </div>
   </div>
-</div>
 
-<!-- TUTORIAL OVERLAY (Spotlight + Arrow) -->
-<div id="tutorialOverlay" title="Click anywhere to continue • Double-click to skip">
-  <div class="tutorialBlocker"></div>
-  <div id="tutorialHighlight"></div>
-  <svg id="tutorialArrowSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-  <div id="tutorialBubble">
-    <div id="tutorialMascot">🐱</div>
-    <div id="tutorialRight">
-      <div id="tutorialTitle">Mao the Cat</div>
-      <div id="tutorialText"></div>
-      <div id="tutorialHint">Click anywhere to continue • Double-click anywhere to skip</div>
-    </div>
-  </div>
-</div>
+  <!-- 1. Utilities & Config (no dependencies) -->
+  <script src="js/utils.js"></script>
+  <script src="js/gameBalance.js"></script>
+  <script src="js/quizBank.js"></script>
 
-<!-- MODAL -->
-<div id="modal" class="modal">
-  <div class="modalBox">
-    <div class="modalHeader">
-      <div id="modalTitleCon"><h2 id="modalTitle"></h2></div>
-      <button class="modalClose" onclick="closeModal()"></button>
-    </div>
-    <div id="modalContent"></div>
-  </div>
-</div>
+  <!-- 2. Data / State -->
+  <script src="js/arenaData.js"></script>
+  <script src="js/petsData.js"></script>
+  <script src="js/boosts.js"></script>
 
-<!-- 1. Utilities & Config (no dependencies) -->
-<script src="js/utils.js"></script>
-<script src="js/gameBalance.js"></script>
-<script src="js/quizBank.js"></script>
+  <!-- 3. Core Systems -->
+  <script src="js/saveLoad.js"></script>
+  <script src="js/xpLevel.js"></script>
+  <script src="js/questionRenderer.js"></script>
 
-<!-- 2. Data / State -->
-<script src="js/arenaData.js"></script>
-<script src="js/petsData.js"></script>
-<script src="js/boosts.js"></script>
+  <!-- 4. UI & Navigation -->
+  <script src="js/ui.js"></script>
+  <script src="js/tutorial.js"></script>
+  <script src="js/uiUpdate.js"></script>
+  <script src="js/avatar.js"></script>
 
-<!-- 3. Core Systems -->
-<script src="js/saveLoad.js"></script>
-<script src="js/xpLevel.js"></script>
-<script src="js/questionRenderer.js"></script>
+  <!-- 5. Game Screens -->
+  <script src="js/farmGrid.js"></script>
+  <script src="js/plantingHarvesting.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/zoo.js"></script>
+  <script src="js/arena.js"></script>
+  <script src="js/arenaScreen.js"></script>
+  <script src="js/bossFight.js"></script>
 
-<!-- 4. UI & Navigation -->
-<script src="js/ui.js"></script>
-<script src="js/tutorial.js"></script>
-<script src="js/uiUpdate.js"></script>
+  <!-- 6. Wild Pets -->
+  <script src="js/wildPetSpawn.js"></script>
+  <script src="js/wildPetEntity.js"></script>
 
-<!-- 5. Game Screens -->
-<script src="js/farmGrid.js"></script>
-<script src="js/plantingHarvesting.js"></script>
-<script src="js/tools.js"></script>
-<script src="js/zoo.js"></script>
-<script src="js/arena.js"></script>
-<script src="js/arenaScreen.js"></script>
-<script src="js/bossFight.js"></script>
+  <!-- 7. Quests, Shop, Library -->
+  <script src="js/dailyQuests.js"></script>
+  <script src="js/shopInventory.js"></script>
+  <script src="js/libraryExam.js"></script>
 
-<!-- 6. Wild Pets -->
-<script src="js/wildPetSpawn.js"></script>
-<script src="js/wildPetEntity.js"></script>
+  <!-- 8. World / Init -->
+  <script src="js/tileUnlock.js"></script>
+  <script src="js/gameLoop.js"></script>
+  <script src="js/startGame.js"></script>
+  <script src="js/initDefaults.js"></script>
 
-<!-- 7. Quests, Shop, Library -->
-<script src="js/dailyQuests.js"></script>
-<script src="js/shopInventory.js"></script>
-<script src="js/libraryExam.js"></script>
-
-<!-- 8. World / Init -->
-<script src="js/tileUnlock.js"></script>
-<script src="js/gameLoop.js"></script>
-<script src="js/startGame.js"></script>
-<script src="js/initDefaults.js"></script>
-
-<!-- 9. Auth — load last (depends on game being ready) -->
-<script src="js/supabase.js"></script>
-<script src="js/avatar.js"></script>
+  <!-- 9. Auth — load last (depends on game being ready) -->
+  <script src="js/supabase.js"></script>
 
 
 
 
-<!-- LOGOUT CONFIRM MODAL -->
-<div id="logoutModal" style="
+  <!-- LOGOUT CONFIRM MODAL -->
+  <div id="logoutModal" style="
   display:none; position:fixed; inset:0; z-index:9500;
   align-items:center; justify-content:center;
   background:rgba(0,0,0,0.5);
 ">
-  <div class="logoutModalCard">
-    <div class="logoutModalIcon">🚪</div>
-    <div class="logoutModalTitle">Log Out?</div>
-    <div class="logoutModalSub">Your progress will be saved to the cloud before logging out.</div>
-    <div class="logoutModalBtns">
-      <button class="logoutModalYes" id="logoutConfirmYes">Yes, Log Out</button>
-      <button class="logoutModalNo"  id="logoutConfirmNo">Cancel</button>
+    <div class="logoutModalCard">
+      <div class="logoutModalIcon">🚪</div>
+      <div class="logoutModalTitle">Log Out?</div>
+      <div class="logoutModalSub">Your progress will be saved to the cloud before logging out.</div>
+      <div class="logoutModalBtns">
+        <button class="logoutModalYes" id="logoutConfirmYes">Yes, Log Out</button>
+        <button class="logoutModalNo" id="logoutConfirmNo">Cancel</button>
+      </div>
     </div>
   </div>
-</div>
 
 
   <!-- Hidden file input for avatar upload -->
@@ -777,7 +808,8 @@
         </div>
         <div class="avatarCropControls">
           <label class="avatarZoomLabel">Zoom</label>
-          <input type="range" id="avatarZoomSlider" min="1" max="3" step="0.01" value="1" oninput="onAvatarZoom(this.value)">
+          <input type="range" id="avatarZoomSlider" min="1" max="3" step="0.01" value="1"
+            oninput="onAvatarZoom(this.value)">
         </div>
         <div class="avatarCropHint">Drag to reposition • Pinch or slider to zoom</div>
         <div class="avatarCropBtns">
@@ -800,4 +832,5 @@
     }
   </script>
 </body>
+
 </html>

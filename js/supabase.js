@@ -243,6 +243,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (typeof loadDailyQuests === "function") loadDailyQuests();
       if (typeof updateUI === "function") updateUI();
       if (typeof renderFarm === "function") renderFarm();
+      if (typeof restoreAvatar === "function") restoreAvatar();
     } catch (e) {
       console.error("applyGameState error:", e);
     }
@@ -271,11 +272,18 @@ window.addEventListener("DOMContentLoaded", () => {
     // satisfied. Read the name from localStorage (the ground truth) rather
     // than window.playerName which is a plain `let` and not on window.
     const name = getPlayerName();
+    // Include the avatar URL if it exists
+    const avatarUrl = typeof playerAvatarUrl !== "undefined" ? playerAvatarUrl : "";
 
     const { error } = await supabase
       .from("players")
       .upsert(
-        { player_id: userId, user_id: userId, player_name: name },
+        {
+          player_id: userId,
+          user_id: userId,
+          player_name: name,
+          avatar_url: avatarUrl
+        },
         { onConflict: "player_id" }
       );
 
