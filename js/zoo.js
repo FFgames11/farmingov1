@@ -29,11 +29,11 @@ function openPetDetails(uid) {
     <div class="petItem">
         <div class="itemCard">
         <div class="itemLeft">
-          <div class="itemIcon">${pet.imagepath}</div>
+          <div class="itemIcon">${pet.imagepath} <div class="rarityLabel"><span data-title="${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</span></div></div>
           <div class="itemMeta">
             <div class="itemInfoGroup">
               <div class="itemName"><span data-title="${pet.name}">${escapeHtml(pet.name)}${meta ? ` <span data-title="Lv${lvl}">Lv${lvl}</span>` : ""}</div>
-              <div class="itemSub">${escapeHtml(pet.rarity || (meta ? meta.rarity : "Captured"))}</div>
+              
               <div class="badgeRow">
                 ${meta ? `<div class="badge"><span class="badgeStat" data-title="ATK ${stats.atk}">ATK ${stats.atk}</span><div class="statBarContainer"><div class="statBarFill atkBar statBarGrow" style="--target-width: ${Math.min(100, (stats.atk / 20) * 100)}%"></div></div></div>` : `<div class="badge">Captured</div>`}
                 ${meta ? `<div class="badge"><span class="badgeStat" data-title="DEF ${stats.def}">DEF ${stats.def}</span><div class="statBarContainer"><div class="statBarFill defBar statBarGrow" style="--target-width: ${Math.min(100, (stats.def / 20) * 100)}%"></div></div></div>` : `<div class="badge">Captured</div>`}

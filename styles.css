@@ -2009,6 +2009,8 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .itemMeta .itemName span {
@@ -2028,6 +2030,54 @@ body {
   z-index: -1;
   content: attr(data-title);
   height: 100%;
+}
+
+
+.rarityLabel {
+  padding: 2px 9px !important;
+  position: relative !important;
+  background: #2BB7E6 !important;
+  border: 1px solid #071F69;
+  border-radius: 11px !important;
+  width: 78%;
+  display: block;
+  text-align: center;
+}
+
+.rarityLabel:before {
+  background: #93CFFF;
+  border-radius: 8px 8px 3px 3px;
+  content: '';
+  width: 86%;
+  height: 12px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  top: 4px;
+  position: absolute;
+  z-index: 0;
+}
+
+.rarityLabel span {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  filter: drop-shadow(0px 3px 0 #152066);
+  font: normal 14px / 100% 'Bungee';
+  top: -5px;
+}
+
+.rarityLabel span:before {
+  -webkit-text-stroke: 3px #091C17;
+  -webkit-text-fill-color: white;
+  paint-order: fill stroke;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  content: attr(data-title);
+  height: 100%;
+  top: 3px;
 }
 
 
