@@ -19,7 +19,9 @@ const ANIMAL_BASE_TABLE = [
   ["Lion", "Heavy bruiser", "9", "7", "4"],
   ["Panda", "Tank healer", "5", "9", "3"],
   ["Fox", "Debuff controller", "6", "4", "9"],
-  ["Alligator", "Armor shredder", "8", "6", "5"]
+  ["Alligator", "Armor shredder", "8", "6", "5"],
+  ["Dragon", "Scorchbringer", "11", "8", "5"],
+  ["Wolf", "Alpha predator", "9", "5", "13"]
 ];
 
 
@@ -65,7 +67,17 @@ const ANIMAL_LEVEL_TABLE = [
   ["Alligator", "Lv2", "9", "7", "6"],
   ["Alligator", "Lv3", "10", "8", "7"],
   ["Alligator", "Lv4", "11", "9", "8"],
-  ["Alligator", "Lv5", "12", "10", "9"]
+  ["Alligator", "Lv5", "12", "10", "9"],
+  ["Dragon", "Lv1", "11", "8", "5"],
+  ["Dragon", "Lv2", "12", "9", "6"],
+  ["Dragon", "Lv3", "13", "10", "7"],
+  ["Dragon", "Lv4", "14", "11", "8"],
+  ["Dragon", "Lv5", "15", "12", "9"],
+  ["Wolf", "Lv1", "9", "5", "13"],
+  ["Wolf", "Lv2", "10", "6", "14"],
+  ["Wolf", "Lv3", "11", "7", "15"],
+  ["Wolf", "Lv4", "12", "8", "16"],
+  ["Wolf", "Lv5", "13", "9", "17"]
 ];
 
 
@@ -359,24 +371,24 @@ const BATTLE_ANIMALS = {
     "headimage": '<img src="images/dragonhead.png" alt="dragon">',
     "rarity": "Legendary",
     "base": {
-      "atk": 12,
-      "def": 10,
-      "spd": 8
+      "atk": 11,
+      "def": 8,
+      "spd": 5
     },
     "skills": {
       "attack": {
         "name": "Flame Breath",
-        "power": 10,
-        "desc": "High damage."
+        "power": 8,
+        "desc": "Deal damage. Apply Scorched: enemy DEF -3 for 2 turns."
       },
       "buff": {
         "name": "Dragon Soul",
-        "desc": "Boost all stats."
+        "desc": "+3 ATK, +2 DEF, +2 SPD for 2 turns."
       },
       "ultimate": {
         "name": "Cataclysm",
-        "power": 15,
-        "desc": "Extreme damage."
+        "power": 13,
+        "desc": "Massive damage. If enemy has any debuff, +5 bonus damage and ignore 3 DEF."
       }
     }
   },
@@ -387,24 +399,24 @@ const BATTLE_ANIMALS = {
     "headimage": '<img src="images/wolfhead.png" alt="wolf">',
     "rarity": "Legendary",
     "base": {
-      "atk": 10,
-      "def": 8,
-      "spd": 10
+      "atk": 9,
+      "def": 5,
+      "spd": 13
     },
     "skills": {
       "attack": {
-        "name": "Howl Attack",
-        "power": 8,
-        "desc": "High speed attack."
+        "name": "Howl Slash",
+        "power": 6,
+        "desc": "Deal damage. If Wolf moves first this round, deal +3 bonus damage."
       },
       "buff": {
         "name": "Pack Leader",
-        "desc": "Boost ATK and SPD."
+        "desc": "+4 ATK, +3 SPD for 2 turns. Gain 15% dodge for 1 turn."
       },
       "ultimate": {
         "name": "Moon Slash",
-        "power": 14,
-        "desc": "High damage."
+        "power": 7,
+        "desc": "Strike twice. First hit is normal. Second hit ignores 2 DEF."
       }
     }
   }

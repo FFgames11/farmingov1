@@ -412,14 +412,28 @@ function resolveArenaSkill(kind) {
 
 function doArenaAttack(actor, foe) {
   const meta = BATTLE_ANIMALS[actor.animalId];
-  const pwr = meta.skills.attack.power;
+  const id = actor.animalId;
+  const b = arenaBattle;
+  let pwr = meta.skills.attack.power;
   const a = getEffStats(actor);
   const f = getEffStats(foe);
+
+  // Wolf first-strike bonus: +3 if Wolf moves first this round
+  if (id === "wolf" && b && b.order[0] === actor.side) pwr += 3;
 
   const dmg = calcBaseDamage(pwr, a.atk, f.def);
   const dealt = applyDamage(actor, foe, dmg);
 
-  addArenaLog(`${actor.name} used ${meta.skills.attack.name} (${dealt} dmg).`);
+  // Dragon Flame Breath: apply Scorched (DEF -3 for 2 turns)
+  if (id === "dragon") {
+    addStatus(foe, { kind: "stat", def: -3, turns: 2 });
+    addArenaLog(`${actor.name} used Flame Breath (${dealt} dmg). ${foe.name} is Scorched! DEF -3 for 2 turns.`);
+  } else if (id === "wolf" && b && b.order[0] === actor.side) {
+    addArenaLog(`${actor.name} used Howl Slash (${dealt} dmg) — First-strike bonus!`);
+  } else {
+    addArenaLog(`${actor.name} used ${meta.skills.attack.name} (${dealt} dmg).`);
+  }
+
   actor.charge = Math.min(100, actor.charge + 25);
 }
 
@@ -475,12 +489,13 @@ function doArenaBuff(actor, foe) {
     addArenaLog(`${actor.name} used Iron Hide.`);
   }
   else if (id === "dragon") {
-    addStatus(actor, { kind: "stat", atk: +2, def: +2, spd: +2, turns: 3 });
-    addArenaLog(`${actor.name} used Dragon Soul.`);
+    addStatus(actor, { kind: "stat", atk: +3, def: +2, spd: +2, turns: 2 });
+    addArenaLog(`${actor.name} used Dragon Soul. +3 ATK, +2 DEF, +2 SPD for 2 turns.`);
   }
   else if (id === "wolf") {
-    addStatus(actor, { kind: "stat", atk: +3, spd: +3, turns: 2 });
-    addArenaLog(`${actor.name} used Pack Leader.`);
+    addStatus(actor, { kind: "stat", atk: +4, spd: +3, turns: 2 });
+    addStatus(actor, { kind: "dodge", pct: 0.15, turns: 1 });
+    addArenaLog(`${actor.name} used Pack Leader. +4 ATK, +3 SPD, 15% dodge.`);
   }
 }
 
@@ -564,14 +579,31 @@ function doArenaUltimate(actor, foe) {
     addArenaLog(`${actor.name} used Death Roll! (${dealt} dmg)`);
   }
   else if (id === "dragon") {
-    const dmg = calcBaseDamage(15, a.atk, f.def);
+    // Cataclysm: if enemy has any debuff, +5 bonus damage and ignore 3 DEF
+    const hasAnyDebuff = hasDebuff(foe) || (foe.statuses && foe.statuses.some(s => s.kind === "stat" && ((s.def || 0) < 0 || (s.atk || 0) < 0 || (s.spd || 0) < 0)));
+    let basePwr = 13;
+    let ignoreDef = 0;
+    if (hasAnyDebuff) { basePwr += 5; ignoreDef = 3; }
+    const adjustedFDef = Math.max(0, f.def - ignoreDef);
+    const dmg = calcBaseDamage(basePwr, a.atk, adjustedFDef);
     const dealt = applyDamage(actor, foe, dmg);
-    addArenaLog(`${actor.name} used Cataclysm! (${dealt} dmg)`);
+    if (hasAnyDebuff) {
+      addArenaLog(`${actor.name} used Cataclysm! (${dealt} dmg) — Debuff bonus: +5 dmg, ignored 3 DEF!`);
+    } else {
+      addArenaLog(`${actor.name} used Cataclysm! (${dealt} dmg)`);
+    }
   }
   else if (id === "wolf") {
-    const dmg = calcBaseDamage(14, a.atk, f.def);
-    const dealt = applyDamage(actor, foe, dmg);
-    addArenaLog(`${actor.name} used Moon Slash! (${dealt} dmg)`);
+    // Moon Slash: 2 hits — second hit ignores 2 DEF
+    const hit1 = calcBaseDamage(7, a.atk, f.def);
+    const dealt1 = applyDamage(actor, foe, hit1);
+    let dealt2 = 0;
+    if (foe.hp > 0) {
+      const reducedDef = Math.max(0, f.def - 2);
+      const hit2 = calcBaseDamage(7, a.atk, reducedDef);
+      dealt2 = applyDamage(actor, foe, hit2);
+    }
+    addArenaLog(`${actor.name} used Moon Slash! (${dealt1} + ${dealt2} dmg, 2nd hit ignored 2 DEF)`);
   }
 }
 
