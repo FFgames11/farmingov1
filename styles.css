@@ -4063,9 +4063,8 @@ hr.sep {
   flex-shrink: 0;
   flex-basis: auto;
   position: relative;
+  width: 48%;
 }
-
-.speciesPetRowGlow {}
 
 .animalInfoCon {
   display: none;
