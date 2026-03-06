@@ -6,6 +6,20 @@ const arenaLoadingOverlay = $("arenaLoadingOverlay");
 const arenaLoadingBarFill = $("arenaLoadingBarFill");
 const arenaLoadingHint = $("arenaLoadingHint");
 
+// Local helpers (avoid cross-file dependency on arena.js)
+function _hasStatus(c, kind) { return c.statuses && c.statuses.some(s => s.kind === kind); }
+function _consumeStatus(c, kind, amt) {
+  if (!c.statuses) return;
+  const s = c.statuses.find(x => x.kind === kind);
+  if (s) s.turns -= amt;
+  c.statuses = c.statuses.filter(x => x.turns > 0);
+}
+function _tickStatusesEndTurn(c) {
+  if (!c.statuses) return;
+  c.statuses.forEach(s => s.turns -= 1);
+  c.statuses = c.statuses.filter(x => x.turns > 0);
+}
+
 const WS_WORDS = {
   normal: ["CAT","DOG","COW","PIG","FISH","BIRD","SUN","MOON","STAR","SKY","RAIN","SNOW","FIRE","WIND","EGG","MILK","CUP","BALL","TOY","BOOK","PEN","BAG","HAT","SHOE","TREE","LEAF","ROCK","SAND","MUD","CAR","BEAR","WOLF","FROG","MOUSE","DEER","GOAT","DUCK","OWL","BEE","ANT","RAT","HEN","SHARK","PEAR","BEAN","RICE","CORN","ROSE","BARK","FORK","SPOON","KNIFE","PLATE","RULER","BELT","COAT","VEST","DRUM"],
   heavy: ["HORSE","SHEEP","TIGER","LION","PLANE","TRAIN","TRUCK","SHIP","BOAT","GOLD","SILVER","IRON","LEAD","PANDA","ZEBRA","CAMEL","HYENA","EAGLE","HAWK","RAVEN","CASTLE","BRIDGE","TUNNEL","ROCKET","WAGON","CART","CANOE","SWORD","SHIELD","ARROW","BOW","SPEAR","AXE","CHEST","CROWN","THRONE","JEWEL"]
@@ -211,10 +225,10 @@ function arenaScreenUseSkill(kind){
   if(actor.control !== "human") return;
 
   // Stun check
-  if(hasStatus(actor, "stun")){
+  if(_hasStatus(actor, "stun")){
     addArenaLog(`${actor.name} is stunned and loses the turn!`);
-    consumeStatus(actor, "stun", 1);
-    tickStatusesEndTurn(actor);
+    _consumeStatus(actor, "stun", 1);
+    _tickStatusesEndTurn(actor);
     endArenaTurn();
     return;
   }
@@ -508,7 +522,7 @@ function evaluateWordConnect(){
       arenaScreenPendingSkill = null;
       arenaBattle.waiting = false;
       const side = currentArenaSide();
-      tickStatusesEndTurn(getCombatant(side));
+      _tickStatusesEndTurn(getCombatant(side));
       endArenaTurn();
     }, 700);
   }
