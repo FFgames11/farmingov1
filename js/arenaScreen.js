@@ -221,13 +221,14 @@ function arenaScreenUseSkill(kind){
 
   // No quiz mode — resolve immediately
   if(!b.quizOn){
-    resolveArenaSkill(kind === "heavy" ? "attack" : kind);
+    resolveArenaSkill(kind === "heavy" ? "buff" : kind);
     return;
   }
 
   // Show word connect challenge
+  b.waiting = true;
   arenaScreenPendingSkill = kind;
-  const pool = kind === "normal" ? WS_WORDS.normal : WS_WORDS.heavy;
+  const pool = kind === "attack" ? WS_WORDS.normal : WS_WORDS.heavy;
   const word = pool[Math.floor(Math.random() * pool.length)];
   $("arenaSkillButtons").style.display = "none";
   $("arenaWordChallenge").style.display = "flex";
@@ -489,8 +490,8 @@ function evaluateWordConnect(){
       $("arenaWordChallenge").style.display = "none";
       $("arenaSkillButtons").style.display = "flex";
       wc = null;
-      // Map "normal"/"heavy" → existing arena skill kinds
-      const mappedKind = arenaScreenPendingSkill === "heavy" ? "attack" : arenaScreenPendingSkill;
+      // Map "attack"/"heavy" → existing arena skill kinds (heavy = buff)
+      const mappedKind = arenaScreenPendingSkill === "heavy" ? "buff" : arenaScreenPendingSkill;
       arenaBattle.waiting = false;
       resolveArenaSkill(mappedKind || "attack");
     }, 600);

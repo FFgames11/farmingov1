@@ -689,6 +689,47 @@ function openBattleGuide() {
   `);
 }
 
+// Helper Functions for Arena (must be defined before use)
+function calcBaseDamage(power, atk, def) { return Math.max(1, power + atk - def); }
+function hasStatus(c, kind) { return c.statuses.some(s => s.kind === kind); }
+function addStatus(c, statusObj) { c.statuses.push(statusObj); }
+function consumeStatus(c, kind, turnsAmt) {
+  const s = c.statuses.find(x => x.kind === kind);
+  if (s) s.turns -= turnsAmt;
+  c.statuses = c.statuses.filter(x => x.turns > 0);
+}
+function tickStatusesEndTurn(c) {
+  c.statuses.forEach(s => s.turns -= 1);
+  c.statuses = c.statuses.filter(x => x.turns > 0);
+}
+function applyDamage(actor, foe, amt) {
+  let finalDmg = amt;
+  const dr = foe.statuses.find(s => s.kind === "dmgReduce");
+  if (dr) finalDmg = Math.max(0, finalDmg - (dr.amount || 0));
+  const g = foe.statuses.find(s => s.kind === "guard");
+  if (g) finalDmg = Math.max(0, finalDmg - (g.amount || 0));
+  if (hasStatus(foe, "evasion")) {
+    finalDmg = 0;
+    consumeStatus(foe, "evasion", 1);
+  }
+  const s1 = getEffStats(actor).spd;
+  const s2 = getEffStats(foe).spd;
+  let dodgePct = s2 > s1 ? Math.min(0.25, Math.floor((s2 - s1) / 2) * 0.05) : 0;
+  const dBuff = foe.statuses.find(s => s.kind === "dodge");
+  if (dBuff) dodgePct += (dBuff.pct || 0);
+  if (Math.random() < dodgePct) {
+    addArenaLog(" dodged!");
+    return 0;
+  }
+  foe.hp = Math.max(0, foe.hp - finalDmg);
+  if (finalDmg > 0) foe.charge = Math.min(100, foe.charge + 10);
+  if (foe.hp === 0 && hasStatus(foe, "cheatDeath")) {
+    foe.hp = 1;
+    consumeStatus(foe, "cheatDeath", 1);
+    addArenaLog(" survived with Nine-Lives Trick!");
+  }
+  return finalDmg;
+}
 
 // ensure global hook for HTML onclick
-window.openArena = openArena;
+window.openArena = openArena;
