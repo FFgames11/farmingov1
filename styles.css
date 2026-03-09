@@ -4314,3 +4314,88 @@ hr.sep {
   gap: 10px;
   padding: 4px 0;
 }
+/* Encounter Dialogue UI */
+.encounterContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.encounterSprite {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  border: 3px solid #D3B58D;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.encounterSprite.small {
+  width: 70px;
+  height: 70px;
+}
+
+.encounterSprite img {
+  width: 70%;
+  height: auto;
+}
+
+.encounterSpeechBubble {
+  position: relative;
+  background: #fff;
+  border: 2px solid #D3B58D;
+  border-radius: 18px;
+  padding: 15px 20px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.encounterSpeechBubble:after {
+  content: \"\";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 12px 12px 12px;
+  border-style: solid;
+  border-color: transparent transparent #fff transparent;
+}
+
+.encounterSpeechBubble:before {
+  content: \"\";
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 13px 13px 13px;
+  border-style: solid;
+  border-color: transparent transparent #D3B58D transparent;
+}
+
+.speechText {
+  font-size: 16px;
+  line-height: 1.4;
+  color: #3d2a16;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.speechHint {
+  font-size: 11px;
+  color: #8d5e3b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 900;
+  opacity: 0.7;
+}
+
+.encounterQuizBox {
+  width: 100%;
+}
+
