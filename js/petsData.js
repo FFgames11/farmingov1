@@ -15,6 +15,7 @@ const PET_TYPES = [
   // --- Uncommon (appear from level 3) ---
   { id:"deer",      name:"Deer",      emoji:"🦌", rarity:"Uncommon",  minLevel:3,  weight:15, eatMs:14000, poopMin:1, poopMax:2, isImage:true, imagepath:'<img src="images/deer.png" alt="deer">', headimage:'<img src="images/deerhead.png" alt="deer">' },
   { id:"cat",       name:"Cat",       emoji:"🐱", rarity:"Uncommon",  minLevel:3,  weight:15, eatMs:14000, poopMin:1, poopMax:2, isImage:true, imagepath:'<img src="images/cat.png" alt="cat">', headimage:'<img src="images/cathead.png" alt="cat">' },
+  { id:"snake",     name:"Snake",     emoji:"🐍", rarity:"Uncommon",  minLevel:4,  weight:15, eatMs:14000, poopMin:1, poopMax:2, isImage:true, imagepath:'<img src="images/snake.png" alt="snake">', headimage:'<img src="images/snakehead.png" alt="snake">' },
 
   // --- Rare (appear from level 6) ---
   { id:"fox",       name:"Fox",       emoji:"🦊", rarity:"Rare",      minLevel:6,  weight:8,  eatMs:13000, poopMin:1, poopMax:2, isImage:true, imagepath:'<img src="images/fox.png" alt="fox">', headimage:'<img src="images/foxhead.png" alt="fox">' },

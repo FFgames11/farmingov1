@@ -6,7 +6,7 @@ let bossScreenPendingSkill = null;
 let bossWc = null;
 
 const BOSS_WS_WORDS = {
-  normal: ["CAT", "DOG", "COW", "PIG", "FISH", "BIRD", "SUN", "MOON", "STAR", "SKY", "RAIN", "SNOW", "FIRE", "WIND", "EGG", "MILK", "CUP", "BALL", "TOY", "BOOK", "PEN", "BAG", "HAT", "SHOE", "TREE", "LEAF", "ROCK", "SAND", "MUD", "CAR", "BEAR", "FROG", "DUCK", "OWL", "BEE", "ANT", "HEN", "PEAR", "BEAN", "RICE", "CORN", "ROSE", "BARK", "FORK", "DRUM"],
+  normal: ["CAT", "DOG", "COW", "PIG", "FISH", "BIRD", "SUN", "MOON", "STAR", "SKY", "RAIN", "SNOW", "FIRE", "WIND", "EGG", "MILK", "CUP", "BALL", "TOY", "BOOK", "PEN", "BAG", "HAT", "SHOE", "TREE", "LEAF", "ROCK", "SAND", "MUD", "CAR", "BEAR", "FROG", "DUCK", "OWL", "BEE", "ANT", "HEN", "SNAKE", "PEAR", "BEAN", "RICE", "CORN", "ROSE", "BARK", "FORK", "DRUM"],
   heavy: ["HORSE", "SHEEP", "TIGER", "LION", "PLANE", "TRAIN", "TRUCK", "SHIP", "GOLD", "SILVER", "PANDA", "ZEBRA", "CAMEL", "EAGLE", "HAWK", "CASTLE", "BRIDGE", "ROCKET", "SWORD", "SHIELD", "ARROW", "CROWN", "THRONE", "JEWEL", "SPIDER", "GHOST", "FLAME", "STORM", "CHAOS"]
 };
 

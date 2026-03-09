@@ -16,6 +16,7 @@ const ANIMAL_BASE_TABLE = [
   ["Dog", "Balanced fighter", "6", "6", "6"],
   ["Deer", "Evasive support", "4", "5", "8"],
   ["Cat", "Crit trickster", "7", "4", "8"],
+  ["Snake", "Poison striker", "7", "4", "9"],
   ["Lion", "Heavy bruiser", "9", "7", "4"],
   ["Panda", "Tank healer", "5", "9", "3"],
   ["Fox", "Debuff controller", "6", "4", "9"],
@@ -48,6 +49,11 @@ const ANIMAL_LEVEL_TABLE = [
   ["Cat", "Lv3", "9", "6", "10"],
   ["Cat", "Lv4", "10", "7", "11"],
   ["Cat", "Lv5", "11", "8", "12"],
+  ["Snake", "Lv1", "7", "4", "9"],
+  ["Snake", "Lv2", "8", "5", "10"],
+  ["Snake", "Lv3", "9", "6", "11"],
+  ["Snake", "Lv4", "10", "7", "12"],
+  ["Snake", "Lv5", "11", "8", "13"],
   ["Lion", "Lv1", "9", "7", "4"],
   ["Lion", "Lv2", "10", "8", "5"],
   ["Lion", "Lv3", "11", "9", "6"],
@@ -221,6 +227,34 @@ const BATTLE_ANIMALS = {
         "name": "Nine-Lives Trick",
         "power": 8,
         "desc": "If Cat would be KO'd in the next 2 turns, survive once at 1 HP."
+      }
+    }
+  },
+  "snake": {
+    "name": "Snake",
+    "emoji": "🐍",
+    "imagepath": '<img src="images/snake.png" alt="snake">',
+    "headimage": '<img src="images/snakehead.png" alt="snake">',
+    "rarity": "Uncommon",
+    "base": {
+      "atk": 7,
+      "def": 4,
+      "spd": 9
+    },
+    "skills": {
+      "attack": {
+        "name": "Venom Bite",
+        "power": 5,
+        "desc": "40% chance: enemy ATK -2 for 1 turn."
+      },
+      "buff": {
+        "name": "Shed Skin",
+        "desc": "Heal 3. Remove all debuffs."
+      },
+      "ultimate": {
+        "name": "Cobra Strike",
+        "power": 9,
+        "desc": "If enemy has < 50% HP, deal +4 bonus damage."
       }
     }
   },
