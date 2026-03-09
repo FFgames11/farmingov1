@@ -230,72 +230,124 @@ function getPetQuizDifficulty(tileIndex) {
   return "beginner";
 }
 
-const PET_DIALOGUES = {
-  pig: [
-    "Oink? Are those... premium carrots I smell?",
-    "I was just passing through, but your farm looks delicious!",
-    "If you want me to stay, you'll have to prove you're a top-tier farmer!"
-  ],
-  rabbit: [
-    "*Twitches nose rapidly* You're fast, but I'm faster!",
-    "I bet you can't even keep track of where I'll hop next.",
-    "Show me you have the wits to match my speed!"
-  ],
-  dog: [
-    "Woof! This place looks like it needs a good guardian.",
-    "I've been looking for a pack. Do you have what it takes to be my leader?",
-    "Answer this, and maybe I'll consider sticking around!"
-  ],
-  deer: [
-    "The forest is quiet, but your farm is full of life...",
-    "I usually avoid humans, but there's something different about you.",
-    "Tell me, traveler... do you truly understand the nature of this land?"
-  ],
-  cat: [
-    "Oh, it's you. I suppose this dirt is acceptable for lounging.",
-    "Don't look so surprised. I go where the snacks are.",
-    "If you want my respect, you'll need to answer a very specific question."
-  ],
-  snake: [
-    "Sssss... a new face in the tall grassss.",
-    "Your garden has many hiding sspots, very cozy.",
-    "Let uss see if your mind is as sharp as my fangs."
-  ],
-  fox: [
-    "Heh, I almost had those crops! You've got sharp eyes.",
-    "The others say you're a clever one. Let's put that to the test, shall we?",
-    "A little riddle for a little farm. Ready?"
-  ],
-  panda: [
-    "Zzz... oh! Is it lunchtime already?",
-    "I was looking for a nice bamboo thicket, but this looks peaceful too.",
-    "I'll stay if you can help me remember something important..."
-  ],
-  lion: [
-    "Roar! This territory... it has potential.",
-    "A true king knows how to manage his domain. Do you?",
-    "Prove your wisdom, and I might lend you my strength."
-  ],
-  tiger: [
-    "I've been watching you from the shadows. You're persistent.",
-    "A hunter respects a hard worker. But are you a smart worker?",
-    "Let's see if you can handle a real challenge."
-  ],
-  alligator: [
-    "Snap! This pond of yours is looking a bit crowded.",
-    "I like the way you run things here. Very efficient.",
-    "But can you handle the pressure of a real question?"
-  ],
-  dragon: [
-    "Mortal, you've built quite a hoard of crops here.",
-    "I haven't seen such dedication in a long time.",
-    "Answer correctly, and I shall grace your ranch with my presence."
-  ],
-  wolf: [
-    "The moon led me here. Your farm has a strange energy.",
-    "I seek a master who is both strong and wise.",
-    "Are you the one the legends spoke of?"
-  ]
+const PET_ENCOUNTERS = {
+  pig: {
+    script: [
+      { speaker: "animal", text: "Oink! Are those premium carrots?" },
+      { speaker: "player", text: "I grow only the best for my friends!" },
+      { speaker: "animal", text: "Friends? Prove you're a real farmer first!" }
+    ],
+    successText: "Delicious! I'm moving in!",
+    failureText: "Those carrots look fake... I'm out of here!"
+  },
+  rabbit: {
+    script: [
+      { speaker: "animal", text: "*Twitches nose rapidly* You're fast, but I'm faster!" },
+      { speaker: "player", text: "We'll see about that!" },
+      { speaker: "animal", text: "Show me you have the wits to match my speed!" }
+    ],
+    successText: "You kept up! Let's be friends!",
+    failureText: "Too slow! Catch me if you can!"
+  },
+  dog: {
+    script: [
+      { speaker: "animal", text: "Woof! This place looks like it needs a good guardian." },
+      { speaker: "player", text: "I could always use some help around here." },
+      { speaker: "animal", text: "Answer this, and maybe I'll consider sticking around!" }
+    ],
+    successText: "You're a great leader! I'll protect this farm!",
+    failureText: "I'll find another pack. See ya!"
+  },
+  deer: {
+    script: [
+      { speaker: "animal", text: "The forest is quiet, but your farm is full of life..." },
+      { speaker: "player", text: "You're welcome to stay if you like it." },
+      { speaker: "animal", text: "Tell me, traveler... do you truly understand the nature of this land?" }
+    ],
+    successText: "Your wisdom is deep like the roots. I will stay.",
+    failureText: "The wind calls me elsewhere..."
+  },
+  cat: {
+    script: [
+      { speaker: "animal", text: "Oh, it's you. I suppose this dirt is acceptable for lounging." },
+      { speaker: "player", text: "You're too kind." },
+      { speaker: "animal", text: "If you want my respect, you'll need to answer a very specific question." }
+    ],
+    successText: "Purr-fect. I'll take the sunny spot over there.",
+    failureText: "How disappointing. Goodbye."
+  },
+  snake: {
+    script: [
+      { speaker: "animal", text: "Sssss... a new face in the tall grassss." },
+      { speaker: "player", text: "Don't bite my crops!" },
+      { speaker: "animal", text: "Let uss see if your mind is as sharp as my fangs." }
+    ],
+    successText: "Sssss-plendid answer. We are allies.",
+    failureText: "Sssss... not quite. I slither away."
+  },
+  fox: {
+    script: [
+      { speaker: "animal", text: "Heh, I almost had those crops! You've got sharp eyes." },
+      { speaker: "player", text: "Not today, sneaky fox!" },
+      { speaker: "animal", text: "A little riddle for a little farm. Ready?" }
+    ],
+    successText: "You're clever! I'll stick around... for now.",
+    failureText: "Too easy! Better luck next time!"
+  },
+  panda: {
+    script: [
+      { speaker: "animal", text: "Zzz... oh! Is it lunchtime already?" },
+      { speaker: "player", text: "You were fast asleep!" },
+      { speaker: "animal", text: "I'll stay if you can help me remember something important..." }
+    ],
+    successText: "Oh right! Now, back to sleep... *yawn*",
+    failureText: "I forgot... I'm just going to roll away..."
+  },
+  lion: {
+    script: [
+      { speaker: "animal", text: "Roar! This territory... it has potential." },
+      { speaker: "player", text: "Welcome to my farm!" },
+      { speaker: "animal", text: "Prove your wisdom, and I might lend you my strength." }
+    ],
+    successText: "A worthy ally! I shall join you.",
+    failureText: "You lack the courage. Farewell."
+  },
+  tiger: {
+    script: [
+      { speaker: "animal", text: "I've been watching you from the shadows. You're persistent." },
+      { speaker: "player", text: "I work hard on my farm." },
+      { speaker: "animal", text: "Let's see if you can handle a real challenge." }
+    ],
+    successText: "Impressive. You have my respect.",
+    failureText: "A disappointment. Back to the jungle."
+  },
+  alligator: {
+    script: [
+      { speaker: "animal", text: "Snap! This pond of yours is looking a bit crowded." },
+      { speaker: "player", text: "It's a very busy farm." },
+      { speaker: "animal", text: "But can you handle the pressure of a real question?" }
+    ],
+    successText: "You've got guts. I like that.",
+    failureText: "Not tough enough for the swamp!"
+  },
+  dragon: {
+    script: [
+      { speaker: "animal", text: "Mortal, you've built quite a hoard of crops here." },
+      { speaker: "player", text: "It took a lot of work!" },
+      { speaker: "animal", text: "Answer correctly, and I shall grace your ranch with my presence." }
+    ],
+    successText: "A brilliant mind! I shall stay and guard this hoard.",
+    failureText: "Foolish mortal! I take my leave."
+  },
+  wolf: {
+    script: [
+      { speaker: "animal", text: "The moon led me here. Your farm has a strange energy." },
+      { speaker: "player", text: "It's a peaceful place." },
+      { speaker: "animal", text: "Are you the one the legends spoke of?" }
+    ],
+    successText: "You are worthy of the pack. I pledge my loyalty.",
+    failureText: "The legends were wrong. *Howls*"
+  }
 };
 
 function onWildPetClicked() {
@@ -306,36 +358,68 @@ function onWildPetClicked() {
   activeWildPet.pauseStartedAt = Date.now();
 
   const type = activeWildPet.type;
-  const dialogues = PET_DIALOGUES[type.id] || [
-    `Hello there! I'm a ${type.name}.`,
-    "Your farm looks wonderful!",
-    "Let's see if we can be friends!"
-  ];
+  
+  let encounter = PET_ENCOUNTERS[type.id];
+  if (!encounter) {
+    encounter = {
+      script: [
+        { speaker: "animal", text: `Hello there! I'm a ${type.name}.` },
+        { speaker: "player", text: "Your farm looks wonderful!" },
+        { speaker: "animal", text: "Let's see if we can be friends!" }
+      ],
+      successText: "Yay! Let's be friends!",
+      failureText: "Oh well, maybe next time!"
+    };
+  }
 
   let currentStep = 0;
+  const scriptLen = encounter.script.length;
 
   function renderEncounter() {
-    const isDialogue = currentStep < dialogues.length;
+    const isDialogue = currentStep < scriptLen;
     const title = isDialogue ? `Encounter: ${type.name}` : `Capture ${type.name}!`;
 
     let content = "";
+    
+    // Progress bar for the top of the modal content
+    const totalSteps = scriptLen + 1; // Dialogues + 1 for Quiz
+    const currentProgress = currentStep + 1;
+    const pct = Math.floor((currentProgress / totalSteps) * 100);
+    
+    const progressHtml = `
+      <div class="encounterProgressContainer">
+        <div class="encounterProgressFill" style="width: ${pct}%;"></div>
+      </div>
+    `;
+
     if (isDialogue) {
+      const line = encounter.script[currentStep];
+      const isPlayer = line.speaker === "player";
+      
+      const avatarHtml = isPlayer 
+        ? `<div class="encounterSprite small"><img src="images/profile.png" alt="Player"></div>` 
+        : `<div class="encounterSprite small">${type.imagepath}</div>`;
+        
+      const bubbleClass = isPlayer ? "encounterSpeechBubble playerBubble" : "encounterSpeechBubble animalBubble";
+      
       content = `
-        <div class="encounterContainer">
-          <div class="encounterSprite">${type.imagepath}</div>
-          <div class="encounterSpeechBubble">
-            <div class="speechText">"${dialogues[currentStep]}"</div>
-            <div class="speechHint">Click to continue...</div>
+        ${progressHtml}
+        <div class="encounterDialogueArea ${isPlayer ? 'playerTurn' : 'animalTurn'}">
+          ${!isPlayer ? avatarHtml : ''}
+          <div class="${bubbleClass}">
+            <div class="speechText">"${line.text}"</div>
           </div>
+          ${isPlayer ? avatarHtml : ''}
         </div>
+        <button id="btnEncounterNext" class="encounterNextBtn">Next</button>
       `;
     } else {
       const diff = getPetQuizDifficulty(activeWildPet.targetTileIndex);
       const q = pickQuestion(diff);
       let resolved = false;
 
-      // We need to store the question temporarily to use it in the callback
       content = `
+        ${progressHtml}
         <div class="encounterContainer">
           <div class="encounterSprite small">${type.imagepath}</div>
           <div class="encounterQuizBox">
@@ -358,17 +442,17 @@ function onWildPetClicked() {
 
         if (!ok) {
           fb.className = "quizFeedback bad";
-          fb.innerHTML = `Wrong! ${type.name} ran away.`;
+          fb.innerHTML = `Wrong! ${encounter.failureText}`;
           setTimeout(() => {
             despawnWildPet();
             closeModal();
             saveState();
             updateUI();
             renderFarm();
-          }, 1000);
+          }, 1500);
         } else {
           fb.className = "quizFeedback good";
-          fb.innerHTML = `Correct! ${type.name} joined your Ranch! 🐾`;
+          fb.innerHTML = `Correct! ${encounter.successText} 🐾`;
           capturePet(type);
           questProgress("capture", 1);
           setTimeout(() => {
@@ -377,7 +461,7 @@ function onWildPetClicked() {
             saveState();
             updateUI();
             renderFarm();
-          }, 1200);
+          }, 1500);
         }
       });
       return; // Exit early as we handled the modal update
@@ -385,22 +469,26 @@ function onWildPetClicked() {
 
     openModal(title, content);
 
-    // Add click listener to advance dialogue
-    const modalContent = document.querySelector(".modal-content");
-    // Some project use .modal-content or #modalContent, let's be safe and check both or use #modalBox
-    const targetBox = document.querySelector(".modalBox") || modalContent;
-
-    if (targetBox) {
+    if (isDialogue) {
+      const nextBtn = document.getElementById("btnEncounterNext");
+      const targetBox = document.querySelector(".modalBox") || document.querySelector(".modal-content");
+      
       const advance = (e) => {
-        // Only advance if clicking the dialogue or the overlay, not buttons if any were there
+        e.stopPropagation();
         currentStep++;
-        targetBox.removeEventListener("click", advance);
+        if (targetBox) targetBox.removeEventListener("click", advance);
         renderEncounter();
       };
-      // Delay slightly so the click that opened the modal doesn't trigger it
-      setTimeout(() => {
-        targetBox.addEventListener("click", advance);
-      }, 50);
+      
+      if (nextBtn) {
+        nextBtn.onclick = advance;
+      }
+      
+      if (targetBox) {
+        setTimeout(() => {
+          targetBox.addEventListener("click", advance);
+        }, 50);
+      }
     }
   }
 
